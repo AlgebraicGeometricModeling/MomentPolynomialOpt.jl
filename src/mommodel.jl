@@ -19,13 +19,17 @@ mutable struct Model
 end
 
 # Define a moment model
-function Model(X, d::Int64, optimizer; kwargs...)
-    m = JuMP.Model(optimizer;kwargs...)
-    m[:variables] = X
 
+function Model(X, d::Int64, optimizer; nu::Int64=1, kwargs...)
+
+    m = JuMP.Model(optimizer;kwargs...)
+    m[:nu] = nu
+    m[:variables] = X
     m[:degree] = d
+    
     B = monomials(X,seq(0:d))
     N = length(B)
+    m[:basis] = B
 
     m[:monomials] = DynamicPolynomials.Monomial{true}[]
     m[:index] = Dict{DynamicPolynomials.Monomial{true},Int64}()
@@ -43,120 +47,129 @@ function Model(X, d::Int64, optimizer; kwargs...)
         end
     end
     s = length(m[:monomials])
-    @variable(m, y[1:s])
+    @variable(m, y[1:nu,1:s])
     m[:moments] = y
 
-    @constraint(m, m[:moments][1]==1)
-    
-    m[:H] = [ y[m[:index][B[i]*B[j]]] for i in 1:N, j in 1:N]
-    @SDconstraint(m, m[:H] >= zeros(N,N))
+#    @constraint(m, m[:moments][1]==1)
+    for k in 1:nu 
+        H = [ y[k,m[:index][B[i]*B[j]]] for i in 1:N, j in 1:N]
+        @SDconstraint(m, H >= zeros(N,N))
+    end
 
     return MOM.Model(m)
 end
 
 #----------------------------------------------------------------------
 function Model(o,  E::Vector, G::Vector, X, d::Int64, optimizer; kwargs...)
-    m  = MOM.Model(X,d,optimizer;kwargs...)
-    MOM.objective(m,o)
+    M  = MOM.Model(X,d,optimizer;kwargs...)
+    JuMP.@constraint(M.model, M[:moments][1,1]==1)
+    MOM.objective(M,o)
     for p in E
-        MOM.add_constraint_zero(m,p)
+        MOM.add_constraint_zero(M,p)
     end
     for p in G
-        MOM.add_constraint_nneg(m,p)
+        MOM.add_constraint_nneg(M,p)
     end
     return m
 end
 
 
 #----------------------------------------------------------------------
-
 function Model(pop, X,  d:: Int64, optimizer; kwargs...)
-    m = MOM.Model(X, d, optimizer)
+    M = MOM.Model(1, X, d, optimizer;kwargs...)
+    JuMP.@constraint(M.model, M[:moments][1,1]==1)
     for p in constraints(pop)
         if p[2]=="=0"
-            MOM.add_constraint_zero(m, p)
+            MOM.add_constraint_zero(M, p)
         elseif p[2]==">=0"
-            MOM.add_constraint_nneg(m, p)
+            MOM.add_constraint_nneg(M, p)
         elseif p[2]=="<=0"
-            MOM.add_constraint_nneg(m, -p)
+            MOM.add_constraint_nneg(M, -p)
         end
     end
     if objective(pop)[2] == "inf"
-        MOM.objective(m,objective(pop)[1])
+        MOM.objective(M,objective(pop)[1])
     else
-        MOM.objective(m,-objective(pop)[1])
+        MOM.objective(M,-objective(pop)[1])
     end
     return  m
 end
 
 #----------------------------------------------------------------------
-function add_constraint_zero(m::MOM.Model, eqs...)
+function add_constraint_zero(M::MOM.Model, eqs...)
     for e in eqs
         p = e*one(Polynomial{true,Float64})
-        X = m.model[:variables]
-        mon = monomials(X,seq(0:2*m.model[:degree]-maxdegree(p)))
-        for mn in mon
+        X = M[:variables]
+        L = monomials(X,seq(0:2*M[:degree]-maxdegree(p)))
+        for mn in L
             q = p*mn*one(Float64)
-            @constraint(m.model, sum(t.α*m.model[:moments][m.model[:index][t.x]] for t in q) ==0)
-        end
-    end
-end
-
-#----------------------------------------------------------------------
-function add_constraint_nneg(m::MOM.Model, eqs...)
-    for e in eqs
-        p = e*one(Polynomial{true,Float64})
-        X = m.model[:variables]
-        L = monomials(X, seq(0:m[:degree] - maxdegree(p)))
-        N = length(L)
-        P = [ sum(t.α*m.model[:moments][m.model[:index][t.x*L[i]*L[j]]] for t in p)
-              for i in 1:N, j in 1:N ]
-        @SDconstraint(m.model, P >= zeros(N,N))
-    end
-end
-
-#----------------------------------------------------------------------
-function add_constraint_moments(m::MOM.Model, sigma::Series)
-    delta = maxdegree(sigma)
-    L = m[:monomials]
-    N = length(L)
-    for i in 1:N
-        for j in 1:N
-            mn = L[i]*L[j]
-	    cf = sigma[mn]
-	    if  maxdegree(mn) <= delta
-                @constraint(m, sum(H[i,j]*s for (H,s) in zip(m[:H], m[:sign]))-cf == 0)
+            for k in 1:M[:nu]
+                @constraint(M.model, sum(t.α*M[:moments][k,M[:index][t.x]] for t in q) ==0)
             end
         end
     end
 end
 
+#----------------------------------------------------------------------
+function add_constraint_nneg(M::MOM.Model, eqs...)
+    for e in eqs
+        p = e*one(Polynomial{true,Float64})
+        X = M[:variables]
+        L = monomials(X, seq(0:M[:degree] - maxdegree(p)))
+        N = length(L)
+        for k in 1:M[:nu]
+            P = [ sum(t.α*M[:moments][k,M[:index][t.x*L[i]*L[j]]] for t in p)
+                  for i in 1:N, j in 1:N ]
+            @SDconstraint(M.model, P >= zeros(N,N))
+        end
+    end
+end
+
+#----------------------------------------------------------------------
+function add_constraint_moments(M::MOM.Model, sigma::Series)
+    delta = maxdegree(sigma)
+    L = M[:monomials]
+    for (m,c) in sigma
+        @constraint(M.model,
+                    sum(M[:moments][k,M[:index][m]]*(-1)^(k-1) for k in 1:M[:nu]) - c==0)
+    end
+end
 
 #----------------------------------------------------------------------
 """
  Add as objective function the linear functional associated to the polynomial pol
 """
-function objective(m::MOM.Model, pol)
+function objective(M::MOM.Model, pol)
     f = pol*one(Polynomial{true,Float64})
-
-    @objective(m.model, Min, sum(t.α*m.model[:moments][m.model[:index][t.x]] for t in f))
-end
-
+    @objective(M.model, Min, sum(t.α*M[:moments][1,M[:index][t.x]] for t in f))
 end
 
 #----------------------------------------------------------------------
-function getseries(m::MOM.Model)
-    v = JuMP.value.(m.model[:moments])
-    s = series([m.model[:monomials][i]=> v[i] for i in 1:length(v)])
+function objective_ncl(M)
+    B = M[:basis]
+    @objective(M.model, Min,  sum(sum(M[:moments][k,M[:index][B[i]^2]] for i in 1:length(B)) for k in 1:M[:nu]))
+end
+#----------------------------------------------------------------------
+function objective_tv(M)
+    @objective(M.model, Min, sum(M[:moments][k][1] for k in 1:M[:nu]))
+end
+
+
+end  #module MOM
+#----------------------------------------------------------------------
+#----------------------------------------------------------------------
+function getseries(M::MOM.Model)
+    v = JuMP.value.(M[:moments][1,:])
+    s = series([M[:monomials][i]=> v[i] for i in 1:length(v)])
 end
 
 #----------------------------------------------------------------------
-function getminimizers(m::MOM.Model)
-    s = getseries(m)
+function getminimizers(M::MOM.Model)
+    s = getseries(M)
     w, Xi = decompose(s);
     Xi
 end
-
+#----------------------------------------------------------------------
 function Base.setindex!(p::MOM.Model, v, k::Symbol)  p.model[k] = v end
 
 function Base.getindex(p::MOM.Model, s::Symbol)
@@ -167,3 +180,4 @@ function Base.show(io::IO, m::MOM.Model)
     println(io, "\nA MOMent program with:")
     Base.show(io, m.model)
 end
+#----------------------------------------------------------------------

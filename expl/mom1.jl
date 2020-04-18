@@ -24,3 +24,5 @@ optimize!(m.model)
 v = objective_value(m.model)
 
 s = getseries(m)
+
+Xi = getminimizers(m)
