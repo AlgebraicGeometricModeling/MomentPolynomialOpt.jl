@@ -6,6 +6,6 @@ using MultivariateSeries
 include("mommodel.jl")
 include("optimize.jl")
 
-export MOM, getseries, getminimizers
+export MOM, getseries, getminimizers, getmeasure
 
 end

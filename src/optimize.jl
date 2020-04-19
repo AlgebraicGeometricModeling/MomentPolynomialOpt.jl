@@ -1,4 +1,4 @@
-export minimize
+export minimize, minimize_ncl, minimize_tv
 
 #------------------------------------------------------------------------
 """
@@ -33,79 +33,56 @@ getminimizer(m)
 ```
 """
 function minimize(fct, Eq, Pos,  X, d::Int64, optimizer)
-    m = MOM.Model(fct, Eq, Pos, X, d, optimizer)
-    JuMP.optimize!(m.model)
-     if JuMP.has_values(m.model)
-        return JuMP.objective_value(m.model), m
+    M = MOM.Model(fct, Eq, Pos, X, d, optimizer)
+    JuMP.optimize!(M)
+    if JuMP.has_values(M.model)
+        return JuMP.objective_value(M.model), M
     else
-        println("Solver status: ", JuMP.termination_status(m.model))
-        return nothing, m
+        println("Solver status: ", JuMP.termination_status(M.model))
+        return nothing, M
     end
 end
 
 function minimize(pop,  X, d::Int64, optimizer)
-    m = MOM.Model(pop,X, d, optimizer)
-    JuMP.optimize!(m.model)
-    if JuMP.has_values(m.model)
-        return JuMP.objective_value(m.model), m
+    M = MOM.Model(pop,X, d, optimizer)
+    JuMP.optimize!(M.model)
+    if JuMP.has_values(M.model)
+        return JuMP.objective_value(M.model), M
     else
-        println("Solver status: ", JuMP.termination_status(m.model))
-        return nothing, m
+        println("Solver status: ", JuMP.termination_status(M.model))
+        return nothing, M
+    end
+end
+
+#----------------------------------------------------------------------
+# Minimize the nuclear norm, using a SDP matrix of size 2*N
+function minimize_ncl(X, d, sigma, optimizer)
+
+    M = MUS.Model(X, d, optimizer)
+    JuMP.@objective(M.model, Min, sum( P[i,i] for i in 1:2*N) )
+
+    if JuMP.has_values(M.model)
+        return JuMP.objective_value(M.model), M
+    else
+        println("Solver status: ", JuMP.termination_status(M.model))
+        return nothing, M
     end
 end
 
 
 #----------------------------------------------------------------------
 # Minimize the nuclear norm, using a SDP matrix of size 2*N
-function minimize_ncl(X, d, sigma, optimizer)
+function minimize_tv(X, d, sigma, optimizer)
 
-    m = MUS.Model(X, d, optimizer)
-    JuMP.@objective(m.model, Min, sum( P[i,i] for i in 1:2*N) )
+    M = MUS.Model(X, d, optimizer)
+    JuMP.@objective(M.model, Min, sum( P[i,i] for i in 1:2*N) )
 
-    if JuMP.has_values(m.model)
-        return JuMP.objective_value(m.model), m
+    if JuMP.has_values(M.model)
+        return JuMP.objective_value(M.model), M
     else
-        println("Solver status: ", JuMP.termination_status(m.model))
-        return nothing, m
+        println("Solver status: ", JuMP.termination_status(M.model))
+        return nothing, M
     end
 end
 
-
-function minimize_ncl(X, d, sigma)
-
-    L = monoms(X,d)
-    N = length(L)
-    n = length(variables(sigma))
-
-    mdl = Model(solver = CSDPSolver())
-
-    @variable(mdl, P[1:2*N,1:2*N], SDP)
-
-    I = Dict{DynamicPolynomials.Monomial{true}, Tuple{Int64,Int64}}()
-    for i in 1:N
-        for j  in 1:N
-            m = L[i]*L[j]
-	        if !haskey(I, m)
-	            I[m] = (i,j)
-	        else
-                id = I[m]
-	            if (i != id[2]) || (j != id[1])
-                    @constraint(mdl, P[i,N+j]-P[id[1], N+id[2]] == 0)
-	            end
-	        end
-	        if  degree(m) <= maxdegree(sigma) #cf != 0
-                cf = sigma[m]
-                @constraint(mdl, P[i,N+j]-cf == 0)
-	        end
-        end
-    end
-
-    #println(mdl)
-
-    @objective(mdl, Min, sum( P[i,i] for i in 1:2*N) )
-
-    status = solve(mdl)
-    println("Objective value: ", getobjectivevalue(mdl)/2)
-    R = getvalue(P)
-    R[1:N,N+1:2*N]
-end
+#----------------------------------------------------------------------
