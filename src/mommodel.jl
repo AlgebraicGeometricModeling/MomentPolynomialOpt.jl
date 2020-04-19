@@ -85,11 +85,8 @@ function Model(pop, X,  d:: Int64, optimizer; kwargs...)
             MOM.add_constraint_nneg(M, -p)
         end
     end
-    if objective(pop)[2] == "inf"
-        MOM.objective(M,objective(pop)[1])
-    else
-        MOM.objective(M,-objective(pop)[1])
-    end
+
+    MOM.objective(M, objective(pop)...)
     return  M
 end
 
@@ -151,9 +148,15 @@ end
 """
  Add as objective function the linear functional associated to the polynomial pol to minimize.
 """
-function objective(M::MOM.Model, pol)
-    f = pol*one(Polynomial{true,Float64})
-    @objective(M.model, Min, sum(t.α*M[:moments][M[:index][t.x],1] for t in f))
+function objective(M::MOM.Model, pol, sense="inf")
+    if pol != nothing
+        f = pol*one(Polynomial{true,Float64})
+        if sense == "inf"
+            @objective(M.model, Min, sum(t.α*M[:moments][M[:index][t.x],1] for t in f))
+        else
+            @objective(M.model, Max, sum(t.α*M[:moments][M[:index][t.x],1] for t in f))
+        end
+    end
 end
 
 #----------------------------------------------------------------------

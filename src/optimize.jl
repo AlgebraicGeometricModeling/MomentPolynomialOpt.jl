@@ -1,4 +1,4 @@
-export minimize, minimize_ncl, minimize_tv
+export minimize, maximize, minimize_ncl, minimize_tv
 
 #------------------------------------------------------------------------
 """
@@ -43,7 +43,7 @@ function minimize(fct, Eq, Pos,  X, d::Int64, optimizer)
     end
 end
 
-function minimize(pop,  X, d::Int64, optimizer)
+function optimize(pop,  X, d::Int64, optimizer)
     M = MOM.Model(pop,X, d, optimizer)
     JuMP.optimize!(M.model)
     if JuMP.has_values(M.model)
@@ -54,6 +54,17 @@ function minimize(pop,  X, d::Int64, optimizer)
     end
 end
 
+#----------------------------------------------------------------------
+function maximize(fct, Eq, Pos,  X, d::Int64, optimizer)
+    M = MOM.Model(-fct, Eq, Pos, X, d, optimizer)
+    JuMP.optimize!(M)
+    if JuMP.has_values(M.model)
+        return -JuMP.objective_value(M.model), M
+    else
+        println("Solver status: ", JuMP.termination_status(M.model))
+        return nothing, M
+    end
+end
 #----------------------------------------------------------------------
 # Minimize the nuclear norm, using a SDP matrix of size 2*N
 function minimize_ncl(X, d, sigma, optimizer)

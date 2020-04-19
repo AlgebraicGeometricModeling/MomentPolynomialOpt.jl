@@ -1,6 +1,4 @@
-using JuMP
-using MomentTools
-using DynamicPolynomials
+using JuMP, DynamicPolynomials, MomentTools
 
 using MosekTools;optimizer = Mosek.Optimizer
 
@@ -16,12 +14,8 @@ e2 = (x2^2-3)*(x1*x2-2)
 p1 = x1
 p2 = 2-x2
 
-v, m = minimize(-x1, [e1, e2], [p1,p2], X, 4, optimizer)
+v, M = maximize(x1, [e1, e2], [p1,p2], X, 4, optimizer)
 
-optimize!(m)
 
-v = objective_value(m.model)
 
-println("value: ",v)
-
-Xi = getminimizers(m)
+Xi = getminimizers(M)
