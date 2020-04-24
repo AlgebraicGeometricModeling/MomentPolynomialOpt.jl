@@ -1,10 +1,10 @@
 module MOM
 
 import DynamicPolynomials: MonomialVector
-
 using DynamicPolynomials
 using MultivariateSeries
 using JuMP
+using MathOptInterface
 
 function DynamicPolynomials.MonomialVector(V::Vector{PolyVar{true}}, rg::Seq)
     L = DynamicPolynomials.Monomial{true}[]
@@ -61,7 +61,7 @@ end
 #----------------------------------------------------------------------
 function Model(o,  E::Vector, G::Vector, X, d::Int64, optimizer; kwargs...)
     M  = MOM.Model(X,d,optimizer;kwargs...)
-    MOM.add_constraint_measure(M)
+    MOM.add_constraint_unitmass(M)
     MOM.objective(M,o)
     for p in E
         MOM.add_constraint_zero(M,p)
@@ -73,21 +73,40 @@ function Model(o,  E::Vector, G::Vector, X, d::Int64, optimizer; kwargs...)
 end
 
 #----------------------------------------------------------------------
-function Model(pop, X,  d:: Int64, optimizer; kwargs...)
-    M = MOM.Model(X, d, optimizer;kwargs...)
-    MOM.add_constraint_measure(M)
-    for p in constraints(pop)
-        if p[2]=="=0"
-            MOM.add_constraint_zero(M, p)
-        elseif p[2]==">=0"
-            MOM.add_constraint_nneg(M, p)
-        elseif p[2]=="<=0"
-            MOM.add_constraint_nneg(M, -p)
+function Model(o,  C::Vector, X, d::Int64, optimizer; kwargs...)
+    M  = MOM.Model(X,d,optimizer;kwargs...)
+    MOM.add_constraint_unitmass(M)
+    MOM.objective(M,o[1],o[2])
+    for c in C
+        if c[2] == "=0"
+            MOM.add_constraint_zero(M,c[1])
+        elseif c[2] == ">=0"
+            MOM.add_constraint_nneg(M,c[1])
+        elseif c[2] == "<=0"
+            MOM.add_constraint_nneg(M,-c[1])
         end
     end
+    return M
+end
 
-    MOM.objective(M, objective(pop)...)
-    return  M
+#----------------------------------------------------------------------
+function Model(C::Vector, X, d::Int64, optimizer; kwargs...)
+    M  = MOM.Model(X,d,optimizer;kwargs...)
+    MOM.add_constraint_unitmass(M)
+    for c in C
+        if c[2] == "inf"
+            MOM.objective(M,c[1], "inf")
+        elseif c[2] == "inf"
+            MOM.objective(M,c[1], "sup")
+        elseif c[2] == "=0"
+            MOM.add_constraint_zero(M,c[1])
+        elseif c[2] == ">=0"
+            MOM.add_constraint_nneg(M,c[1])
+        elseif c[2] == "<=0"
+            MOM.add_constraint_nneg(M,-c[1])
+        end
+    end
+    return M
 end
 
 #----------------------------------------------------------------------
@@ -129,9 +148,16 @@ function add_constraint_nneg(M::MOM.Model, eqs...)
 end
 
 #----------------------------------------------------------------------
-function add_constraint_measure(M::MOM.Model)
+function add_constraint_unitmass(M::MOM.Model)
     for k in 1:M[:nu]
-        @constraint(M.model,M[:moments][1,k] == 1)
+        @constraint(M.model,M[:moments][1,k] - 1 == 0)
+    end
+end
+
+function add_constraint_unitmass(M::MOM.Model, p::Polynomial)
+    for k in 1:M[:nu]
+         @constraint(M.model,
+                    sum(t.α*M[:moments][M[:index][t.x],k] for t in p) -1 ==0)
     end
 end
 #----------------------------------------------------------------------
@@ -144,6 +170,14 @@ function add_constraint_moments(M::MOM.Model, sigma::Series)
     end
 end
 
+#----------------------------------------------------------------------
+function add_constraint_moments(M::MOM.Model, moments::Vector)
+    for c in moments
+        p = c[1]*one(Polynomial{true,Float64}) 
+        @constraint(M.model,
+                    sum(sum(t.α*M[:moments][M[:index][t.x],k] for t in p)*(-1)^(k-1) for k in 1:M[:nu])-c[2]==0)
+    end
+end
 #----------------------------------------------------------------------
 """
  Add as objective function the linear functional associated to the polynomial pol to minimize.
@@ -211,9 +245,16 @@ function Base.show(io::IO, m::MOM.Model)
     println(io, "\nA MOMent program with:")
     Base.show(io, m.model)
 end
+
 #----------------------------------------------------------------------
 function JuMP.optimize!(M::MOM.Model)
     JuMP.optimize!(M.model)
+    if JuMP.has_values(M.model)
+        return JuMP.objective_value(M.model), M
+    else
+        println("Solver status: ", JuMP.termination_status(M.model))
+        return nothing, M
+    end
 end
 
 function JuMP.objective_value(M::MOM.Model)

@@ -13,13 +13,18 @@ using MosekTools;optimizer = Mosek.Optimizer
 #using CSDP; optimizer = CSDP.Optimizer
 
 d = 4
-m = MOM.Model(X, d, optimizer; nu=2)
-MOM.add_constraint_moments(m, MultivariateSeries.dual(p))
-MOM.objective_tv(m)
+M = MOM.Model(X, d, optimizer; nu=2)
 
-optimize!(m)
+s = MultivariateSeries.dual(p)
+L = monomials(X,seq(0:2))
 
-v = objective_value(m)
-s = getseries(m)
+MOM.add_constraint_moments(M, [(m=>s[m]) for m in L])
 
-w, Xi = getmeasure(m)
+MOM.objective_tv(M)
+
+optimize!(M)
+
+v = objective_value(M)
+s = getseries(M)
+
+w, Xi = getmeasure(M)

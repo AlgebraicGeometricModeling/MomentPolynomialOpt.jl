@@ -1,4 +1,6 @@
-export minimize, maximize, minimize_ncl, minimize_tv
+using MathOptInterface
+
+export minimize, maximize, optimize, minimize_ncl, minimize_tv
 
 #------------------------------------------------------------------------
 """
@@ -34,37 +36,22 @@ getminimizer(m)
 """
 function minimize(fct, Eq, Pos,  X, d::Int64, optimizer)
     M = MOM.Model(fct, Eq, Pos, X, d, optimizer)
-    JuMP.optimize!(M)
-    if JuMP.has_values(M.model)
-        return JuMP.objective_value(M.model), M
-    else
-        println("Solver status: ", JuMP.termination_status(M.model))
-        return nothing, M
-    end
-end
-
-function optimize(pop,  X, d::Int64, optimizer)
-    M = MOM.Model(pop,X, d, optimizer)
-    JuMP.optimize!(M.model)
-    if JuMP.has_values(M.model)
-        return JuMP.objective_value(M.model), M
-    else
-        println("Solver status: ", JuMP.termination_status(M.model))
-        return nothing, M
-    end
+   return JuMP.optimize!(M)
 end
 
 #----------------------------------------------------------------------
 function maximize(fct, Eq, Pos,  X, d::Int64, optimizer)
-    M = MOM.Model(-fct, Eq, Pos, X, d, optimizer)
-    JuMP.optimize!(M)
-    if JuMP.has_values(M.model)
-        return -JuMP.objective_value(M.model), M
-    else
-        println("Solver status: ", JuMP.termination_status(M.model))
-        return nothing, M
-    end
+    M = MOM.Model(nothing, Eq, Pos, X, d, optimizer)
+    MOM.objective(M, fct, "sup")
+    return JuMP.optimize!(M)
 end
+
+#----------------------------------------------------------------------
+function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
+    M  = MOM.Model(C, X, d, optimizer;kwargs...)
+    return JuMP.optimize!(M)
+end
+
 #----------------------------------------------------------------------
 # Minimize the nuclear norm, using a SDP matrix of size 2*N
 function minimize_ncl(X, d, sigma, optimizer)
