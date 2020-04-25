@@ -5,12 +5,11 @@ using DynamicPolynomials
 using MultivariateSeries
 using JuMP
 
-import ..seq
-
 mutable struct Model
     model::JuMP.Model
 end
 
+    
 #----------------------------------------------------------------------
 # Define a moment model
 function Model(X, d::Int64; nu::Int64=1, kwargs...)

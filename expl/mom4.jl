@@ -21,7 +21,7 @@ L = monomials(X,seq(0:2))
 
 constraint_moments(M, [(m=>s[m]) for m in L])
 
-MOM.objective_tv(M)
+objective_tv(M)
 
 optimize!(M)
 
