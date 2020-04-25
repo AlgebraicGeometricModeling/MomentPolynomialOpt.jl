@@ -14,17 +14,17 @@ using CSDP; optimizer = CSDP.Optimizer
 
 d = 3
 
-m = MOM.Model(X, d, optimizer)
+M = MOM.Model(X, d)
+set_optimizer(M, optimizer)
+constraint_unitmass(M)
+constraint_zero(M, p1, p2)
+constraint_nneg(M, q)
+objective(M, y)
 
-MOM.add_constraint_measure(m)
-MOM.add_constraint_zero(m, p1, p2)
-MOM.add_constraint_nneg(m,q)
-MOM.objective(m, y)
+optimize!(M)
 
-optimize!(m)
-
-v  = objective_value(m)
-y  = value(m)
-L  = m[:monomials]
-s  = getseries(m)
-Xi = getminimizers(m)
+v  = objective_value(M)
+y  = value(M)
+L  = M[:monomials]
+s  = getseries(M)
+Xi = getminimizers(M)
