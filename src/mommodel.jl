@@ -5,15 +5,6 @@ using DynamicPolynomials
 using MultivariateSeries
 using JuMP
 
-
-function DynamicPolynomials.MonomialVector(V::Vector{PolyVar{true}}, rg::Seq)
-    L = DynamicPolynomials.Monomial{true}[]
-    for i in rg.val
-        append!(L, DynamicPolynomials.monomials(V,i))
-    end
-    L
-end
-
 mutable struct Model
     model::JuMP.Model
 end
@@ -28,7 +19,7 @@ function Model(X, d::Int64; nu::Int64=1, kwargs...)
     m[:variables] = X
     m[:degree] = d
     
-    B = monomials(X,seq(0:d))
+    B = monomials(X,MomentTools.seq(0:d))
     N = length(B)
     m[:basis] = B
 

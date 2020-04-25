@@ -26,5 +26,6 @@ optimize!(M)
 v  = objective_value(M)
 y  = value(M)
 L  = M[:monomials]
+
 s  = getseries(M)
 Xi = getminimizers(M)
