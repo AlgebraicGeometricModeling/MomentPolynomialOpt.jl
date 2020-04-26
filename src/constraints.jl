@@ -4,19 +4,26 @@ export constraint_zero, constraint_nneg, constraint_unitmass, constraint_moments
 
 
 #----------------------------------------------------------------------
-function constraint_zero(M::MOM.Model, eqs::Polynomial...)
+function constraint_zero(M::MOM.Model, idx::Vector{Int64}, eqs::Polynomial...)
     for e in eqs
-        for k in 1:M[:nu]
-            MOM.add_constraint_zero(M,k,e)
-        end
+        MOM.add_constraint_zero(M,idx,e)
+    end
+end
+
+
+function constraint_zero(M::MOM.Model, eqs::Polynomial...)
+    constraint_zero(M,collect(1:M[:nu]),eqs...)
+end
+
+#----------------------------------------------------------------------
+function constraint_nneg(M::MOM.Model, idx::Vector{Int64}, eqs::Polynomial...)
+    for e in eqs
+        MOM.add_constraint_nneg(M,idx,e)
     end
 end
 
 function constraint_nneg(M::MOM.Model, eqs::Polynomial...)
-    Idx = [1:M[:nu]...]
-    for e in eqs
-        MOM.add_constraint_nneg(M,Idx,e)
-    end
+    constraint_nneg(M,collect(1:M[:nu]),eqs...)
 end
 #----------------------------------------------------------------------
 function constraint_unitmass(M::MOM.Model, idx=1:M[:nu])

@@ -59,18 +59,21 @@ end
 
 
 #----------------------------------------------------------------------
-function add_constraint_zero(M::MOM.Model, k::Int64, eq::Polynomial)
+function add_constraint_zero(M::MOM.Model, Idx::AbstractVector, eq::Polynomial)
     p = eq*one(Polynomial{true,Float64})
     X = M[:variables]
     L = monomials(X,seq(0:2*M[:degree]-maxdegree(p)))
     for mn in L
         q = p*mn*one(Float64)
-        @constraint(M.model, sum(t.α*M[:moments][M[:index][t.x],k] for t in q) ==0)
+        for k in Idx
+            @constraint(M.model,
+                        sum(t.α*M[:moments][M[:index][t.x],k] for t in q) ==0)
+        end
     end
 end
 
 #----------------------------------------------------------------------
-function add_constraint_nneg(M::MOM.Model, Idx::Vector{Int64}, e::Polynomial)
+function add_constraint_nneg(M::MOM.Model, Idx::AbstractVector, e::Polynomial)
     p = e*one(Polynomial{true,Float64})
     X = M[:variables]
     L = monomials(X, seq(0:M[:degree] - maxdegree(p)))
