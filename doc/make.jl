@@ -1,4 +1,4 @@
-using Documenter
+using Documenter, DocumenterMarkdown
 using MomentTools
 
 dir = "mrkd"
@@ -8,7 +8,7 @@ Expl = map(file -> joinpath("expl", file),
 
 makedocs(
     sitename = "MomentTools",
-    format = Documenter.HTML(),
+    format = Documenter.HTML(prettyurls = false),
     authors = "B. Mourrain",
     modules = [MomentTools],
     build = "html",
@@ -16,11 +16,13 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "Example" => Expl,
+#        "Test" => ["a" => "try.html"],
 #        "Functions & types" => Code
     ],
     doctest = false
 )
 
 deploydocs(
+    deps = Deps.pip("pygments", "mkdocs", "python-markdown-math"),
     repo = "gitlab.inria.fr/AlgebraicGeometricModeling/MomentTools.jl.git"
 )

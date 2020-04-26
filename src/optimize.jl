@@ -32,7 +32,7 @@ function getmeasure(M::MOM.Model)
 end
 
 #----------------------------------------------------------------------
-function JuMP.optimize!(M::MOM.Model)
+function optimize(M::MOM.Model)
     JuMP.optimize!(M.model)
     if JuMP.has_values(M.model)
         return JuMP.objective_value(M.model), M
