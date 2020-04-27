@@ -16,13 +16,13 @@ function constraint_zero(M::MOM.Model, eqs::Polynomial...)
 end
 
 #----------------------------------------------------------------------
-function constraint_nneg(M::MOM.Model, idx::Vector{Int64}, eqs::Polynomial...)
+function constraint_nneg(M::MOM.Model, idx::Vector{Int64}, eqs...)
     for e in eqs
         MOM.add_constraint_nneg(M,idx,e)
     end
 end
 
-function constraint_nneg(M::MOM.Model, eqs::Polynomial...)
+function constraint_nneg(M::MOM.Model, eqs...)
     constraint_nneg(M,collect(1:M[:nu]),eqs...)
 end
 #----------------------------------------------------------------------

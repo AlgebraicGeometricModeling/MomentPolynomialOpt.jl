@@ -60,7 +60,7 @@ end
 
 
 #----------------------------------------------------------------------
-function add_constraint_zero(M::MOM.Model, Idx::AbstractVector, eq::Polynomial)
+function add_constraint_zero(M::MOM.Model, Idx::AbstractVector, eq)
     p = eq*one(Polynomial{true,Float64})
     X = M[:variables]
     L = monomials(X,seq(0:2*M[:degree]-maxdegree(p)))
@@ -74,8 +74,8 @@ function add_constraint_zero(M::MOM.Model, Idx::AbstractVector, eq::Polynomial)
 end
 
 #----------------------------------------------------------------------
-function add_constraint_nneg(M::MOM.Model, Idx::AbstractVector, e::Polynomial)
-    p = e*one(Polynomial{true,Float64})
+function add_constraint_nneg(M::MOM.Model, Idx::AbstractVector, eq)
+    p = eq*one(Polynomial{true,Float64})
     X = M[:variables]
     L = monomials(X, seq(0:M[:degree] - maxdegree(p)))
     N = length(L)

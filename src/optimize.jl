@@ -86,7 +86,7 @@ getminimizer(m)
 [1.41421 1.73205; 1.41421 1.41421; 1.41421 -1.73205]
 ```
 """
-function minimize(fct, Eq, Pos,  X, d::Int64, optimizer; kwargs...)
+function minimize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs...)
     M = MOM.Model(X, d, optimizer; kwargs...)
     constraint_unitmass(M)
     constraint_zero(M,Eq...)
@@ -98,7 +98,7 @@ function minimize(fct, Eq, Pos,  X, d::Int64, optimizer; kwargs...)
 end
 
 #----------------------------------------------------------------------
-function maximize(fct, Eq, Pos,  X, d::Int64, optimizer; kwargs...)
+function maximize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs...)
     M = MOM.Model(X, d, optimizer; kwargs...)
     constraint_unitmass(M)
     constraint_zero(M,Eq...)
