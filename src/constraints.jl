@@ -45,17 +45,25 @@ function constraint_moments(M::MOM.Model, sigma::Series)
     L = M[:monomials]
     for (m,c) in sigma
         @constraint(M.model,
-                    sum(M[:moments][M[:index][m],k]*(-1)^(k-1) for k in 1:M[:nu]) - c==0)
+                    sum(M[:moments][M[:index][m],k]*M[:w][k] for k in 1:M[:nu]) - c == 0)
     end
 end
 
 #----------------------------------------------------------------------
-function constraint_moments(M::MOM.Model, moments::Vector,
-                            lambda::Vector=[(-1)^(k-1) for k in 1:M[:nu]])
+function constraint_moments(M::MOM.Model, moments::Vector)
     for c in moments
         p = c[1]*one(Polynomial{true,Float64}) 
         @constraint(M.model,
-                    sum(sum(t.α*M[:moments][M[:index][t.x],k] for t in p)*lambda[k] for k in 1:M[:nu])-c[2]==0)
+                    sum(sum(t.α*M[:moments][M[:index][t.x],k] for t in p)*M[:w][k] for k in 1:M[:nu])-c[2]==0)
+    end
+end
+
+#----------------------------------------------------------------------
+function constraint_moments(M::MOM.Model, moments::Vector, k::Int64)
+    for c in moments
+        p = c[1]*one(Polynomial{true,Float64}) 
+        @constraint(M.model,
+                    sum(t.α*M[:moments][M[:index][t.x],k] for t in p)*M[:w][k]-c[2]==0)
     end
 end
 
@@ -63,13 +71,13 @@ end
 """
  Add as objective function the linear functional associated to the polynomial pol to minimize.
 """
-function objective(M::MOM.Model, pol, sense="inf", k::Int64=1)
+function objective(M::MOM.Model, pol, sense="inf")
     if pol != nothing
         f = pol*one(Polynomial{true,Float64})
         if sense == "inf"
-            @objective(M.model, Min, sum(t.α*M[:moments][M[:index][t.x],k] for t in f))
+            @objective(M.model, Min, sum(sum(t.α*M[:moments][M[:index][t.x],k]*M[:w][k] for t in f) for k in 1:M[:nu]))
         else
-            @objective(M.model, Max, sum(t.α*M[:moments][M[:index][t.x],k] for t in f))
+            @objective(M.model, Max, sum(sum(t.α*M[:moments][M[:index][t.x],k]*M[:w][k] for t in f) for k in 1:M[:nu]))
         end
     end
 end
@@ -81,5 +89,5 @@ function objective_ncl(M)
 end
 #----------------------------------------------------------------------
 function objective_tv(M)
-    @objective(M.model, Min, sum(M[:moments][1,k] for k in 1:M[:nu]))
+    @objective(M.model, Min, sum(M[:moments][1,k]*abs(M[:w][k]) for k in 1:M[:nu]))
 end

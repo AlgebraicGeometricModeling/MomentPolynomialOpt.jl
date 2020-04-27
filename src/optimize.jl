@@ -1,4 +1,3 @@
-#using MathOptInterface
 
 export getseries, getminimizers, getmeasure,
     minimize, maximize, optimize, minimize_ncl, minimize_tv
@@ -24,7 +23,7 @@ function getmeasure(M::MOM.Model)
     w, Pts = decompose(s[1]);
     for k in 2:M[:nu]
         c, Xi = decompose(s[k])
-        w = vcat(w, c*(-1)^(k-1))
+        w = vcat(w, c*M[:w][k])
         Pts= hcat(Pts,Xi)
     end
     
@@ -42,6 +41,7 @@ function optimize(M::MOM.Model)
     end
 end
 
+#----------------------------------------------------------------------
 function JuMP.objective_value(M::MOM.Model)
     JuMP.objective_value(M.model)
 end
@@ -92,7 +92,7 @@ function minimize(fct, Eq, Pos,  X, d::Int64, optimizer; kwargs...)
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
     objective(M, fct)
-    return JuMP.optimize!(M)
+    return JuMP.optimize!(M.model)
 end
 
 #----------------------------------------------------------------------
@@ -102,7 +102,7 @@ function maximize(fct, Eq, Pos,  X, d::Int64, optimizer; kwargs...)
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
     objective(M, fct, "sup")
-    return JuMP.optimize!(M)
+    return JuMP.optimize!(M.model)
 end
 
 #----------------------------------------------------------------------
@@ -123,7 +123,7 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
         end
     end
     set_optimizer(M,optimizer)
-    return JuMP.optimize!(M)
+    return JuMP.optimize!(M.model)
 end
 
 #----------------------------------------------------------------------

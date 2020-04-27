@@ -12,11 +12,12 @@ end
     
 #----------------------------------------------------------------------
 # Define a moment model
-function Model(X, d::Int64; nu::Int64=1, kwargs...)
+function Model(X, d::Int64; nu::Int64=1, w::Vector = [(-1)^(k-1) for k in 1:nu],   kwargs...)
 
     m = JuMP.Model(kwargs...)
 
     m[:nu] = nu
+    m[:w] = w
     m[:variables] = X
     m[:degree] = d
     

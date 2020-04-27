@@ -1,9 +1,8 @@
 module MomentTools
 
-using JuMP
 using DynamicPolynomials
 using MultivariateSeries
-
+using JuMP
 
 
 include("mommodel.jl")
