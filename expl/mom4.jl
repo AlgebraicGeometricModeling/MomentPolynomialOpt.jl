@@ -23,9 +23,8 @@ constraint_moments(M, [(m=>s[m]) for m in L])
 
 objective_tv(M)
 
-optimize!(M)
+v = optimize(M)[1]
 
-v = objective_value(M)
 s = getseries(M)
 
 w, Xi = getmeasure(M)

@@ -92,7 +92,9 @@ function minimize(fct, Eq, Pos,  X, d::Int64, optimizer; kwargs...)
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
     objective(M, fct)
-    return JuMP.optimize!(M.model)
+    JuMP.optimize!(M.model)
+    v = objective_value(M.model)
+    return v, M
 end
 
 #----------------------------------------------------------------------
@@ -102,7 +104,9 @@ function maximize(fct, Eq, Pos,  X, d::Int64, optimizer; kwargs...)
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
     objective(M, fct, "sup")
-    return JuMP.optimize!(M.model)
+    JuMP.optimize!(M.model)
+    v = objective_value(M.model)
+    return v, M
 end
 
 #----------------------------------------------------------------------
@@ -123,7 +127,9 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
         end
     end
     set_optimizer(M,optimizer)
-    return JuMP.optimize!(M.model)
+    JuMP.optimize!(M.model)
+    v = objective_value(M.model)
+    return v, M
 end
 
 #----------------------------------------------------------------------

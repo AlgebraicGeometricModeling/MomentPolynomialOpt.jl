@@ -21,7 +21,7 @@ constraint_zero(M, p1, p2)
 constraint_nneg(M, q)
 objective(M, y)
 
-optimize!(M)
+v = optimize(M)[1]
 
 v  = objective_value(M)
 L  = M[:monomials]
