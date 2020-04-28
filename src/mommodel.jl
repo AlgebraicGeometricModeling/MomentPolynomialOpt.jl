@@ -60,32 +60,46 @@ end
 
 
 #----------------------------------------------------------------------
-function add_constraint_zero(M::MOM.Model, Idx::AbstractVector, eq)
+function add_constraint_zero(M::MOM.Model, eq)
     p = eq*one(Polynomial{true,Float64})
     X = M[:variables]
     L = monomials(X,seq(0:2*M[:degree]-maxdegree(p)))
     for mn in L
         q = p*mn*one(Float64)
-        for k in Idx
+        for k in 1:M[:nu]
             @constraint(M.model,
-                        sum(t.α*M[:moments][M[:index][t.x],k] for t in q) ==0)
+                        sum(t.α*M[:moments][M[:index][t.x],k] for t in q) == 0)
         end
+    end
+end
+          
+#----------------------------------------------------------------------
+function add_constraint_zero(M::MOM.Model, idx::AbstractVector, Veq)
+    P = [ e*one(Polynomial{true,Float64}) for eq in Veq ]
+    X = M[:variables]
+    d0 = max([maxdegree(e) for e in P]...)
+    L = monomials(X,seq(0:2*M[:degree]-d0))
+    for mn in L
+        @constraint(M.model,
+                    sum(sum(t.α*M[:moments][M[:index][t.x],idx[k]] for t in P[k]*mn) for k in 1:length(idx)) == 0)
     end
 end
 
 #----------------------------------------------------------------------
-function add_constraint_nneg(M::MOM.Model, Idx::AbstractVector, eq)
-    p = eq*one(Polynomial{true,Float64})
+function add_constraint_nneg(M::MOM.Model, pos)
+    p = pos*one(Polynomial{true,Float64})
     X = M[:variables]
-    L = monomials(X, seq(0:M[:degree] - maxdegree(p)))
+    d0 = maxdegree(p)
+    X = M[:variables]
+    L = monomials(X, seq(0:M[:degree] - d0))
     N = length(L)
     if N == 1
-        for k in Idx
+        for k in 1:M[:nu]
             @constraint(M.model,
                         sum(t.α*M[:moments][M[:index][t.x],k] for t in p)>=0)
         end
     else
-        for k in Idx
+        for k in 1:M[:nu]
             P = [ sum(t.α*M[:moments][M[:index][t.x*L[i]*L[j]],k]
                       for t in p)
                   for i in 1:N, j in 1:N ]
@@ -94,8 +108,24 @@ function add_constraint_nneg(M::MOM.Model, Idx::AbstractVector, eq)
     end
 end
 
+#----------------------------------------------------------------------
+function add_constraint_nneg(M::MOM.Model, idx::AbstractVector, Veq)
+    p = [ eq*one(Polynomial{true,Float64}) for eq in Veq ]
+    X = M[:variables]
+    d0 = max([maxdegree(e) for e in p]...)
+    L = monomials(X, seq(0:M[:degree] - d0))
+    N = length(L)
+    if N == 1
+        @constraint(M.model,
+                    sum(sum(t.α*M[:moments][M[:index][t.x],idx[k]] for t in p[k]) for k in 1:length(idx)) >=0)
+    else
 
-
+        P = [ sum(sum(t.α*M[:moments][M[:index][t.x*L[i]*L[j]],idx[k]]
+                      for t in p[k]) for k in 1:length(idx)) 
+              for i in 1:N, j in 1:N ]
+        @SDconstraint(M.model, P >= zeros(N,N))
+    end
+end
 
 
 end  #module MOM

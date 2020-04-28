@@ -16,10 +16,10 @@ d = 4
 M = MOM.Model(X, d; nu=2)
 set_optimizer(M,optimizer)
 
-s = MultivariateSeries.dual(p)
+s0 = MultivariateSeries.dual(p)
 L = monomials(X,seq(0:2))
 
-constraint_moments(M, [(m=>s[m]) for m in L])
+constraint_moments(M, [(m=>s0[m]) for m in L])
 
 objective_tv(M)
 
