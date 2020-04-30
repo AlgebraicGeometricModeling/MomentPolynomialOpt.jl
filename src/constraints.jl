@@ -25,6 +25,7 @@ function constraint_nneg(M::MOM.Model, idx::Vector{Int64}, eqs::Vector...)
 end
 
 function constraint_nneg(M::MOM.Model, eqs...)
+    println("nneg")
     for e in eqs
         MOM.add_constraint_nneg(M,e)
     end

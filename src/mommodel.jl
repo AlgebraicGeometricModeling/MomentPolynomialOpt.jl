@@ -4,6 +4,7 @@ module MOM
 using DynamicPolynomials
 using MultivariateSeries
 using JuMP
+using LinearAlgebra
 
 mutable struct Model
     model::JuMP.Model
@@ -46,7 +47,7 @@ function Model(X, d::Int64; nu::Int64=1, w::Vector = [(-1)^(k-1) for k in 1:nu],
 
     for k in 1:nu 
         H = [ y[m[:index][B[i]*B[j]],k] for i in 1:N, j in 1:N]
-        @SDconstraint(m, H >= zeros(N,N))
+        @SDconstraint(m, Symmetric(H) >= zeros(N,N))
     end
 
     return MOM.Model(m)
@@ -74,7 +75,7 @@ function add_constraint_zero(M::MOM.Model, eq)
 end
           
 #----------------------------------------------------------------------
-function add_constraint_zero(M::MOM.Model, idx::AbstractVector, Veq)
+function add_constraint_zero(M::MOM.Model, idx::Vector{Int64}, Veq)
     P = [ e*one(Polynomial{true,Float64}) for eq in Veq ]
     X = M[:variables]
     d0 = max([maxdegree(e) for e in P]...)
@@ -89,7 +90,7 @@ end
 function add_constraint_nneg(M::MOM.Model, pos)
     p = pos*one(Polynomial{true,Float64})
     X = M[:variables]
-    d0 = maxdegree(p)
+    d0 = Int64(ceil(maxdegree(p)/2))
     X = M[:variables]
     L = monomials(X, seq(0:M[:degree] - d0))
     N = length(L)
@@ -109,10 +110,10 @@ function add_constraint_nneg(M::MOM.Model, pos)
 end
 
 #----------------------------------------------------------------------
-function add_constraint_nneg(M::MOM.Model, idx::AbstractVector, Veq)
+function add_constraint_nneg(M::MOM.Model, idx::Vector{Int64}, Veq)
     p = [ eq*one(Polynomial{true,Float64}) for eq in Veq ]
     X = M[:variables]
-    d0 = max([maxdegree(e) for e in p]...)
+    d0 = Int64(max([maxdegree(e) for e in p]...)/2)
     L = monomials(X, seq(0:M[:degree] - d0))
     N = length(L)
     if N == 1
