@@ -4,7 +4,6 @@ module MOM
 using DynamicPolynomials
 using MultivariateSeries
 using JuMP
-using LinearAlgebra
 
 mutable struct Model
     model::JuMP.Model
@@ -31,7 +30,7 @@ function Model(X, d::Int64; nu::Int64=1,   kwargs...)
 
     M[:H] = []
     for k in 1:nu
-        push!(M[:H], @variable(M, [1:N,1:N], SDP))
+        push!(M[:H], @variable(M, [1:N,1:N], PSD))
     end
 
     # Hankel structure
@@ -43,9 +42,9 @@ function Model(X, d::Int64; nu::Int64=1,   kwargs...)
                     push!(M[:monomials], mn)
 	        else
                     id = get(M[:index], mn, (0,0))
-	            if (i != id[2]) || (j != id[1])
+	            if (i != id[2]) || (j != id[1]) 
                         for k in 1:nu
-	                    @constraint(m, M[:H][k][i,j]-M[:H][k][id...] == 0)
+	                    @constraint(M, M[:H][k][i,j]-M[:H][k][id...] == 0)
                         end
                     end
 	        end
@@ -99,10 +98,10 @@ function add_constraint_nneg(M::MOM.Model, pos)
     if N == 1
         for k in 1:M[:nu]
             @constraint(M.model,
-                        sum(t.α*M[:moments][M[:index][t.x],k] for t in p)>=0)
+                        sum(t.α*M[:H][k][M[:index][t.x]...] for t in p)>=0)
         end
     else
-        P  = @variable(m, [1:N,1:N], SDP)
+        P  = @variable(M.model, [1:N,1:N], PSD)
         for i in 1:N
             for j  in 1:i
                 mn = L[i]*L[j]
@@ -126,7 +125,7 @@ function add_constraint_nneg(M::MOM.Model, idx::Vector{Int64}, Veq)
         @constraint(M.model,
                     sum(sum(t.α*M[:H][idx[k]][M[:index][t.x]...] for t in p[k]) for k in 1:length(idx)) >=0)
     else
-        P  = @variable(m, [1:N,1:N], SDP)
+        P  = @variable(M.model, [1:N,1:N], PSD)
         for i in 1:N
             for j  in 1:i
                 mn = L[i]*L[j]
@@ -137,8 +136,37 @@ function add_constraint_nneg(M::MOM.Model, idx::Vector{Int64}, Veq)
     end
 end
 
-end  #module MOM
 
+function add_constraint_moment(M::MOM.Model, v , p)
+    for k in 1:M[:nu]
+        @constraint(M.model,
+                    sum(sum(t.α*M[:H][k][M[:index][t.x]...] for t in p) for k in 1:M[:nu])-v == 0)
+    end
+end
+
+function add_constraint_moment(M::MOM.Model, v, idx::Vector{Int64}, p::Vector)
+    for k in idx
+        @constraint(M.model,
+                    sum(sum(t.α*M[:H][idx[k]][M[:index][t.x]...] for t in p[k]) for k in 1:length(idx)) - v ==0)
+    end
+end
+
+function set_objective(M::MOM.Model, f, sense)
+    obj = sum(sum(t.α*M[:H][k][M[:index][t.x]...] for t in f) for k in 1:M[:nu])
+
+end
+
+function set_objective(M::MOM.Model, idx::Vector{Int64}, f::Vector, sense)
+    obj = sum(sum(t.α*M[:H][idx[k]][M[:index][t.x]...] for t in f[k]) for k in 1:length(idx))
+    if sense == "inf"  
+        @objective(m.model, Min, obj)
+    else
+        @objective(M.model, Max, obj)
+    end
+end
+
+end  #module MOM
+#----------------------------------------------------------------------
 #----------------------------------------------------------------------
 function Base.setindex!(p::MOM.Model, v, k::Symbol)  p.model[k] = v end
 

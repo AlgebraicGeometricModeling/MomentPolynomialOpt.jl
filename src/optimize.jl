@@ -4,9 +4,7 @@ export getseries, getminimizers, getmeasure,
 
 #----------------------------------------------------------------------
 function getseries(M::MOM.Model)
-    [series([M[:monomials][i]=>JuMP.value(M[:moments][i,k])
-             for i in 1:length(M[:monomials])])
-     for k in 1:M[:nu]]
+    [series(JuMP.value.(M[:H][k]), M[:basis], M[:basis]) for k in 1:M[:nu]]
 end
 
 #----------------------------------------------------------------------
@@ -17,13 +15,13 @@ function getminimizers(M::MOM.Model)
 end
 
 #----------------------------------------------------------------------
-function getmeasure(M::MOM.Model)
+function getmeasure(M::MOM.Model, p::Vector= [(-1)^(k-1) for k in 1:M[:nu]])
     s = getseries(M)    
 
     w, Pts = decompose(s[1]);
     for k in 2:M[:nu]
         c, Xi = decompose(s[k])
-        w = vcat(w, c*M[:w][k])
+        w = vcat(w, c*p[k])
         Pts= hcat(Pts,Xi)
     end
     

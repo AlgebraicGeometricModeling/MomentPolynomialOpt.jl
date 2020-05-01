@@ -9,8 +9,7 @@ p2 = x^2-2
 q  = 2*x-x^2
 using MosekTools;optimizer = Mosek.Optimizer
 #using MosekTools; optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
-
-using CSDP; optimizer = CSDP.Optimizer
+#using CSDP; optimizer = CSDP.Optimizer
 
 d = 3
 
