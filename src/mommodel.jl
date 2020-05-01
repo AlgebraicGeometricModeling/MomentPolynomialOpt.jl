@@ -143,7 +143,11 @@ end
 #----------------------------------------------------------------------
 function set_objective(M::MOM.Model, f, sense)
     obj = sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in f) for k in 1:M[:nu])
-
+    if sense == "inf"  
+        @objective(M.model, Min, obj)
+    else
+        @objective(M.model, Max, obj)
+    end
 end
 
 function set_objective(M::MOM.Model, idx::Vector{Int64}, f::Vector, sense)
