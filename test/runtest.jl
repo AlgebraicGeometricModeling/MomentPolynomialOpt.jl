@@ -3,7 +3,7 @@ dir=pwd()
 F0 = filter(x ->startswith(x, "mom"), readdir(dir))
 
 for f in F0
-    #include(f)
+    include(f)
 end
 
 F1 = filter(x ->endswith(x, ".ipynb"), readdir(dir*"/../expl"))
