@@ -4,7 +4,8 @@ export getseries, getminimizers, getmeasure,
 
 #----------------------------------------------------------------------
 function getseries(M::MOM.Model)
-    [series([M[:monomials][i]=>JuMP.value(M[:moments][i,k])
+    MOM.get_series(M)
+    [series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
              for i in 1:length(M[:monomials])])
      for k in 1:M[:nu]]
 end
