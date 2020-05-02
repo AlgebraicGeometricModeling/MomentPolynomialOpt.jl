@@ -1,7 +1,7 @@
 name = "MomentTools"
 uuid = "65cd4d85-9fe5-4fdc-93e2-c8798c615752"
 authors = ["mourrain <bernard.mourrain@inria.fr>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Dualization = "191a621a-6537-11e9-281d-650236a99e60"
