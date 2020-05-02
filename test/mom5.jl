@@ -15,7 +15,7 @@ using MosekTools;optimizer = Mosek.Optimizer
 
 X = @polyvar x y
 
-leb_mom(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))
+lebesgue(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))
 
 d = 10
 
@@ -23,23 +23,23 @@ M = MOM.Model(X, d, optimizer; nu=2)
 
 p1 = 1-x^2-y^2
 # p1 * mu_1 >= 0
-constraint_nneg(M, 1, p1)
+constraint_nneg(M, 1, 1-x^2-y^2)
 
 q1 = 1-x^2
 q2 = 1-y^2
 # q1 * mu_2 >= 0, q2 * mu_2 >=0
-constraint_nneg(M, 2, q1, q2 )
+constraint_nneg(M, 2, 1-x^2, 1-y^2 )
 
 # monomials of degree <= 2*d
 L = monomials(X, seq(0:2*d))
 
 # <1*mu_1, m> + <1*mu_2, m> = leb_mom(m)
 constraint_moments(M,
-                   [(m=>leb_mom(exponents(m)...)) for m in L],
+                   [(m=>lebesgue(exponents(m)...)) for m in L],
                    collect(1:2), [1,1] )
 
 # sup  <1*mu_1,1>  
-objective(M, [1], [1], "sup")
+objective(M, 1, 1, "sup")
 
 v = optimize(M)[1]
 println("Approximate volume: ", v)

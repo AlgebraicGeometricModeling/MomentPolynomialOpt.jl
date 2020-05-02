@@ -10,7 +10,13 @@ function objective(M::MOM.Model, pol, sense="inf")
     end
 end
 
-#----------------------------------------------------------------------
+function objective(M::MOM.Model, idx::Int64, pol, sense="inf")
+    if pol != nothing
+        f = pol*one(Polynomial{true,Float64})
+        MOM.set_objective(M,[idx], [f], sense)
+    end
+end
+
 """
  Add as objective function the linear functional associated to the polynomial pol to minimize.
 """
