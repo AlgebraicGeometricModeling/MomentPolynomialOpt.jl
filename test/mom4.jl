@@ -9,7 +9,6 @@ p =  x^2+2*x*y+1
 
 using MosekTools;optimizer = Mosek.Optimizer
 #using MosekTools; optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
-
 #using CSDP; optimizer = CSDP.Optimizer
 
 d = 4

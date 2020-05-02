@@ -1,3 +1,4 @@
+import Dualization
 
 export getseries, getminimizers, getmeasure,
     minimize, maximize, optimize, minimize_ncl, minimize_tv
@@ -18,13 +19,12 @@ function getminimizers(M::MOM.Model)
 end
 
 #----------------------------------------------------------------------
-function getmeasure(M::MOM.Model)
+function getmeasure(M::MOM.Model, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
     s = getseries(M)    
-
     w, Pts = decompose(s[1]);
     for k in 2:M[:nu]
         c, Xi = decompose(s[k])
-        w = vcat(w, c*M[:w][k])
+        w = vcat(w, c*lambda[k])
         Pts= hcat(Pts,Xi)
     end
     
@@ -52,7 +52,11 @@ function JuMP.value(M::MOM.Model)
 end
 
 function JuMP.set_optimizer(M::MOM.Model, optimizer)
-    JuMP.set_optimizer(M.model, optimizer)
+    if M[:dual]
+        set_optimizer(M.model, Dualization.dual_optimizer(optimizer))
+    else
+        set_optimizer(M.model, optimizer)
+    end
 end
 
 #------------------------------------------------------------------------
@@ -92,7 +96,11 @@ function minimize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs.
     constraint_unitmass(M)
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
-    objective(M, fct)
+    if fct != nothing
+        objective(M, fct)
+    else
+        objective(M, 1)
+    end
     JuMP.optimize!(M.model)
     v = objective_value(M.model)
     return v, M
@@ -104,7 +112,11 @@ function maximize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs.
     constraint_unitmass(M)
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
-    objective(M, fct, "sup")
+    if fct != nothing
+        objective(M, fct, "sup")
+    else
+        objective(M, 1, "sup")
+    end
     JuMP.optimize!(M.model)
     v = objective_value(M.model)
     return v, M
