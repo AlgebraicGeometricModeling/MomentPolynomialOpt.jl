@@ -99,7 +99,7 @@ function minimize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs.
     if fct != nothing
         objective(M, fct)
     else
-        objective(M, 1)
+        objective(M, one(Polynomial{true,Float64}))
     end
     JuMP.optimize!(M.model)
     v = objective_value(M.model)
@@ -113,9 +113,9 @@ function maximize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs.
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
     if fct != nothing
-        objective(M, fct, "sup")
+        objective(M, 1, fct, "sup")
     else
-        objective(M, 1, "sup")
+        objective(M, 1, 1, "sup")
     end
     JuMP.optimize!(M.model)
     v = objective_value(M.model)

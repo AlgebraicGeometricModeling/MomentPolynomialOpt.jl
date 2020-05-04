@@ -5,17 +5,22 @@ export objective, objective_ncl, objective_tv
 """
 function objective(M::MOM.Model, pol, sense="inf")
     if pol != nothing
-        f = pol*one(Polynomial{true,Float64})
-        MOM.set_objective(M,f,sense)
+        MOM.set_objective(M,pol,sense)
     end
 end
 
-function objective(M::MOM.Model, idx::Int64, pol, sense="inf")
+function objective(M::MOM.Model, pol::Vector, sense="inf")
     if pol != nothing
-        f = pol*one(Polynomial{true,Float64})
-        MOM.set_objective(M,[idx], [f], sense)
+        MOM.set_objective(M, collect(1:M[:nu]), pol, sense)
     end
 end
+
+function objective(M::MOM.Model, idx:: Int64, pol, sense="inf")
+    if pol != nothing
+        MOM.set_objective(M, [idx], [pol], sense)
+    end
+end
+
 
 """
  Add as objective function the linear functional associated to the polynomial pol to minimize.

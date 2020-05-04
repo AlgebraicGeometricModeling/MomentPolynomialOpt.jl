@@ -7,6 +7,12 @@ function constraint_zero(M::MOM.Model, idx::Int64, eqs...)
     end
 end
 
+function constraint_zero(M::MOM.Model, eqs::Vector...)
+    for e in eqs
+        MOM.add_constraint_zero(M, collect(1:M[:nu]), e)
+    end
+end
+
 function constraint_zero(M::MOM.Model, idx::Vector{Int64}, eqs::Vector...)
     for e in eqs
         MOM.add_constraint_zero(M,idx,e)
@@ -23,6 +29,12 @@ end
 function constraint_nneg(M::MOM.Model, idx::Int64, eqs...)
     for e in eqs
         MOM.add_constraint_nneg(M,[idx],[e])
+    end
+end
+
+function constraint_nneg(M::MOM.Model, eqs::Vector...)
+    for e in eqs
+        MOM.add_constraint_nneg(M, collect(1:M[:nu]), e)
     end
 end
 
@@ -45,9 +57,9 @@ function constraint_moments(M::MOM.Model, moments::Vector)
     end
 end
 
-function constraint_moments(M::MOM.Model, moments::Vector, idx::Int64, p)
+function constraint_moments(M::MOM.Model, moments::Vector, p::Vector)
     for c in moments
-        MOM.add_constraint_moment(M, c[2], [idx], [p*c[1]*one(Polynomial{true,Float64})])
+        MOM.add_constraint_moment(M, c[2], p*c[1]*one(Polynomial{true,Float64}))
     end
 end
 

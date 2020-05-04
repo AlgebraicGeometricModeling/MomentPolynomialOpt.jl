@@ -127,7 +127,6 @@ function add_constraint_nneg(M::MOM.Model, idx::Vector{Int64}, Veq)
         @constraint(M.model,
                     sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in p[k]) for k in 1:length(idx)) >=0)
     else
-
         P = [ sum(sum(t.α*M[:moments][idx[k],M[:index][t.x*L[i]*L[j]]]
                       for t in p[k]) for k in 1:length(idx)) 
               for i in 1:N, j in 1:N ]
@@ -143,15 +142,19 @@ function add_constraint_moment(M::MOM.Model, v , p)
     end
 end
 
+function add_constraint_moment(M::MOM.Model, v, p::Vector)
+    @constraint(M.model,
+                sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in p[k]) for k in 1:length(p)) - v ==0)
+end
+
 function add_constraint_moment(M::MOM.Model, v, idx::Vector{Int64}, p::Vector)
-    for k in idx
-        @constraint(M.model,
-                    sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in p[k]) for k in 1:length(idx)) - v ==0)
-    end
+    @constraint(M.model,
+                sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in p[k]) for k in 1:length(idx)) - v ==0)
 end
 
 #----------------------------------------------------------------------
-function set_objective(M::MOM.Model, f, sense)
+function set_objective(M::MOM.Model, p, sense)
+    f = p*one(Polynomial{true,Float64})
     obj = sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in f) for k in 1:M[:nu])
     if sense == "inf"  
         @objective(M.model, Min, obj)
@@ -160,7 +163,8 @@ function set_objective(M::MOM.Model, f, sense)
     end
 end
 
-function set_objective(M::MOM.Model, idx::Vector{Int64}, f::Vector, sense)
+function set_objective(M::MOM.Model, idx::Vector{Int64}, p::Vector, sense)
+    f = p*one(Polynomial{true,Float64})
     obj = sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in f[k]) for k in 1:length(idx))
     if sense == "inf"  
         @objective(M.model, Min, obj)

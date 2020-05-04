@@ -36,7 +36,7 @@ L = monomials(X, seq(0:2*d))
 # <1*mu_1, m> + <1*mu_2, m> = leb_mom(m)
 constraint_moments(M,
                    [(m=>lebesgue(exponents(m)...)) for m in L],
-                   collect(1:2), [1,1] )
+                   [1,1] )
 
 # sup  <1*mu_1,1>  
 objective(M, 1, 1, "sup")
