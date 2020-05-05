@@ -1,0 +1,45 @@
+using JuMP
+using Combinatorics
+using MomentTools
+using DynamicPolynomials
+using MultivariateSeries
+using LinearAlgebra
+using MosekTools;optimizer = Mosek.Optimizer
+
+X = @polyvar x y z;
+
+# Minimize on a compact singular semialgebraic set with polar_minimize: 3d cusp + circle
+h = [] #zero constraints
+g = [z^3-(x^2+y^2), 1-x^2-y^2-z^2] #nonneg constraints
+f = z #objective function
+d = 10 #degree of approximation
+
+v, m = polar_minimize(f, h, g, X, d, optimizer) #takes a while
+println(v)
+
+# Minimize on a compact singular semialgebraic set with polar_minimize: section of 3d cusp + circle
+h = [x] #zero constraints
+g = [z^3-(x^2+y^2), 1-x^2-y^2-z^2] #nonneg constraints
+f = z #objective function
+d = 10 #degree of approximation
+
+v, m = polar_minimize(f, h, g, X, d, optimizer) #takes a while
+println(v)
+
+#Minimize globally the Motzkin polynomial
+h = [] #zero constraints
+g = [] #nonneg constraints
+f =  x^4*y^2+x^2*y^4+z^6-3*x^2*y^2*z^2 #objective function: Motzkin polynomial
+d = 10 #degree of approximation
+
+v, m = polar_minimize(f, h, g, X, d, optimizer) #takes a while
+println(v)
+
+#Minimize the Motzkin polynomial on the positive orthant
+h = [] #zero constraints
+g = [x, y, z] #nonneg constraints
+f =  x^4*y^2+x^2*y^4+z^6-3*x^2*y^2*z^2 #objective function: Motzkin polynomial
+d = 10 #degree of approximation
+
+v, m = polar_minimize(f, h, g, X, d, optimizer) #takes a while
+println(v)
