@@ -146,34 +146,3 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
 end
 
 #----------------------------------------------------------------------
-# Minimize the nuclear norm, using a SDP matrix of size 2*N
-function minimize_ncl(X, d, sigma, optimizer)
-
-    M = MUS.Model(X, d, optimizer)
-    JuMP.@objective(M.model, Min, sum( P[i,i] for i in 1:2*N) )
-
-    if JuMP.has_values(M.model)
-        return JuMP.objective_value(M.model), M
-    else
-        println("Solver status: ", JuMP.termination_status(M.model))
-        return nothing, M
-    end
-end
-
-
-#----------------------------------------------------------------------
-# Minimize the nuclear norm, using a SDP matrix of size 2*N
-function minimize_tv(X, d, sigma, optimizer)
-
-    M = MUS.Model(X, d, optimizer)
-    JuMP.@objective(M.model, Min, sum( P[i,i] for i in 1:2*N) )
-
-    if JuMP.has_values(M.model)
-        return JuMP.objective_value(M.model), M
-    else
-        println("Solver status: ", JuMP.termination_status(M.model))
-        return nothing, M
-    end
-end
-
-#----------------------------------------------------------------------
