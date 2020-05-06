@@ -23,5 +23,5 @@ objective(M, y)
 set_optimizer(M, optimizer)
 v = optimize(M)[1]
 
-s     = getseries(M)
-w, Xi = getmeasure(M)
+s     = get_series(M)
+w, Xi = get_measure(M)

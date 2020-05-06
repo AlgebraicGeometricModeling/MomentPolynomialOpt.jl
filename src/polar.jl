@@ -3,13 +3,12 @@ export polar_ideal, polar_minimize, preordering
 #----------------------------------------------------------------------
 """
 ```julia
-j = polar_ideal(f, [h1, h2, ...], [g1, g2, ...])
+j = polar_ideal(f, [h1, h2, ...], [g1, g2, ...], X)
 ```
-Compute generators of the polar ideal associated with f, [h1, h2, ...] and [g1, g2, ...] (equality constraints hi == 0 and the sign constraints gi >= 0).
+Compute generators of the polar ideal associated with `f, [h1, h2, ...], [g1, g2, ...]` (equality constraints hi == 0 and the sign constraints gi >= 0) with respect to the variable vector X.
 
 f, hi, gi should be polynomials in variables X.
 """
-
 function polar_ideal(f, h::Vector, g::Vector, X)
     n = length(X)
     r = length(h)
@@ -86,18 +85,17 @@ end
 #----------------------------------------------------------------------
 """
 ```julia
-v, m = polar_minimize(f, [h1, h2, ...], [g1, g2, ...], X, degree_approx, optimizer)
+v, M = polar_minimize(f, [h1, h2, ...], [g1, g2, ...], X, degree_approx, optimizer)
 ```
 Compute the infimum of the f (equality constraints hi == 0 and the sign constraints gi >= 0) on the moment side.
-It does that callnig minimize(...), replacing the equality constraints  [h1, h2, ...] with generators of the polar ideal.
+It does that calling minimize(...), replacing the equality constraints  [h1, h2, ...] with generators of the polar ideal.
 
 f, hi, gi should be polynomials in the variables X.
 
 If the problem is feasible and has minimizers, it outputs
   - v: the minimum value
-  - m: the moment model of type MOM.Model
+  - M: the moment model of type MOM.Model
 """
-
 function polar_minimize(f, h::Vector, g::Vector, X, d::Int64, optimizer)
     j = polar_ideal(f, h, g, X)
     return minimize(f, j, g, X, d, optimizer)
@@ -111,7 +109,6 @@ pg = preordering([g1, g2, ...])
 Compute all the product, without repetitions, of the gi's. I.e. computes the generators (as a quadratic module) of the preordering O(g1, g2, ...).
 
 """
-
 function preordering(g::Vector)
     pg = [1];
     for p in collect(powerset(g,1,length(g)))

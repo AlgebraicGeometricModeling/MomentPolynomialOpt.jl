@@ -44,13 +44,13 @@ objective(M, 1, 1, "sup")
 v = optimize(M)[1]
 println("Approximate volume: ", v)
 
-# s = getseries(M)
-# w, Xi = getmeasure(M)
+# s = get_series(M)
+# w, Xi = get_measure(M)
 
 # sp = p1*s[1]
 # L1 = monomials(X, seq(0:d-1)); H1 =  hankel(sp, L1, L1); vp1 = eigvals(H1)
 # L2 = monomials(X, seq(0:d)); H2 =  hankel(s[1], L2, L2); vp2 = eigvals(H2)
 
-#w, Xi = decompose(getseries(M)[1])
+#w, Xi = decompose(get_series(M)[1])
 #plotmeas(w,Xi)
 

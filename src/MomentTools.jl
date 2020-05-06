@@ -13,6 +13,4 @@ include("objective.jl")
 include("optimize.jl")
 include("polar.jl")
 
-export MOM, getseries, getminimizers, getmeasure
-
 end

@@ -24,6 +24,6 @@ objective_tv(M)
 
 v = optimize(M)[1]
 
-s = getseries(M)
+s = get_series(M)
 
-w, Xi = getmeasure(M)
+w, Xi = get_measure(M)

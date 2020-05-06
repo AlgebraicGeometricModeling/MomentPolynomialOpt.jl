@@ -1,3 +1,5 @@
+export MOM
+
 module MOM
 
 #import DynamicPolynomials: MonomialVector
@@ -195,7 +197,19 @@ end
 #----------------------------------------------------------------------
 export MomModel
 
-function MomModel(X, d::Int64, nu::Int64=1;  kwargs...)
+"""
+Construct the Moment Program in the variables X of order d.  
+The moments of all monomials in X of degree 2*d are variables of 
+the optimization program.
+
+```
+M = MomModel(X,d; nu=k)
+```
+  - `X` is the vector of variables
+  - `d` is the order of the moment relaxation. 
+  - `nu=k` is the number of Positive Moment Sequences
+"""
+function MomModel(X, d::Int64; nu::Int64=1,  kwargs...)
     return MOM.Model(X,d;nu=nu,kwargs...)
 end
 

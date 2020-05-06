@@ -1,10 +1,10 @@
 using Documenter, DocumenterMarkdown
-using MomentTools
+using MomentTools, JuMP
 
 dir = "mrkd"
 Expl = map(file -> joinpath("expl", file),
            filter(x ->endswith(x, "md"), readdir(dir*"/expl")))
-Code = map(file -> joinpath("code", file), filter(x ->endswith(x, "md"), readdir(dir*"code")))
+Code = map(file -> joinpath("code", file), filter(x ->endswith(x, "md"), readdir(dir*"/code")))
 
 makedocs(
     sitename = "MomentTools",
@@ -15,9 +15,8 @@ makedocs(
     source = dir,
     pages = Any[
         "Home" => "index.md",
+        "Functions & types" => Code,
         "Example" => Expl,
-#        "Test" => ["a" => "try.html"],
-#        "Functions & types" => Code
     ],
     doctest = false
 )

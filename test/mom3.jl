@@ -15,7 +15,7 @@ pop = [(x,"inf"), (q1,">=0"), (q2, ">=0")]
 
 v, M = optimize(pop, X, 4, optimizer)
 
-w, Xi = getmeasure(M)
+w, Xi = get_measure(M)
 
 
 
