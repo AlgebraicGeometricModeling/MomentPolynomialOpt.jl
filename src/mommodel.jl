@@ -195,7 +195,7 @@ function Base.show(io::IO, m::MOM.Model)
     Base.show(io, m.model)
 end
 #----------------------------------------------------------------------
-export MomModel
+export MomentModel
 
 """
 Construct the Moment Program in the variables X of order d.  
@@ -203,16 +203,16 @@ The moments of all monomials in X of degree 2*d are variables of
 the optimization program.
 
 ```
-M = MomModel(X,d; nu=k)
+M = MomentModel(X,d; nu=k)
 ```
   - `X` is the vector of variables
   - `d` is the order of the moment relaxation. 
   - `nu=k` is the number of Positive Moment Sequences
 """
-function MomModel(X, d::Int64; nu::Int64=1,  kwargs...)
+function MomentModel(X, d::Int64; nu::Int64=1,  kwargs...)
     return MOM.Model(X,d;nu=nu,kwargs...)
 end
 
-function MomModel(X, d::Int64, optimizer; kwargs...)
+function MomentModel(X, d::Int64, optimizer; kwargs...)
     return MOM.Model(X,d,optimizer; kwargs...)
 end
