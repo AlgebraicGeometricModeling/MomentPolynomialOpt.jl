@@ -30,7 +30,7 @@ get_minimizer(M)
 """
 function get_minimizers(M::MOM.Model)
     s = get_series(M)[1]
-    w, Xi = decompose(s);
+    w, Xi = ms_decompose(s);
     Xi
 end
 
@@ -52,9 +52,9 @@ w, Xi = get_measure(M)
 """
 function get_measure(M::MOM.Model, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
     s = get_series(M)    
-    w, Pts = decompose(s[1]);
+    w, Pts = ms_decompose(s[1]);
     for k in 2:M[:nu]
-        c, Xi = decompose(s[k])
+        c, Xi = ms_decompose(s[k])
         w = vcat(w, c*lambda[k])
         Pts= hcat(Pts,Xi)
     end
