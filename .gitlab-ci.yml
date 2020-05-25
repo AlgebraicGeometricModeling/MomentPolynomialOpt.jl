@@ -1,0 +1,23 @@
+# Example documentation deployment
+pages:
+  image: julia:1.3
+  stage: deploy
+  script:
+    - apt-get update -qq && apt-get install -y git  # needed by Documenter
+    - julia -e 'using Pkg; Pkg.add("Documenter")'  # install Documenter
+    - julia --project=doc/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+    - julia --project=doc/ docs/make.jl
+    - mv doc/html public  
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+
+# WARNING: This template is using the `julia` images from [Docker
+# Hub][3]. One can use custom Julia images and/or the official ones found
+# in the same place. However, care must be taken to correctly locate the binary
+# file (`/opt/julia/bin/julia` above), which is usually given on the image's
+# description page.
+#
+# [3]: https://hub.docker.com/_/julia/
