@@ -17,6 +17,7 @@ makedocs(
         "Home" => "index.md",
         "Functions & types" => Code,
         "Example" => Expl,
+        "About the package"  => "package.md",
     ],
     doctest = false
 )
