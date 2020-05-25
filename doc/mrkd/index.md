@@ -1,6 +1,7 @@
 # Moment Tools
 
 The package provide tools for moment optimization problems on Positive Moment Sequences (PMS).
+    
 A PMS is a sequence of moments $\mu=(\mu_{\alpha})$ or equivalently a linear functional
 $\mu: p \in \mathbb{R}[\mathbf{x}] \mapsto \langle \mu, p \rangle = \sum_{\alpha} p_{\alpha}
 \mu_{\alpha}$, which is positive on the square of the polynomials:
@@ -9,7 +10,7 @@ $\mu: p \in \mathbb{R}[\mathbf{x}] \mapsto \langle \mu, p \rangle = \sum_{\alpha
 
 ## Optimization
 
-Optimization problem of the following form are considered:
+Optimization problems of the following form are considered:
 
 ```math
 \begin{array}{rl}
