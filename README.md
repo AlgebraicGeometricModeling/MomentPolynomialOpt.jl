@@ -12,3 +12,7 @@ The package can be installed in julia as follows:
 ] add https://gitlab.inria.fr/AlgebraicGeometricModeling/MomentTools.jl
 ```
 
+
+## Documentation
+
+ - [Latest version](http://www-sop.inria.fr/members/Bernard.Mourrain/software/MomentTools/)

@@ -14,4 +14,4 @@ all: $(MD)
 clean:
 	rm ./mrkd/expl/*.md
 deploy:
-	cp -r html/* /Volumes/Bernard.mourrain/software/MomentTools
+	cp -r html/* /Volumes/Bernard.mourrain/software/MomentTools/

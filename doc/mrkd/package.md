@@ -38,7 +38,6 @@ The main developpers are (so far)
 
 The development is done in relation with the activity of the network [POEMA](http://poema-network.eu/).
 
-
 ## See also 
 
 Other Julia packages are currently developed for polynomial and moment optimization:
