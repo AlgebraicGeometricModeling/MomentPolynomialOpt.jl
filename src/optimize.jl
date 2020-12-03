@@ -62,6 +62,20 @@ function get_measure(M::MOM.Model, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu
     return w, Pts
 end
 
+function get_measure(M::MOM.Model, e::Float64, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
+    s = get_series(M)    
+    w, Pts = ms_decompose(s[1], MultivariateSeries.eps_rkf(e));
+    for k in 2:M[:nu]
+        c, Xi = ms_decompose(s[k],MultivariateSeries.eps_rkf(e))
+        w = vcat(w, c*lambda[k])
+        Pts= hcat(Pts,Xi)
+    end
+    
+    return w, Pts
+end
+
+
+    
 #----------------------------------------------------------------------
 """
 ```julia
@@ -213,6 +227,9 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
             constraint_nneg(M,c[1])
         elseif c[2] == "<=0"
             constraint_nneg(M,-c[1])
+        elseif isa(c[2],AbstractVector)
+            constraint_nneg(M,c[1]-c[2][1])
+            constraint_nneg(M,-c[1]+c[2][2])
         end
     end
     set_optimizer(M,optimizer)
@@ -221,4 +238,9 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
     return v, M
 end
 
+function optimize(C::Vector, d::Int64, optimizer; kwargs...)
+    X = union([DynamicPolynomials.variables(c[1]) for c in C]...)
+    return optimize(C, X, d, optimizer; kwargs...)
+end
 #----------------------------------------------------------------------
+
