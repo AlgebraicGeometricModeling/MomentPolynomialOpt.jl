@@ -99,7 +99,7 @@ end
 #----------------------------------------------------------------------
 function add_constraint_nneg(M::MOM.Model, pos)
     p = pos*one(Polynomial{true,Float64})
-    d0 = div(maxdegree(p),2)
+    d0 = Int(ceil(maxdegree(p)/2))
     X = M[:variables]
     L = monomials(X, seq(0:M[:degree] - d0))
     N = length(L)
@@ -121,7 +121,7 @@ end
 function add_constraint_nneg(M::MOM.Model, idx::Vector{Int64}, Veq)
     p = [ eq*one(Polynomial{true,Float64}) for eq in Veq ]
     X = M[:variables]
-    d0 = div(max([maxdegree(e) for e in p]...),2)
+    d0 = Int(ceil(max([maxdegree(e) for e in p]...)/2))
     L = monomials(X, seq(0:M[:degree] - d0))
     N = length(L)
     if N == 1
