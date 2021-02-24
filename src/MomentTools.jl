@@ -12,5 +12,6 @@ include("constraints.jl")
 include("objective.jl")
 include("optimize.jl")
 include("polar.jl")
+include("annihilator.jl")
 
 end
