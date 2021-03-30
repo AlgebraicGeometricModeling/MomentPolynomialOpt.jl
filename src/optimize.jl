@@ -30,7 +30,7 @@ get_minimizer(M)
 """
 function get_minimizers(M::MOM.Model)
     s = get_series(M)[1]
-    w, Xi = ms_decompose(s);
+    w, Xi = MultivariateSeries.decompose(s);
     Xi
 end
 
@@ -52,9 +52,9 @@ w, Xi = get_measure(M)
 """
 function get_measure(M::MOM.Model, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
     s = get_series(M)    
-    w, Pts = ms_decompose(s[1]);
+    w, Pts = MultivariateSeries.decompose(s[1]);
     for k in 2:M[:nu]
-        c, Xi = ms_decompose(s[k])
+        c, Xi = MultivariateSeries.decompose(s[k])
         w = vcat(w, c*lambda[k])
         Pts= hcat(Pts,Xi)
     end
@@ -64,9 +64,9 @@ end
 
 function get_measure(M::MOM.Model, e::Float64, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
     s = get_series(M)    
-    w, Pts = ms_decompose(s[1], MultivariateSeries.eps_rkf(e));
+    w, Pts = MultivariateSeries.decompose(s[1], MultivariateSeries.eps_rkf(e));
     for k in 2:M[:nu]
-        c, Xi = ms_decompose(s[k],MultivariateSeries.eps_rkf(e))
+        c, Xi = MultivariateSeries.decompose(s[k],MultivariateSeries.eps_rkf(e))
         w = vcat(w, c*lambda[k])
         Pts= hcat(Pts,Xi)
     end
@@ -216,11 +216,14 @@ To recover the optimal values, see [`get_minimizers`](@ref), [`get_measure`](@re
 function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
     M  = MOM.Model(X,d;kwargs...)
     constraint_unitmass(M)
+    wobj = false
     for c in C
         if c[2] == "inf" || c[2] == "min"
             objective(M,c[1], "inf")
+            wobj = true
         elseif c[2] == "sup" || c[2] == "max"
             objective(M,c[1], "sup")
+            wobj = true
         elseif c[2] == "=0"
             constraint_zero(M,c[1])
         elseif c[2] == ">=0"
@@ -232,15 +235,18 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
             constraint_nneg(M,-c[1]+c[2][2])
         end
     end
+    if !wobj
+        objective(M,one(C[1][1]), "sup")
+    end
     set_optimizer(M,optimizer)
     JuMP.optimize!(M.model)
     v = objective_value(M.model)
     return v, M
 end
 
-function optimize(C::Vector, d::Int64, optimizer; kwargs...)
-    X = union([DynamicPolynomials.variables(c[1]) for c in C]...)
-    return optimize(C, X, d, optimizer; kwargs...)
-end
+# function optimize(C::Vector, d::Int64, optimizer; kwargs...)
+#     X = union([DynamicPolynomials.variables(c[1]) for c in C]...)
+#     return optimize(C, X, d, optimizer; kwargs...)
+# end
 #----------------------------------------------------------------------
 
