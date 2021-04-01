@@ -42,7 +42,7 @@ w, Xi = get_measure(M, t::Int64 = 2*M[:degree]-2 ,lambda = [(-1)^(k-1) for k in 
 ```
 Return the approximation of the moment sequence ``\\sum_{i=1}^{\\nu} \\lambda_i \\mu_i``
 truncated to moments of degree <= t (default: twice the order of the relaxation minus 2),
-as weighted sum of Dirac measures: ``\\sum_{k=1}^{r} \\omega_k \\delta_{\\xi_k}`` where 
+as weighted sum of Dirac measures: ``\\sum_{k=1}^{r} \\omega_k \\delta_{\\xi_k}`` where
 
 - `w` is the vector of weights of the Dirac measures.
 - `Xi` is matrix of ``n\\times r`` support points of the corresponding Dirac measures. The column `Xi[:,i]` is the support point ``\\xi_{i}`` of the ith Dirac measure and its weights is `w[i]`.
@@ -65,7 +65,7 @@ function get_measure(M::MOM.Model, t::Int64 = 2*M[:degree]-2 , lambda::Vector = 
     return w, Pts
 end
 
-function get_measure(M::MOM.Model, t::Int64 = 2*M[:degree]-2, e::Float64, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
+function get_measure(M::MOM.Model, e::Float64, t::Int64 = 2*M[:degree]-2, lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
     s = get_series(M)
     w, Pts = MultivariateSeries.decompose(truncate(s[1],t), MultivariateSeries.eps_rkf(e));
     for k in 2:M[:nu]
