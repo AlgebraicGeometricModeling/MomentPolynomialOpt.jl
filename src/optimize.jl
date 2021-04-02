@@ -18,7 +18,7 @@ end
 #----------------------------------------------------------------------
 """
 ```
-get_minimizers(M, , t::Int64 = 2*M[:degree]-2)
+get_minimizers(M, , t::Int64 = 2*M[:degree]-1)
 ```
 Return the minimizer points  of the optimized moment program `M`, using moments of degree <=t
 (default: twice the order of the relaxation minus 2)
@@ -29,7 +29,7 @@ get_minimizer(M)
 [1.41421 1.73205; 1.41421 1.41421; 1.41421 -1.73205]
 ```
 """
-function get_minimizers(M::MOM.Model, t::Int64 = 2*M[:degree]-2)
+function get_minimizers(M::MOM.Model, t::Int64 = 2*M[:degree]-1)
     s = get_series(M)[1]
     w, Xi = MultivariateSeries.decompose(truncate(s, t));
     Xi
@@ -38,7 +38,7 @@ end
 #----------------------------------------------------------------------
 """
 ```
-w, Xi = get_measure(M, t::Int64 = 2*M[:degree]-2 ,lambda = [(-1)^(k-1) for k in 1:M[:nu]])
+w, Xi = get_measure(M, t::Int64 = 2*M[:degree]-1 ,lambda = [(-1)^(k-1) for k in 1:M[:nu]])
 ```
 Return the approximation of the moment sequence ``\\sum_{i=1}^{\\nu} \\lambda_i \\mu_i``
 truncated to moments of degree <= t (default: twice the order of the relaxation minus 2),
@@ -53,7 +53,7 @@ w, Xi = get_measure(M)
 ([0.1541368146508854, 0.5889741915171074, 0.256888993597116], [1.4142135624216647 1.414213562080608 1.4142135620270329; -1.732052464639053 1.4141771454788292 1.7319839273833693])
 ```
 """
-function get_measure(M::MOM.Model, t::Int64 = 2*M[:degree]-2 , lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
+function get_measure(M::MOM.Model, t::Int64 = 2*M[:degree]-1 , lambda::Vector = [(-1)^(k-1) for k in 1:M[:nu]])
     s = get_series(M)
     w, Pts = MultivariateSeries.decompose(truncate(s[1], t));
     for k in 2:M[:nu]
