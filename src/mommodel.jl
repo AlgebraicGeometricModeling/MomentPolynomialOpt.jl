@@ -15,7 +15,7 @@ mutable struct Model
     model::JuMP.Model
 end
 
-    
+
 #----------------------------------------------------------------------
 # Define a moment model
 function Model(X, d::Int64; nu::Int64=1, dual::Bool=true,  kwargs...)
@@ -26,7 +26,7 @@ function Model(X, d::Int64; nu::Int64=1, dual::Bool=true,  kwargs...)
     m[:nu] = nu
     m[:variables] = X
     m[:degree] = d
-    
+
     B = monomials(X,seq(0:d))
     N = length(B)
     m[:basis] = B
@@ -51,12 +51,12 @@ function Model(X, d::Int64; nu::Int64=1, dual::Bool=true,  kwargs...)
     @variable(m, y[1:nu, 1:s])
     m[:moments] = y
 
-    for k in 1:nu 
-        H = [ y[k,m[:index][B[i]*B[j]]] for i in 1:N, j in 1:N]
+    for k in 1:nu
+        H = [ y[k,m[:index][B[i]*B[j]]]+0 for i in 1:N, j in 1:N]
         @constraint(m, Symmetric(H) in PSDCone())
         #@SDconstraint(m, H >= zeros(N,N))
     end
-    
+
     return MOM.Model(m)
 end
 
@@ -84,7 +84,7 @@ function add_constraint_zero(M::MOM.Model, eq)
         end
     end
 end
-          
+
 function add_constraint_zero(M::MOM.Model, idx::Vector{Int64}, Veq)
     P = [ e*one(Polynomial{true,Float64}) for eq in Veq ]
     X = M[:variables]
@@ -111,9 +111,9 @@ function add_constraint_nneg(M::MOM.Model, pos)
     else
         for k in 1:M[:nu]
             P = [ sum(t.α*M[:moments][k,M[:index][t.x*L[i]*L[j]]]
-                      for t in p)
+                      for t in p)+0
                   for i in 1:N, j in 1:N ]
-            @constraint(M.model, P in PSDCone())
+            @constraint(M.model, Symmetric(P) in PSDCone())
         end
     end
 end
@@ -129,9 +129,9 @@ function add_constraint_nneg(M::MOM.Model, idx::Vector{Int64}, Veq)
                     sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in p[k]) for k in 1:length(idx)) >=0)
     else
         P = [ sum(sum(t.α*M[:moments][idx[k],M[:index][t.x*L[i]*L[j]]]
-                      for t in p[k]) for k in 1:length(idx)) 
+                      for t in p[k]) for k in 1:length(idx))+0
               for i in 1:N, j in 1:N ]
-        @constraint(M.model, P in PSDCone())
+        @constraint(M.model, Symmetric(P) in PSDCone())
     end
 end
 
@@ -157,7 +157,7 @@ end
 function set_objective(M::MOM.Model, p, sense)
     f = p*one(Polynomial{true,Float64})
     obj = sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in f) for k in 1:M[:nu])
-    if sense == "inf"  
+    if sense == "inf"
         @objective(M.model, Min, obj)
     else
         @objective(M.model, Max, obj)
@@ -167,7 +167,7 @@ end
 function set_objective(M::MOM.Model, idx::Vector{Int64}, p::Vector, sense)
     f = p*one(Polynomial{true,Float64})
     obj = sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in f[k]) for k in 1:length(idx))
-    if sense == "inf"  
+    if sense == "inf"
         @objective(M.model, Min, obj)
     else
         @objective(M.model, Max, obj)
@@ -197,15 +197,15 @@ end
 export MomentModel
 
 """
-Construct the Moment Program in the variables X of order d.  
-The moments of all monomials in X of degree 2*d are variables of 
+Construct the Moment Program in the variables X of order d.
+The moments of all monomials in X of degree 2*d are variables of
 the optimization program.
 
 ```
 M = MomentModel(X,d; nu=k)
 ```
   - `X` is the vector of variables
-  - `d` is the order of the moment relaxation. 
+  - `d` is the order of the moment relaxation.
   - `nu=k` is the number of Positive Moment Sequences
 """
 function MomentModel(X, d::Int64; nu::Int64=1,  kwargs...)
