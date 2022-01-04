@@ -1,5 +1,5 @@
 using DynamicPolynomials, MomentTools, PMO
-using JuMP; MosekTools
+using JuMP, MosekTools
 
 import DynamicPolynomials: maxdegree
 
