@@ -153,9 +153,9 @@ function minimize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs.
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
     if fct != nothing
-        objective(M, fct)
+        set_objective(M, "inf", fct)
     else
-        objective(M, one(Polynomial{true,Float64}))
+        set_objective(M, "inf", one(Polynomial{true,Float64}))
     end
     JuMP.optimize!(M.model)
     v = objective_value(M.model)
@@ -175,9 +175,9 @@ function maximize(fct, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer; kwargs.
     constraint_zero(M,Eq...)
     constraint_nneg(M,Pos...)
     if fct != nothing
-        objective(M, 1, fct, "sup")
+        set_objective(M, "sup", fct)
     else
-        objective(M, 1, 1, "sup")
+        set_objective(M, "sup", one(Polynomial{true,Float64}))
     end
     JuMP.optimize!(M.model)
     v = objective_value(M.model)
@@ -222,24 +222,24 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
     wobj = false
     for c in C
         if c[2] == "inf" || c[2] == "min"
-            objective(M,c[1], "inf")
+            set_objective(M, "inf", c[1])
             wobj = true
         elseif c[2] == "sup" || c[2] == "max"
-            objective(M,c[1], "sup")
+            set_objective(M, "sup", c[1])
             wobj = true
         elseif c[2] == "=0"
-            constraint_zero(M,c[1])
+            constraint_zero(M, c[1])
         elseif c[2] == ">=0"
-            constraint_nneg(M,c[1])
+            constraint_nneg(M, c[1])
         elseif c[2] == "<=0"
             constraint_nneg(M,-c[1])
         elseif isa(c[2],AbstractVector)
-            constraint_nneg(M,c[1]-c[2][1])
+            constraint_nneg(M, c[1]-c[2][1])
             constraint_nneg(M,-c[1]+c[2][2])
         end
     end
     if !wobj
-        objective(M,one(C[1][1]), "sup")
+        set_objective(M, "sup", one(C[1][1]))
     end
     set_optimizer(M,optimizer)
     JuMP.optimize!(M.model)

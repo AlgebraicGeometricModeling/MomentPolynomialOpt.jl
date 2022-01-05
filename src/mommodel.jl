@@ -153,26 +153,6 @@ function add_constraint_moment(M::MOM.Model, v, idx::Vector{Int64}, p::Vector)
                 sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in p[k]) for k in 1:length(idx)) - v ==0)
 end
 
-#----------------------------------------------------------------------
-function set_objective(M::MOM.Model, p, sense)
-    f = p*one(Polynomial{true,Float64})
-    obj = sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in f) for k in 1:M[:nu])
-    if sense == "inf"
-        @objective(M.model, Min, obj)
-    else
-        @objective(M.model, Max, obj)
-    end
-end
-
-function set_objective(M::MOM.Model, idx::Vector{Int64}, p::Vector, sense)
-    f = p*one(Polynomial{true,Float64})
-    obj = sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in f[k]) for k in 1:length(idx))
-    if sense == "inf"
-        @objective(M.model, Min, obj)
-    else
-        @objective(M.model, Max, obj)
-    end
-end
 
 #----------------------------------------------------------------------
 function get_series(M::MOM.Model)

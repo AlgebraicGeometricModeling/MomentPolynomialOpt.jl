@@ -1,26 +1,49 @@
-export objective, objective_ncl, objective_tv
+export set_objective_ncl, set_objective_tv
 
+import JuMP: set_objective
+
+#----------------------------------------------------------------------
 """
 ```
-objective(M, p, sense="inf")
+set_objective(M, sense, p)
 ```
 Set the "inf" or "sup" objective function to  ``\\sum_{i=1}^{\\nu} \\langle p\\star \\mu_i, 1 \\rangle`` where `p` is a polynomial.
 
 """
-function objective(M::MOM.Model, pol, sense="inf")
-    if pol != nothing
-        MOM.set_objective(M,pol,sense)
+function JuMP.set_objective(M::MOM.Model, sense, p)
+    if p != nothing
+        f = p*one(Polynomial{true,Float64})
+        obj = sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in f) for k in 1:M[:nu])
+        if sense == "inf"
+            @objective(M.model, Min, obj)
+        else
+            @objective(M.model, Max, obj)
+        end
     end
 end
 
+
 """
 ```
-objective(M, p, sense="inf")
+set_objective(M, sense, p)
 ```
 Set the "inf" or "sup" objective function to  ``\\sum_{i=1}^{\\nu} \\langle p_{i} \\star \\mu_i, 1 \\rangle`` where `p` is a vector of ``\\nu``=`M[:nu]` polynomials. 
 
 """
-function objective(M::MOM.Model, pol::Vector, sense="inf")
+function JuMP.set_objective(M::MOM.Model, sense, idx::Vector{Int64}, p::Vector)
+    if p != nothing
+        f = p*one(Polynomial{true,Float64})
+        obj = sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in f[k]) for k in 1:length(idx))
+        if sense == "inf"
+            @objective(M.model, Min, obj)
+        else
+            @objective(M.model, Max, obj)
+        end
+    end
+end
+
+
+function JuMP.set_objective(M::MOM.Model, sense, pol::Vector)
     if pol != nothing
         MOM.set_objective(M, collect(1:M[:nu]), pol, sense)
     end
@@ -29,47 +52,47 @@ end
 
 """
 ```
-objective(M, i, p, sense="inf")
+set_objective(M, sense, i, p)
 ```
 Set the "inf" or "sup" objective function to  `` \\langle p \\star \\mu_i, 1 \\rangle`` where `p` is a polynomial. 
 """
-function objective(M::MOM.Model, idx:: Int64, pol, sense="inf")
+function JuMP.set_objective(M::MOM.Model, sense, pol, idx::Int64)
     if pol != nothing
-        MOM.set_objective(M, [idx], [pol], sense)
+        MOM.set_objective(M, sense, [idx], [pol])
     end
 end
 
 
-"""
- Add as objective function the linear functional associated to the polynomial pol to minimize.
-"""
-function objective(M::MOM.Model, idx::Vector{Int64}, pol::Vector, sense="inf")
-    if pol != nothing
-        f = [p*one(Polynomial{true,Float64}) for p in pol]
-        MOM.set_objective(M,idx,f, sense)
-    end
-end
+# """
+#  Add as objective function the linear functional associated to the polynomial pol to minimize.
+# """
+# function JuMP.set_objective(M::MOM.Model, sense, idx::Vector{Int64}, pol::Vector)
+#     if pol != nothing
+#         f = [p*one(Polynomial{true,Float64}) for p in pol]
+#         MOM.set_objective(M, sense, idx, f)
+#     end
+# end
 #----------------------------------------------------------------------
 """
 ```
-objective_ncl(M)
+set_objective_ncl(M)
 ```
 Set the objective function of moment program to the nuclear norm or equivalently the sum of 
 the traces of the moment matrices.
 """
-function objective_ncl(M)
+function set_objective_ncl(M)
     B = M[:basis]
     @objective(M.model, Min,  sum(sum(M[:moments][k,M[:index][B[i]^2]] for i in 1:length(B)) for k in 1:M[:nu]))
 end
 #----------------------------------------------------------------------
 """
 ```
-objective_ncl(M)
+set_objective_ncl(M)
 ```
 Set the objective function of moment program to the total variation of the moment sequences ``\\mu_i``, that is 
 the sum  of the unit mass of the positive moment sequences ``\\sum_{i=1}^{\\nu} \\langle \\mu_i, 1\\rangle``.
 """
-function objective_tv(M)
-    objective(M,collect(1:M[:nu]), ones(M[:nu]),"inf")
+function set_objective_tv(M)
+    set_objective(M,"inf", collect(1:M[:nu]), ones(M[:nu]))
 end
 

@@ -9,8 +9,13 @@ using LinearAlgebra
 #     plot(real(Xi[1,:]), real(Xi[2,:]), seriestype = :scatter, zcolor = abs.(w), m = (:heat, 0.8, Plots.stroke(1, :black)))
 # end
 
-using MosekTools;optimizer = Mosek.Optimizer
-#using MosekTools; optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
+using MosekTools
+if haskey(ENV,"QUIET")
+    optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
+else
+    optimizer = Mosek.Optimizer
+end
+
 #using CSDP; optimizer = CSDP.Optimizer
 
 X = @polyvar x y
@@ -39,7 +44,7 @@ constraint_moments(M,
                    [1,1] )
 
 # sup  <1*mu_1,1>  
-objective(M, 1, 1, "sup")
+set_objective(M, "sup", 1, 1)
 
 v = optimize(M)[1]
 println("Approximate volume: ", v)

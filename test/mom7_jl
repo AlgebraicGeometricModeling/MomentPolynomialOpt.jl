@@ -4,7 +4,8 @@ using MomentTools
 using DynamicPolynomials
 using MultivariateSeries
 using LinearAlgebra
-using MosekTools;optimizer = Mosek.Optimizer
+using MosekTools; optimizer =  optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true)
+
 
 X = @polyvar x y z;
 
