@@ -10,7 +10,7 @@ for i in 1:length(L)
     local p = L[i]
     if p[:type] == "polynomial" && p[:nvar] <= 6 
         try
-            print("\033[96m[ ",p[:name], ": \033[0m")
+            print("\033[96m[",i,"] ",p[:name], ": \033[0m")
             local P = vec(p)
             local d = max([maxdegree(P[i][1]) for i in 1:length(P)]...)
             
@@ -22,5 +22,7 @@ for i in 1:length(L)
         catch
             @warn "error while building the optimization model"
         end
+    else
+        println("\033[95m[",i,"] ",p[:name], ": \033[0m",p[:type], "  nv: ",p[:nvar])
     end
 end
