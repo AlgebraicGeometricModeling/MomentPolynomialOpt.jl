@@ -4,6 +4,7 @@ using JuMP, MosekTools
 import DynamicPolynomials: maxdegree
 function DynamicPolynomials.maxdegree(i::Int64) return 0 end
 
+PMO.update_data()
 L = PMO.table()
 
 for i in 1:length(L)
