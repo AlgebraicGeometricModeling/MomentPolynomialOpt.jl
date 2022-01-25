@@ -247,8 +247,3 @@ function optimize(C::Vector, X, d::Int64, optimizer; kwargs...)
     return v, M
 end
 
-# function optimize(C::Vector, d::Int64, optimizer; kwargs...)
-#     X = union([DynamicPolynomials.variables(c[1]) for c in C]...)
-#     return optimize(C, X, d, optimizer; kwargs...)
-# end
-#----------------------------------------------------------------------

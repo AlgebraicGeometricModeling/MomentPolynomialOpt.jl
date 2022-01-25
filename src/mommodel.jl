@@ -1,4 +1,5 @@
 export MOM
+import JuMP: optimize!, objective_value
 
 module MOM
 
@@ -6,8 +7,11 @@ module MOM
 using DynamicPolynomials
 using MultivariateSeries
 using JuMP
+
 # import MathOptInterface
 # const MOI = MathOptInterface
+
+
 using LinearAlgebra
 import Dualization
 
@@ -162,6 +166,7 @@ end
 
 end  #module MOM
 #----------------------------------------------------------------------
+
 #----------------------------------------------------------------------
 function Base.setindex!(p::MOM.Model, v, k::Symbol)  p.model[k] = v end
 
@@ -195,3 +200,35 @@ end
 function MomentModel(X, d::Int64, optimizer; kwargs...)
     return MOM.Model(X,d,optimizer; kwargs...)
 end
+
+
+"""
+```julia
+M = MomentModel((`sense`,f), [e1, e2, ...], [g1, g2, ...], X, d)
+```
+Construct the Moment Program in the variables X of order d.
+   - `sense` == "inf" or "sup"
+   - `f` polynomial objective function
+   - `[e1, e2, ...]` array of polynomial equality constraints (can be empty)
+   - `[g1, g2, ...]` array of non-negativity constraints (can be empty)
+   - `X` is the vector of variables
+   - `d` is the order of the moment relaxation.
+"""
+function MomentModel(fct, Eq::Vector, Pos::Vector,  X, d::Int64; kwargs...)
+    M = MOM.Model(X, d; kwargs...)
+    constraint_unitmass(M)
+    constraint_zero(M,Eq...)
+    constraint_nneg(M,Pos...)
+    if fct != nothing
+        set_objective(M, fct[1], fct[2])
+    else
+        set_objective(M, "sup", one(Polynomial{true,Float64}))
+    end
+    return M
+end
+
+function JuMP.optimize!(M::MOM.Model)
+    JuMP.optimize!(M.model)
+    return JuMP.objective_value(M.model)
+end
+
