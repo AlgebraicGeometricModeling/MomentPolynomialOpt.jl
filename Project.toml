@@ -1,6 +1,6 @@
 name = "MomentTools"
 uuid = "65cd4d85-9fe5-4fdc-93e2-c8798c615752"
-authors = ["mourrain <bernard.mourrain@inria.fr>"]
+authors = ["mourrain <bernard.mourrain@inria.fr>", "Lorenzo Baldi <lorenzo.baldi@inria.fr>"]
 version = "0.1.1"
 
 [deps]
