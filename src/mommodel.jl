@@ -232,7 +232,7 @@ end
 M = MomentModel(C, X, d)
 ```
 Construct the Moment Program where
-   - C is a vector of pairs (f, sense ) of objective or constraintes where f is a polynomial and sense is "inf", "min", "sup", "max", ">=0", "<=0", "=0", or an interval 
+   - C is a vector of pairs (f, sense ) of objective or constraints where f is a polynomial and sense is "inf", "min", "sup", "max", ">=0", "<=0", "=0", or an interval 
    - `X` is the vector of variables
    - `d` is the order of the moment relaxation.
 """
