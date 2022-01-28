@@ -241,10 +241,10 @@ function  MomentModel(C::Vector, X, d::Int64; kwargs...)
     constraint_unitmass(M)
     for c in C
         if c[2] == "inf" || c[2] == "min"
-            set_objective(M, c[1], "inf")
+            set_objective(M, "inf", c[1])
             wobj = true
         elseif c[2] == "sup" || c[2] == "max"
-            set_objective(M, c[1], "sup")
+            set_objective(M,"sup",  c[1])
             wobj = true
         elseif c[2] == "=0"
             constraint_zero(M, c[1])
