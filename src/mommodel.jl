@@ -227,6 +227,39 @@ function MomentModel(fct, Eq::Vector, Pos::Vector,  X, d::Int64; kwargs...)
     return M
 end
 
+"""
+```julia
+M = MomentModel(C, X, d)
+```
+Construct the Moment Program where
+   - C is a vector of pairs (f, sense ) of objective or constraintes where f is a polynomial and sense is "inf", "min", "sup", "max", ">=0", "<=0", "=0", or an interval 
+   - `X` is the vector of variables
+   - `d` is the order of the moment relaxation.
+"""
+function  MomentModel(C::Vector, X, d::Int64; kwargs...)
+    M = MOM.Model(X, d; kwargs...)
+    constraint_unitmass(M)
+    for c in C
+        if c[2] == "inf" || c[2] == "min"
+            MomentTools.objective(M, c[1], "inf")
+            wobj = true
+        elseif c[2] == "sup" || c[2] == "max"
+            MomentTools.objective(M, c[1], "sup")
+            wobj = true
+        elseif c[2] == "=0"
+            constraint_zero(M, c[1])
+        elseif c[2] == ">=0"
+            constraint_nneg(M, c[1])
+        elseif c[2] == "<=0"
+            constraint_nneg(M, -c[1])
+        elseif isa(c[2], AbstractVector)
+            constraint_nneg(M, c[1] - c[2][1])
+            constraint_nneg(M, -c[1] + c[2][2])
+        end
+    end
+    return M
+end
+
 function JuMP.optimize!(M::MOM.Model)
     JuMP.optimize!(M.model)
     return JuMP.objective_value(M.model)
