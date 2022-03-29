@@ -244,7 +244,7 @@ function  MomentModel(C::Vector, X, d::Int64; kwargs...)
             set_objective(M, "inf", c[1])
             wobj = true
         elseif c[2] == "sup" || c[2] == "max"
-            set_objective(M,"sup",  c[1])
+            set_objective(M,"sup", c[1])
             wobj = true
         elseif c[2] == "=0"
             constraint_zero(M, c[1])
