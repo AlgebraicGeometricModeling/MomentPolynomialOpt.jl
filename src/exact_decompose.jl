@@ -98,10 +98,6 @@ function exact_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], ve
 
     lambda = JuMP.value.(lambda)
 
-    if verbose 
-        println("Minimal eigenvalue: ", lambda)
-    end
-    
     Qopt = JuMP.value.(Q)
     qopt = JuMP.value.(q)
     gopt = B'*Qopt*B + (qopt'*Lq)*f
@@ -114,9 +110,12 @@ function exact_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], ve
     epol = g - (qopt'*Lq)*f - B'*Qopt*B
 
     rho = norm(epol)
-    
-    # Ev = eigen(Qopt).values
-    # println("Eigen: ", Ev)
+    if verbose 
+        println("Minimal eigenvalue: ", lambda)
+        #Ev = eigen(Qopt).values
+        #println("Eigenvalues: ", Ev)
+    end
+
     
     # Rounding
     #delta=0.99*(min(Ev...)-rho)/(n+ sqrt(n)*(n-1)*norm(f))
@@ -126,20 +125,21 @@ function exact_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], ve
     k = Int64(ceil(log10(1/delta)))
     k = min(k, rounding)
 
-    if verbose 
+    if verbose
+        println("Error: ", rho)
+        println("Delta: ", delta)
         println("Rounding precision: $k digit(s)")
     end
 
-    Qr = Int64.(round.(Qopt*10^k; digits = 0))//10^k
-    qr = Int64.(round.(qopt*10^k; digits = 0))//10^k
+    Qround = Int64.(round.(Qopt*10^k; digits = 0))//10^k
+    qround = Int64.(round.(qopt*10^k; digits = 0))//10^k
  
     
-    
     # Projection
-    qexact = (qr'*Lq)
+    qexact = (qround'*Lq)
     p  = -qexact*f + g
     Qp = Q_matrix(p,n)
-    Qexact = Qr + H_proj(Qp-Qr, H)
+    Qexact = Qround + H_proj(Qp-Qround, H)
     
     
     if verbose 
