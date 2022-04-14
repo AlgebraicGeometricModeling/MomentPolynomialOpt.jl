@@ -8,7 +8,7 @@ if haskey(ENV,"QUIET")
 else
     optimizer = Mosek.Optimizer
 end
-MOM.set_optimizer(optimizer)
+set_optimizer(optimizer)
 
 X = @polyvar x y
 

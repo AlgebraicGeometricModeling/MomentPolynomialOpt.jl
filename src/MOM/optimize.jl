@@ -1,4 +1,37 @@
+export optimize, minimize, maximize
 
+"""
+```julia
+v, M = MOM.optimize(sense, f, [e1, e2, ...], [p1, p2, ...], X, d)
+```
+Compute the optimum of `f` under the constraints ``e_i`` =0 and ``p_i \\geq 0`` using a relaxation of order `d` on the moments in the variable `X`. 
+
+  - ``f, e_i, p_i `` should be polynomials in the variables X.
+  - 'sense`is :Inf or :Sup
+  - `X` is a tuple of variables
+  - `d` is the order of the relaxation
+
+The optimizer used to solve the moment relaxation should be defined in MMT[:optimizer].
+
+If the problem is feasible and has minimizers, it outputs
+  - v: the optimum value
+  - M: the moment model of type JuMP.Model
+
+Example
+-------
+```julia
+using MomentTools
+
+X  = @polyvar x1 x2
+e1 = x1^2-2
+e2 = (x2^2-3)*(x1*x2-2)
+p1 = x1
+p2 = 2-x2
+v, M = MOM.optimize(:Inf, -x1, [e1, e2], [p1, p2], X, 3)
+```
+To recover the optimal values, see [`get_minimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
+
+"""
 function optimize(sense::Symbol, fct, Eq::Vector, Pos::Vector,  X, d::Int64; kwargs...)
     M = MOM.Model(X, d; kwargs...)
     constraint_unitmass(M)
@@ -25,17 +58,9 @@ v, M = MOM.set_optimizer(optimizer)
 ```
 Set the optimizer of the moment program `M` to the dual optimizer of `optimizer`.
 """
-function set_optimizer(optimizer)
-
-#    if M[:dual]
-        MOMENV[:optimizer] = Dualization.dual_optimizer(optimizer)
-#    else
-#        set_optimizer(M, optimizer)
-#    end
-end
-
 function set_optimizer(M, optimizer)
     if M[:dual]
+        @warn "Using dual optimizer"
         JuMP.set_optimizer(M, Dualization.dual_optimizer(optimizer))
     else
         set_optimizer(M, optimizer)
@@ -64,7 +89,7 @@ e1 = x1^2-2
 e2 = (x2^2-3)*(x1*x2-2)
 p1 = x1
 p2 = 2-x2
-v, M = minimize(-x1, [e1, e2], [p1, p2], X, 3)
+v, M = MOM.minimize(-x1, [e1, e2], [p1, p2], X, 3)
 ```
 To recover the optimal values, see [`get_minimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
 
@@ -87,7 +112,7 @@ end
 #----------------------------------------------------------------------
 """
 ```julia
-v, M = maximize(f, [e1, e2, ...], [p1, p2, ...], X, d, optimizer)
+v, M = MOM.maximize(f, [e1, e2, ...], [p1, p2, ...], X, d, optimizer)
 ```
 Similar to the function `minimize` but compute the supremun of `f`.
 """
@@ -109,7 +134,7 @@ end
 #----------------------------------------------------------------------
 """
 ```julia
-v, M = optimize([(f, set), ...], X, d)
+v, M = MOM.optimize([(f, set), ...], X, d)
 ```
 Solve the moment program of relaxation of order `d` in the variables `X`, defined by the constraint or objective paires `(f, set)` where
 `f` is a polynomial and `set` is a string
@@ -132,7 +157,7 @@ e1 = x1^2-2
 e2 = (x2^2-3)*(x1*x2-2)
 p1 = x1
 p2 = 2-x2
-v, M = optimize([(-x1, "inf"), (e1, "=0"), (e2, "=0"), (p1, ">=0"), (p2>=0)], X, 3)
+v, M = MOM.optimize([(-x1, "inf"), (e1, "=0"), (e2, "=0"), (p1, ">=0"), (p2>=0)], X, 3)
 ```
 
 To recover the optimal values, see [`get_minimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).

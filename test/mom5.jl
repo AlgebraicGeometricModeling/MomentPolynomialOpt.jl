@@ -19,9 +19,9 @@ end
 
 #using CSDP; optimizer = CSDP.Optimizer
 
-
 #MOM.set_optimizer(Dualization.dual_optimizer(optimizer))
-MOM.set_optimizer(optimizer)
+set_optimizer(optimizer)
+
 X = @polyvar x y
 
 lebesgue(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))

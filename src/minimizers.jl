@@ -79,20 +79,5 @@ end
 
 
 
-#----------------------------------------------------------------------
-"""
-```julia
-v, M = optimize(M)
-```
-Run the optimizer on the moment program `M` and output the objective_value `v` and the moment program `M`. If the optimization program has no value, it returns `nothing` and `M`.
-"""
-function optimize(M::JuMP.Model)
-    JuMP.optimize!(M)
-    if JuMP.has_values(M)
-        return JuMP.objective_value(M), M
-    else
-        println("Solver status: ", JuMP.termination_status(M))
-        return nothing, M
-    end
-end
+
 

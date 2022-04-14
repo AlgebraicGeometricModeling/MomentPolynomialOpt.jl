@@ -9,7 +9,6 @@ else
     MMT[:optimizer] = Mosek.Optimizer
 end
 
-
 X = @polyvar x y
 
 p1 = x*y-1

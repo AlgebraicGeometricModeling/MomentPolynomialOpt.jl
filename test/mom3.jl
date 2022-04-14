@@ -7,7 +7,7 @@ if haskey(ENV,"QUIET")
 else
     optimizer = Mosek.Optimizer
 end 
-
+set_optimizer(optimizer)
 
 X  = @polyvar x y
 q1 = 1-x^2-y^2

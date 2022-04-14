@@ -8,7 +8,7 @@ else
 end
 
 #using CSDP; optimizer = CSDP.Optimizer
-MOM.set_optimizer(optimizer)
+set_optimizer(optimizer)
 
 X  = @polyvar x1 x2
 

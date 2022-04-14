@@ -3,7 +3,7 @@ import JuMP: optimize!, objective_value
 
 module MOM
 
-#import DynamicPolynomials: MonomialVector
+
 using DynamicPolynomials
 using MultivariateSeries
 using JuMP
@@ -15,15 +15,12 @@ using JuMP
 using LinearAlgebra
 import Dualization
 
-mutable struct Model
-    model::JuMP.Model
-end
-
-#using MomentTools
+#mutable struct Model
+#    model::JuMP.Model
+#end
 
 
-MOMENV = Dict{Symbol,Any}( :dual => true )
-export MOMENV
+import MomentTools:MMT
 
 #----------------------------------------------------------------------
 """
@@ -47,8 +44,8 @@ function Model(X, d::Int64; nu::Int64=1, dual::Bool=true,  kwargs...)
     M[:variables] = X
     M[:degree] = d
 
-    if haskey(MOMENV,:optimizer,)
-        JuMP.set_optimizer(M, MOMENV[:optimizer])
+    if haskey(MMT,:optimizer,)
+        JuMP.set_optimizer(M, Dualization.dual_optimizer(MMT[:optimizer]))
     end
 
     B = monomials(X,seq(0:d))
@@ -97,10 +94,10 @@ end
 
 
 #----------------------------------------------------------------------
-function get_series(M::JuMP.Model)
-    [series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
-             for i in 1:length(M[:monomials])]) for k in 1:M[:nu]]
-end
+#function get_series(M::JuMP.Model)
+#    [series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
+#             for i in 1:length(M[:monomials])]) for k in 1:M[:nu]]
+#end
 
 
 include("MOM/constraints.jl")
@@ -108,8 +105,6 @@ include("MOM/objective.jl")
 include("MOM/optimize.jl")
 
 
-
-#----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
 #= function Base.setindex!(p::JuMP.Model, v, k::Symbol)  p.model[k] = v end
@@ -207,9 +202,9 @@ function  Model(C::Vector, X, d::Int64; kwargs...)
     return M
 end
 
-function JuMP.optimize!(M::MOM.Model)
-    JuMP.optimize!(M)
-    return JuMP.objective_value(M)
-end
+#function JuMP.optimize!(M::MOM.Model)
+#    JuMP.optimize!(M)
+#    return JuMP.objective_value(M)
+#end
 
 end  #module MOM
