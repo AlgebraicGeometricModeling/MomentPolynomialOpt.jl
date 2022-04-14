@@ -9,6 +9,7 @@ else
     optimizer = Mosek.Optimizer
 end
 
+
 X = @polyvar x y
 
 p1 = x*y-1
@@ -17,8 +18,8 @@ q  = 2*x-x^2
 
 d = 3
 
-M = MomentModel(("inf", y), [p1,p2], [q], X, d)
-set_optimizer(M, optimizer)
+M = MOM.Model(:Inf, y, [p1,p2], [q], X, d)
+MOM.set_optimizer(M, optimizer)
 
 v = optimize!(M)
 

@@ -5,8 +5,10 @@ if haskey(ENV,"QUIET")
     optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
 else
     optimizer = Mosek.Optimizer
-end 
+end
+
 #using CSDP; optimizer = CSDP.Optimizer
+MOM.set_optimizer(optimizer)
 
 X  = @polyvar x1 x2
 
@@ -16,6 +18,7 @@ e2 = (x2^2-3)*(x1*x2-2)
 p1 = x1
 p2 = 2-x2
 
-v, M = minimize(x1, [e1, e2], [p1,p2], X, 4, optimizer)
+f = x1
+v, M = MOM.optimize(:Inf, f, [e1, e2], [p1, p2], X, 4)
 
 Xi = get_minimizers(M)

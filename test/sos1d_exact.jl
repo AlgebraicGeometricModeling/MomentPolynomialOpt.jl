@@ -2,8 +2,8 @@ using LinearAlgebra, MomentTools, DynamicPolynomials, JuMP
 #using MosekTools; optimizer=Mosek.Optimizer
 using CSDP; MMT[:optimizer] = CSDP.Optimizer
 
-import MomentTools.exact_decompose
-include("../src/exact_decompose.jl")
+#import MomentTools.exact_decompose
+#include("../src/exact_decompose.jl")
 
 
 X = @polyvar x

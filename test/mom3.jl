@@ -15,7 +15,7 @@ q2 = x^3-y^2
 
 pop = [(x,"inf"), (q1,">=0"), (q2, ">=0")]
 
-v, M = optimize(pop, X, 4, optimizer)
+v, M = MOM.optimize(pop, X, 4)
 
 w, Xi = get_measure(M)
 

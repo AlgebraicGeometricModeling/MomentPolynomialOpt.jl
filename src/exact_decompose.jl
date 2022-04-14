@@ -38,8 +38,7 @@ end
 
 
 """
-Decompose g>0 at the real roots of f as a Sum of Squares and a multiple of f with rational 
-coefficients.
+Decompose g>0 at the real roots of f as a rational Sum of Squares and a multiple of f with rational coefficients.
 
   - Q rational matrix which is positive definite if g>0 at the real roots of f
   - q rational factor 

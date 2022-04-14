@@ -1,6 +1,6 @@
 export set_objective, set_objective_ncl, set_objective_tv
 
-import JuMP: set_objective
+using JuMP
 
 #----------------------------------------------------------------------
 """
@@ -10,7 +10,7 @@ set_objective(M, sense, p)
 Set the "inf" or "sup" objective function to  ``\\sum_{i=1}^{\\nu} \\langle p\\star \\mu_i, 1 \\rangle`` where `p` is a polynomial.
 
 """
-function JuMP.set_objective(M::JuMP.Model, sense::String, p)
+function set_objective(M::JuMP.Model, sense::String, p)
     if p != nothing
         f = p*one(Polynomial{true,Float64})
         obj = sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in f) for k in 1:M[:nu])
@@ -30,7 +30,7 @@ set_objective(M, sense, p)
 Set the "inf" or "sup" objective function to  ``\\sum_{i=1}^{\\nu} \\langle p_{i} \\star \\mu_i, 1 \\rangle`` where `p` is a vector of ``\\nu``=`M[:nu]` polynomials. 
 
 """
-function JuMP.set_objective(M::JuMP.Model, sense, idx::Vector{Int64}, p::Vector)
+function set_objective(M::JuMP.Model, sense, idx::Vector{Int64}, p::Vector)
     if p != nothing
         f = p*one(Polynomial{true,Float64})
         obj = sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in f[k]) for k in 1:length(idx))
@@ -43,9 +43,9 @@ function JuMP.set_objective(M::JuMP.Model, sense, idx::Vector{Int64}, p::Vector)
 end
 
 
-function JuMP.set_objective(M::JuMP.Model, sense, pol::Vector)
+function set_objective(M::JuMP.Model, sense, pol::Vector)
     if pol != nothing
-        JuMP.set_objective(M, collect(1:M[:nu]), pol, sense)
+        set_objective(M, collect(1:M[:nu]), pol, sense)
     end
 end
 
@@ -56,9 +56,9 @@ set_objective(M, sense, i, p)
 ```
 Set the "inf" or "sup" objective function to  `` \\langle p \\star \\mu_i, 1 \\rangle`` where `p` is a polynomial. 
 """
-function JuMP.set_objective(M::JuMP.Model, sense::String, pol, idx::Int64)
+function set_objective(M::JuMP.Model, sense::String, pol, idx::Int64)
     if pol != nothing
-        JuMP.set_objective(M, sense, [idx], [pol])
+        set_objective(M, sense, [idx], [pol])
     end
 end
 

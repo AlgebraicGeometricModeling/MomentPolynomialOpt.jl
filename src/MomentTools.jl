@@ -7,15 +7,19 @@ using Dualization
 using LinearAlgebra
 using Combinatorics
 
+MMT = Dict{Symbol,Any}( :dual => true)
+export MMT
+
 include("mommodel.jl")
-include("constraints.jl")
-include("objective.jl")
+#include("constraints.jl")
+#include("objective.jl")
+
 include("optimize.jl")
 include("polar.jl")
 include("annihilator.jl")
+
+include("sosmodel.jl")
 include("exact_decompose.jl")
 
-MMT = Dict{Symbol,Any}()
-export MMT
 
 end

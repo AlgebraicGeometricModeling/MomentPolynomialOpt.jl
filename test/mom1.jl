@@ -1,29 +1,31 @@
 using MomentTools
 using DynamicPolynomials
 using JuMP
-#using Dualization
+
 using MosekTools
 if haskey(ENV,"QUIET")
     optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
 else
     optimizer = Mosek.Optimizer
 end
+MOM.set_optimizer(optimizer)
 
 X = @polyvar x y
 
 p1 = x*y-1
 p2 = x^2-2
 q  = 2*x-x^2
+f  = y
 
 d = 3
 
 M = MOM.Model(X, d)
-set_optimizer(M, optimizer)
+#mom_optimizer(M, optimizer)
 
-constraint_unitmass(M)
-constraint_zero(M, p1, p2)
-constraint_nneg(M, q)
-set_objective(M, "inf", y)
+MOM.constraint_unitmass(M)
+MOM.constraint_zero(M, p1, p2)
+MOM.constraint_nneg(M, q)
+MOM.set_objective(M, "inf", f)
 
 v = optimize(M)[1]
 

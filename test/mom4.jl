@@ -9,6 +9,7 @@ else
     optimizer = Mosek.Optimizer
 end 
 #using CSDP; optimizer = CSDP.Optimizer
+MOM.set_optimizer(optimizer)
 
 X = @polyvar x y
 
@@ -18,16 +19,15 @@ p =  x^2+2*x*y+1
 
 d = 4
 M = MOM.Model(X, d; nu=2)
-set_optimizer(M,optimizer)
 
 s0 = MultivariateSeries.dual(p)
 L = monomials(X,seq(0:2))
 
-constraint_moments(M, [(m=>s0[m]) for m in L])
+MOM.constraint_moments(M, [(m=>s0[m]) for m in L])
+MOM.set_objective_tv(M)
 
-set_objective_tv(M)
-
-v = optimize(M)[1]
+optimize!(M)
+v = objective_value(M)
 
 s = get_series(M)
 

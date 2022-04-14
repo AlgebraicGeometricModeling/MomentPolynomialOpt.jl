@@ -96,9 +96,9 @@ If the problem is feasible and has minimizers, it outputs
   - v: the minimum value
   - M: the moment model of type MOM.Model
 """
-function polar_minimize(f, h::Vector, g::Vector, X, d::Int64, optimizer)
+function polar_minimize(f, h::Vector, g::Vector, X, d::Int64)
     j = polar_ideal(f, h, g, X)
-    return minimize(f, j, g, X, d, optimizer)
+    return MOM.optimize(:Inf, f, j, g, X, d)
 end
 
 #----------------------------------------------------------------------

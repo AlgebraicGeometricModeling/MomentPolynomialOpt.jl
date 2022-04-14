@@ -3,6 +3,7 @@ using MomentTools
 using DynamicPolynomials
 using MultivariateSeries
 using LinearAlgebra
+using Dualization
 
 # using Plots
 # function plotmeas(w,Xi)
@@ -18,35 +19,41 @@ end
 
 #using CSDP; optimizer = CSDP.Optimizer
 
+
+#MOM.set_optimizer(Dualization.dual_optimizer(optimizer))
+MOM.set_optimizer(optimizer)
 X = @polyvar x y
 
 lebesgue(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))
 
 d = 10
 
-M = MOM.Model(X, d, optimizer; nu=2)
+M = MOM.Model(X, d; nu=2)
 
 p1 = 1-x^2-y^2
 # p1 * mu_1 >= 0
-constraint_nneg(M, 1, 1-x^2-y^2)
+MOM.constraint_nneg(M, 1, 1-x^2-y^2)
 
 q1 = 1-x^2
 q2 = 1-y^2
 # q1 * mu_2 >= 0, q2 * mu_2 >=0
-constraint_nneg(M, 2, 1-x^2, 1-y^2 )
+MOM.constraint_nneg(M, 2, 1-x^2, 1-y^2 )
 
 # monomials of degree <= 2*d
 L = monomials(X, seq(0:2*d))
 
 # <1*mu_1, m> + <1*mu_2, m> = leb_mom(m)
-constraint_moments(M,
+MOM.constraint_moments(M,
                    [(m=>lebesgue(exponents(m)...)) for m in L],
                    [1,1] )
 
 # sup  <1*mu_1,1>  
-set_objective(M, "sup", 1, 1)
+MOM.set_objective(M, "sup", 1, 1)
 
-v = optimize(M)[1]
+optimize!(M)
+
+v = objective_value(M)
+
 println("Approximate volume: ", v)
 
 # s = get_series(M)
