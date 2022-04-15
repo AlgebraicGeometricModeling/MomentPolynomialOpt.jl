@@ -1,6 +1,16 @@
 using LinearAlgebra, MomentTools, DynamicPolynomials, JuMP
-#using MosekTools; optimizer=Mosek.Optimizer
-using CSDP; MMT[:optimizer] = CSDP.Optimizer
+
+#=
+using MosekTools; opt=Mosek.Optimizer
+if haskey(ENV,"QUIET")
+    opt = optimizer_with_attributes(opt, "QUIET" => true);
+end
+=#
+using CSDP; opt=CSDP.Optimizer
+
+set_optimizer(opt)
+
+
 
 #import MomentTools.exact_decompose
 #include("../src/exact_decompose.jl")

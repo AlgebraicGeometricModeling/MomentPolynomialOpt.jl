@@ -4,10 +4,11 @@ using JuMP
 #using Dualization
 using MosekTools
 if haskey(ENV,"QUIET")
-    MMT[:optimizer] = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
+    optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
 else
-    MMT[:optimizer] = Mosek.Optimizer
+    optimizer = Mosek.Optimizer
 end
+set_optimizer(optimizer)
 
 X = @polyvar x y
 

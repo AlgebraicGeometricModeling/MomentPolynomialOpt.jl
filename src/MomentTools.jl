@@ -7,7 +7,7 @@ using Dualization
 using LinearAlgebra
 using Combinatorics
 
-MMT = Dict{Symbol,Any}( :dual => true, :optimizer => nothing )
+MMT = Dict{Symbol,Any}( :optimizer => nothing )
 export MMT
 
 include("mom_model.jl")

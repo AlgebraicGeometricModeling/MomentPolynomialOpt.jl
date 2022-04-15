@@ -36,12 +36,11 @@ M = MOM.Model(X,d, optimizer=MMT[:optimizer]; nu=k)
   - 'optimizer`is the the optimizer used to solve the SDP program
   - `nu=k` is the number of Positive Moment Sequences
 """
-function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, dual::Bool=true,  kwargs...)
+function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
 
     M = JuMP.Model(kwargs...)
 
     M[:type] = :moment
-    M[:dual] = dual
     M[:nu] = nu
     M[:variables] = X
     M[:degree] = d
@@ -75,7 +74,6 @@ function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, dual::Bool=t
     for k in 1:nu
         H = [ y[k,M[:index][B[i]*B[j]]]+0 for i in 1:N, j in 1:N]
         @constraint(M, Symmetric(H) in PSDCone())
-        #@SDconstraint(m, H >= zeros(N,N))
     end
 
     return M #MOM.Model(m)
