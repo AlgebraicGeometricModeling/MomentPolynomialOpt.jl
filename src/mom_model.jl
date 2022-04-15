@@ -29,24 +29,24 @@ The moments of all monomials in X of degree 2*d are variables of
 the optimization program.
 
 ```
-M = MOM.Model(X,d; nu=k)
+M = MOM.Model(X,d, optimizer=MMT[:optimizer]; nu=k)
 ```
   - `X` is the vector of variables
-  - `d` is the order of the moment relaxation.
+  - `d` is the order of the moment relaxation
+  - 'optimizer`is the the optimizer used to solve the SDP program
   - `nu=k` is the number of Positive Moment Sequences
 """
-function Model(X, d::Int64; nu::Int64=1, dual::Bool=true,  kwargs...)
+function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, dual::Bool=true,  kwargs...)
 
     M = JuMP.Model(kwargs...)
 
+    M[:type] = :moment
     M[:dual] = dual
     M[:nu] = nu
     M[:variables] = X
     M[:degree] = d
 
-    if haskey(MMT,:optimizer,)
-        JuMP.set_optimizer(M, Dualization.dual_optimizer(MMT[:optimizer]))
-    end
+    JuMP.set_optimizer(M, Dualization.dual_optimizer(optimizer))
 
     B = monomials(X,seq(0:d))
     N = length(B)
@@ -82,42 +82,13 @@ function Model(X, d::Int64; nu::Int64=1, dual::Bool=true,  kwargs...)
 end
 
 
-function Model(X, d::Int64, optimizer; kwargs...)
-    M = MOM.Model(X,d; kwargs...)
-    if M[:dual]
-        set_optimizer(M, Dualization.dual_optimizer(optimizer))
-    else
-        set_optimizer(M, optimizer)
-    end
-    return M
-end
-
 
 #----------------------------------------------------------------------
-#function get_series(M::JuMP.Model)
-#    [series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
-#             for i in 1:length(M[:monomials])]) for k in 1:M[:nu]]
-#end
-
 
 include("MOM/constraints.jl")
 include("MOM/objective.jl")
 include("MOM/optimize.jl")
 
-
-
-#----------------------------------------------------------------------
-#= function Base.setindex!(p::JuMP.Model, v, k::Symbol)  p.model[k] = v end
-
-function Base.getindex(p::JuMP.Model, s::Symbol)
-    getindex(p.model, s)
-end
-
-function Base.show(io::IO, m::JuMP.Model)
-    println(io, "\nA Moment program with:")
-    Base.show(io, m.model)
-end
-=#
 #----------------------------------------------------------------------
 """
 Construct the Moment Program in the variables X of order d.
@@ -201,10 +172,5 @@ function  Model(C::Vector, X, d::Int64; kwargs...)
     end
     return M
 end
-
-#function JuMP.optimize!(M::MOM.Model)
-#    JuMP.optimize!(M)
-#    return JuMP.objective_value(M)
-#end
 
 end  #module MOM

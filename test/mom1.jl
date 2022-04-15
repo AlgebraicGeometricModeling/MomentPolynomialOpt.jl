@@ -19,7 +19,7 @@ f  = y
 
 d = 3
 
-M = MOM.Model(X, d)
+M = MOM.Model(X, d, optimizer)
 #mom_optimizer(M, optimizer)
 
 MOM.constraint_unitmass(M)

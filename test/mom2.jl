@@ -19,6 +19,6 @@ p1 = x1
 p2 = 2-x2
 
 f = x1
-v, M = MOM.optimize(:Inf, f, [e1, e2], [p1, p2], X, 4)
+v, M = MOM.minimize(f, [e1, e2], [p1, p2], X, 4)
 
 Xi = get_minimizers(M)
