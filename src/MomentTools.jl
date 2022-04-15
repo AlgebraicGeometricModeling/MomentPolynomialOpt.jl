@@ -17,7 +17,9 @@ include("polar.jl")
 include("annihilator.jl")
 
 include("sos_model.jl")
-include("exact_decompose.jl")
+include("sos_decompose.jl")
+include("sos_exact.jl")
+
 
 export optimize
 #----------------------------------------------------------------------

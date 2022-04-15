@@ -6,15 +6,12 @@ using JuMP, DynamicPolynomials
 
 import MomentTools: MMT
 
-function Model(sense::Symbol, f, H, G, X, d)
+function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
 
-    M = JuMP.Model()
+    M = JuMP.Model(optimizer)
+
+    M[:type] = :polynomial
     
-    if haskey(MMT,:optimizer,)
-        set_optimizer(M, MMT[:optimizer])
-    end
-
-
     Mh = [monomials(X,0:2*d-maxdegree(h)) for h in H]
 
     Lg = [monomials(X,0:d-Int64(ceil(maxdegree(g)/2))) for g in G]
@@ -31,7 +28,7 @@ function Model(sense::Symbol, f, H, G, X, d)
     M[:Q] = Q
     M[:Q0]= Q0
 
-    if sense == :Min
+    if in(sense, [:Min, :min, :Inf, :inf])
         
         P = f - lambda -
             sum( H[i]*sum(a[i][j]*Mh[i][j] for j in 1:length(Mh[i])) for i in 1:length(H)) -
@@ -59,13 +56,21 @@ function Model(sense::Symbol, f, H, G, X, d)
 end
 
 
-function optimize(sense::Symbol, f, H, G, X, d)
-    M = SOS.Model(sense,f,H,G,X,d)
+function optimize(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
+    M = SOS.Model(sense,f,H,G,X,d, optimizer)
     optimize!(M)
 
     return objective_value(M), M
 end
 
-end #mod
+function minimize(f, H, G, X, d , optimizer = MMT[:optimizer])
+   return SOS.optimize(:inf, f,H,G,X,d, optimizer)
+end
+
+function maximize(f, H, G, X, d , optimizer = MMT[:optimizer])
+   return SOS.optimize(:sup, f,H,G,X,d, optimizer)
+end
+
+end #modulde SOS
 
 
