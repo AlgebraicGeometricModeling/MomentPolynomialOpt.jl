@@ -4,6 +4,8 @@ using JuMP, MosekTools
 import DynamicPolynomials: maxdegree
 function DynamicPolynomials.maxdegree(i::Int64) return 0 end
 
+set_optimizer(optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true))
+
 PMO.update_data()
 L = PMO.table()
 
@@ -15,8 +17,8 @@ for i in 1:length(L)
             local P = vec(p)
             local d = max([maxdegree(P[i][1]) for i in 1:length(P)]...)
             
-            local t = @elapsed local v, M = optimize(P, variables(p), div(d+1,2),
-                        optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true))
+            local t = @elapsed local v, M = MOM.optimize(P, variables(p), div(d+1,2))
+
 
             println(" nv: ", p[:nvar],"  d: ", d, "  o: ", div(d+1,2), "  v*: ", v, "  ",t,"(s)")
         
