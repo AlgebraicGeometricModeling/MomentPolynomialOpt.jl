@@ -41,9 +41,10 @@ It outputs:
   * B the monomial basis
 
 """
-function annihilator(sigma, L, eps = 1.e-4)
+function annihilator(sigma, t::Int64, eps = 1.e-4)
     X = variables(sigma)
-    dA = deg(L[length(L)])
+    L = monomials(X,0:t)
+    dA = maxdegree(L[length(L)])
 
     P = []
     B = []
