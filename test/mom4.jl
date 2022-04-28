@@ -3,11 +3,8 @@ using MomentTools
 using DynamicPolynomials, MultivariateSeries
 
 using MosekTools
-if haskey(ENV,"QUIET")
-    optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
-else
-    optimizer = Mosek.Optimizer
-end 
+optimizer = Mosek.Optimizer
+
 #using CSDP; optimizer = CSDP.Optimizer
 
 set_optimizer(optimizer)

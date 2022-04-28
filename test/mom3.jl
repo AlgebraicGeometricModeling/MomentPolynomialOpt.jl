@@ -3,11 +3,11 @@ using DynamicPolynomials
 using MultivariateSeries
 using JuMP, MosekTools
 
-if haskey(ENV,"QUIET")
-    optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
-else
-    optimizer = Mosek.Optimizer
-end 
+#if haskey(ENV,"QUIET")
+#    optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
+#else
+optimizer = Mosek.Optimizer
+#end 
 set_optimizer(optimizer)
 
 X  = @polyvar x y

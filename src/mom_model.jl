@@ -6,14 +6,14 @@ module MOM
 
 using DynamicPolynomials
 using MultivariateSeries
-using JuMP
+using JuMP, Dualization
 
 # import MathOptInterface
 # const MOI = MathOptInterface
 
 
 using LinearAlgebra
-import Dualization
+
 
 #mutable struct Model
 #    model::JuMP.Model
@@ -45,7 +45,7 @@ function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
     M[:variables] = X
     M[:degree] = d
 
-    JuMP.set_optimizer(M, Dualization.dual_optimizer(optimizer))
+    JuMP.set_optimizer(M, JuMP.with_optimizer(DualOptimizer,optimizer()))
 
     B = monomials(X,seq(0:d))
     N = length(B)

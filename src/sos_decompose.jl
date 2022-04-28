@@ -22,7 +22,8 @@ where
 """
 function sos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, optimizer = MMT[:optimizer])
 
-    M = JuMP.Model( optimizer )
+    M = JuMP.Model(with_optimizer(optimizer))
+    
     M[:type] = :polynomial
     
     Mh = [monomials(X,0:2*d-maxdegree(h)) for h in H]
@@ -40,7 +41,7 @@ function sos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt
     Q0 = @variable(M, [1:n, 1:n], Symmetric, base_name="Q0") 
 
     # Positivity constraint: Q - lambda*I >=0
-    @constraint(M, Q0 - lambda*Matrix(I,n,n) in PSDCone())
+    @constraint(M, Q0 - diagm(fill(lambda,n)) in PSDCone())
         
     M[:a] = a
     M[:Q] = Q

@@ -8,7 +8,7 @@ import MomentTools: MMT
 
 function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
 
-    M = JuMP.Model(optimizer)
+    M = JuMP.Model(with_optimizer(optimizer))
 
     M[:type] = :polynomial
     

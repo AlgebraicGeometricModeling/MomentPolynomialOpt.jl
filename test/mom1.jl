@@ -3,11 +3,8 @@ using DynamicPolynomials
 using JuMP
 
 using MosekTools
-if haskey(ENV,"QUIET")
-    optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
-else
-    optimizer = Mosek.Optimizer
-end
+
+optimizer = Mosek.Optimizer
 set_optimizer(optimizer)
 
 X = @polyvar x y

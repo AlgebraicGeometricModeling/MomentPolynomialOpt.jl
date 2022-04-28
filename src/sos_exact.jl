@@ -65,10 +65,7 @@ function exact_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], ve
     cf = MultivariateSeries.matrixof([f],L)
     cg = MultivariateSeries.matrixof([g],L)
 
-    M = JuMP.Model()
-
-    
-    set_optimizer(M, optimizer)
+    M = JuMP.Model(with_optimizer(optimizer))
 
     # The variables are lambda, the symmetric matrix Q and the coefficients of q
     @variable(M, lambda)
@@ -78,7 +75,7 @@ function exact_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], ve
 
 
     # Positivity constraint: Q - lambda*I >=0
-    @constraint(M, Q - lambda*Matrix(I,n,n) in PSDCone())
+    @constraint(M, Q - diagm(fill(lambda,n)) in PSDCone())
 
     # The constraints g = x^t Q x + q*f
     for k in 1:length(L)
@@ -89,7 +86,7 @@ function exact_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], ve
                     - cg[1,k] == 0)
     end    
 
-    # Objectiv function = lambda to maximize the smallest eigenvalmue of Q
+    # Objectiv function = lambda to maximize the smallest eigenvalue of Q
 
     @objective(M, Max, lambda)
 

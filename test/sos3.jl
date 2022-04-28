@@ -1,9 +1,6 @@
 using MomentTools, JuMP
 using DynamicPolynomials
 using MosekTools; opt = Mosek.Optimizer
-if haskey(ENV,"QUIET")
-    opt = optimizer_with_attributes(opt, "QUIET" => true);
-end
 set_optimizer(opt)
 
 X = @polyvar x y z u v
@@ -15,7 +12,7 @@ G = [u - u^2, v - v^2]
 d = 2
 
 M = SOS.Model(:Inf,f,H,G,X,d, opt)
-set_optimizer(M,opt)
+
 
 v0, M0 = optimize(M)
 
