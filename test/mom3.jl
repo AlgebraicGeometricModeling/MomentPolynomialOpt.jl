@@ -1,7 +1,8 @@
 using MomentTools
 using DynamicPolynomials
 using MultivariateSeries
-using MosekTools
+using JuMP, MosekTools
+
 if haskey(ENV,"QUIET")
     optimizer = optimizer_with_attributes(Mosek.Optimizer, "QUIET" => true);
 else

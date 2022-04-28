@@ -14,8 +14,3 @@ for f in F0
     end
 end
 
-# using NBInclude
-# F1 = filter(x ->endswith(x, ".ipynb"), readdir(dir*"/../expl"))
-# for f in F1
-#     @nbinclude(joinpath(dir*"/../expl", f))
-# end

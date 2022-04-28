@@ -1,5 +1,5 @@
-export get_series, get_minimizers, get_measure, mom_optimizer,
-    minimize, maximize, optimize, minimize_ncl, minimize_tv
+export get_series, get_minimizers, get_measure
+
 
 #----------------------------------------------------------------------
 """

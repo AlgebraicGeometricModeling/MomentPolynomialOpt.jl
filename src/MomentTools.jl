@@ -41,7 +41,13 @@ end
 
 import JuMP: set_optimizer
 
-function set_optimizer(opt)
+"""
+```julia
+set_optimizer(opt)
+```
+Define the default optimizer `opt` for the optimization problems created by MomentTools
+"""
+function JuMP.set_optimizer(opt)
     MMT[:optimizer] = opt 
 end
 
