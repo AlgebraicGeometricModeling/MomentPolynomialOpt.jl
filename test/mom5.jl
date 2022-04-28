@@ -3,7 +3,6 @@ using MomentTools
 using DynamicPolynomials
 using MultivariateSeries
 using LinearAlgebra
-using Dualization
 
 # using Plots
 # function plotmeas(w,Xi)
