@@ -18,8 +18,8 @@ include("polar.jl")
 include("annihilator.jl")
 
 include("SOS/Model.jl")
+
 include("sos_decompose.jl")
-include("sos_exact.jl")
 
 end
 
