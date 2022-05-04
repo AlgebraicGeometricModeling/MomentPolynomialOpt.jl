@@ -11,14 +11,10 @@ G = [u - u^2, v - v^2]
 
 d = 2
 
-M = SOS.Model(:Inf,f,H,G,X,d, opt)
+M0 = SOS.Model(:sup,f,H,G,X,d, opt)
+v0, M0 = optimize(M0)
 
 
-v0, M0 = optimize(M)
+M1 = SOS.Model(:sup,f,H,G,X,d)
+v1, M1 = optimize(M1)
 
-
-v1, M1 = SOS.optimize(:sup,f,H,G,X,d)
-
-using CSDP; opt1= CSDP.Optimizer
-
-v2, M2 = SOS.maximize(f,H,G,X,d, opt1)

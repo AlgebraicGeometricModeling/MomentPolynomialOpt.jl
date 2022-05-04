@@ -98,7 +98,7 @@ If the problem is feasible and has minimizers, it outputs
 """
 function polar_minimize(f, h::Vector, g::Vector, X, d::Int64)
     j = polar_ideal(f, h, g, X)
-    return MOM.optimize(:Inf, f, j, g, X, d)
+    return optimize(:inf, f, j, g, X, d)
 end
 
 #----------------------------------------------------------------------

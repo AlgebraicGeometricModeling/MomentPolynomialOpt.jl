@@ -9,10 +9,20 @@ get_series(M)
 Return the vector of ``\\nu``=`M[:nu]` series of optimal moments of the optimized moment program `M`.
 """
 function get_series(M::JuMP.Model)
-    #MOM.get_series(M)
+
+    n = length(M[:monomials])
+    cstr = JuMP.all_constraints(M[:dual], AffExpr, MOI.EqualTo{Float64})
+    s  = [series([M[:monomials][i]=>-JuMP.dual(cstr[n*(k-1)+i])
+                  for i in 1:n])
+          for k in 1:M[:nu]]
+
+    return s
+    
     [series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
              for i in 1:length(M[:monomials])])
      for k in 1:M[:nu]]
+
+    
 end
 
 #----------------------------------------------------------------------
@@ -30,8 +40,8 @@ get_minimizer(M)
 ```
 """
 function get_minimizers(M::JuMP.Model, t::Int64 = 2*M[:degree]-1)
-    s = get_series(M)[1]
-    w, Xi = MultivariateSeries.decompose(truncate(s, t));
+    s = get_series(M)
+    w, Xi = MultivariateSeries.decompose(truncate(s[1], t));
     Xi
 end
 

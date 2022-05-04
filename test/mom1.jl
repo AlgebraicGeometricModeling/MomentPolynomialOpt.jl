@@ -1,30 +1,30 @@
 using MomentTools
 using DynamicPolynomials
 using JuMP
-
-using MosekTools
-
-optimizer = Mosek.Optimizer
-set_optimizer(optimizer)
+using MosekTools; opt = Mosek.Optimizer
+set_optimizer(opt)
 
 X = @polyvar x y
 
 p1 = x*y-1
 p2 = x^2-2
+eq=[p1,p2]
+
 q  = 2*x-x^2
+ineq=[q]
+
 f  = y
 
 d = 3
 
-M = MOM.Model(X, d, optimizer)
-#mom_optimizer(M, optimizer)
-
+M = MOM.Model(X, d)
 MOM.constraint_unitmass(M)
 MOM.constraint_zero(M, p1, p2)
 MOM.constraint_nneg(M, q)
 MOM.set_objective(M, "inf", f)
+MOM.dualize!(M)
 
-v = optimize(M)[1]
+v, M  = optimize(M)
 
 s     = get_series(M)
 w, Xi = get_measure(M)

@@ -1,7 +1,5 @@
 using JuMP, DynamicPolynomials, MomentTools
     
-using MomentTools.MOM: minimize
-
 using MosekTools
 optimizer = Mosek.Optimizer
 

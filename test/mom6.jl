@@ -5,10 +5,9 @@ using DynamicPolynomials
 using MultivariateSeries
 using LinearAlgebra
 
-using MosekTools
-optimizer = Mosek.Optimizer
+using MosekTools; opt = Mosek.Optimizer
 
-set_optimizer(optimizer)
+set_optimizer(opt)
 
 X = @polyvar x y
 

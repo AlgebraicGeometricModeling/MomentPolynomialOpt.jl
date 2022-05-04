@@ -4,7 +4,6 @@ using MosekTools; opt = Mosek.Optimizer
 
 set_optimizer(opt)
 
-#include("../src/sos_decompose.jl")
 X = @polyvar x y 
 
 f = 1-y+0.1

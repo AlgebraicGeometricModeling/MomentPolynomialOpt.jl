@@ -11,17 +11,15 @@ using JuMP, Dualization
 # import MathOptInterface
 # const MOI = MathOptInterface
 
-
 using LinearAlgebra
-
 
 #mutable struct Model
 #    model::JuMP.Model
 #end
 
-
 import MomentTools:MMT
 
+export Model
 #----------------------------------------------------------------------
 """
 Construct the Moment Program in the variables X of order d.
@@ -45,7 +43,6 @@ function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
     M[:variables] = X
     M[:degree] = d
 
-    JuMP.set_optimizer(M, JuMP.with_optimizer(DualOptimizer,optimizer()))
 
     B = monomials(X,seq(0:d))
     N = length(B)
@@ -75,17 +72,24 @@ function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
         H = [ y[k,M[:index][B[i]*B[j]]]+0 for i in 1:N, j in 1:N]
         @constraint(M, Symmetric(H) in PSDCone())
     end
-
+    
+    JuMP.set_optimizer(M, JuMP.with_optimizer(optimizer))
+    #JuMP.set_optimizer(M, JuMP.with_optimizer(DualOptimizer,optimizer()))
+    #@info "Using dual optimizer"
+    
     return M #MOM.Model(m)
 end
 
+#----------------------------------------------------------------------
 
+function dualize!(M::JuMP.Model, optimizer=MMT[:optimizer])
+    M[:dual] = Dualization.dualize(M,with_optimizer(optimizer))
+end
 
 #----------------------------------------------------------------------
 
-include("MOM/constraints.jl")
-include("MOM/objective.jl")
-include("MOM/optimize.jl")
+include("constraints.jl")
+include("objective.jl")
 
 #----------------------------------------------------------------------
 """
@@ -121,13 +125,13 @@ Construct the Moment Program in the variables X of order d.
    - `X` is the vector of variables
    - `d` is the order of the moment relaxation.
 """
-function Model(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64; kwargs...)
-    M = MOM.Model(X, d; kwargs...)
+function Model(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer=MMT[:optimizer])
+    M = MOM.Model(X, d)
     constraint_unitmass(M)
-    constraint_zero(M,Eq...)
-    constraint_nneg(M,Pos...)
+    for e in Eq  constraint_zero(M, e) end
+    for p in Pos constraint_nneg(M, p) end
     if f != nothing
-        if sense == :Inf
+        if in(sense,[:Inf,:inf,:Min,:min])
             set_objective(M, "inf", f)
         else
             set_objective(M, "sup", f)
@@ -135,8 +139,13 @@ function Model(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64; kwargs..
     else
         set_objective(M, "sup", one(Polynomial{true,Float64}))
     end
+
+    MOM.dualize!(M,optimizer)
+     
     return M
 end
+
+
 
 """
 ```julia
@@ -147,7 +156,7 @@ Construct the Moment Program where
    - `X` is the vector of variables
    - `d` is the order of the moment relaxation.
 """
-function  Model(C::Vector, X, d::Int64; kwargs...)
+function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
     M = MOM.Model(X, d; kwargs...)
     constraint_unitmass(M)
     for c in C
@@ -168,7 +177,10 @@ function  Model(C::Vector, X, d::Int64; kwargs...)
             constraint_nneg(M, -c[1] + c[2][2])
         end
     end
+
+    MOM.dualize!(M, optimizer)
     return M
 end
 
 end  #module MOM
+

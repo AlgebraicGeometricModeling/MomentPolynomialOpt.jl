@@ -55,7 +55,7 @@ function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
     return M
 end
 
-
+#=
 function optimize(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
     M = SOS.Model(sense,f,H,G,X,d, optimizer)
     optimize!(M)
@@ -70,6 +70,7 @@ end
 function maximize(f, H, G, X, d , optimizer = MMT[:optimizer])
    return SOS.optimize(:sup, f,H,G,X,d, optimizer)
 end
+=#
 
 end #modulde SOS
 

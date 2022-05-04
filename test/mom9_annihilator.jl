@@ -15,7 +15,7 @@ nn= [-x^2 - y^2 - z^2 - 4*z - 3]
 
 d = 3
 
-v, M = MOM.optimize(:inf, f, eq, nn, X, d)
+v, M = optimize(:inf, f, eq, nn, X, d)
 
 S = get_series(M)[1]
 

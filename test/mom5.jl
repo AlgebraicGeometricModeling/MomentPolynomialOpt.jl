@@ -12,7 +12,6 @@ using LinearAlgebra
 using MosekTools
 optimizer = Mosek.Optimizer
 
-
 #using CSDP; optimizer = CSDP.Optimizer
 
 #MOM.set_optimizer(Dualization.dual_optimizer(optimizer))
@@ -46,9 +45,9 @@ MOM.constraint_moments(M,
 # sup  <1*mu_1,1>  
 MOM.set_objective(M, "sup", 1, 1)
 
-optimize!(M)
+MOM.dualize!(M)
 
-v = objective_value(M)
+v, M = optimize(M)
 
 println("Approximate volume: ", v)
 
