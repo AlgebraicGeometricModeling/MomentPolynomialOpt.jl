@@ -7,9 +7,11 @@ function MaxEigenModel(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt
     M[:type] = :polynomial
     
     MP = [monomials(X,0:2*d-maxdegree(h)) for h in H]
-
+    M[:mP] = MP
     MQ = [monomials(X,0:d-Int64(ceil(maxdegree(g)/2))) for g in G]
+    M[:mQ] = MQ
     L0 = monomials(X,0:d)
+    M[:monomials] = L0
 
     @variable(M, lambda)
 

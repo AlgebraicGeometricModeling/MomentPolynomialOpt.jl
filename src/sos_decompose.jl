@@ -27,12 +27,16 @@ function sos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt
     optimize!(M)
     v = objective_value(M)
 
-    S0 = L0'*value.(Q0)*L0
-
-    println(">  ", eigen(value.(Q0)).values)
+    L0 = M[:monomials]
+    MP = M[:mP]
+    MQ = M[:mQ]
     
-    P = [ dot(MP[i],value.(a[i])) for i in 1:length(H)]
-    Q = [ MQ[i]'*value.(Q[i])*MQ[i] for i in 1:length(G)]
+    S0 = L0'*value.(M[:Q0])*L0
+
+    println(">  ", eigen(value.(M[:Q0])).values)
+    
+    P = [ dot(MP[i],value.(M[:P][i])) for i in 1:length(H)]
+    Q = [ MQ[i]'*value.(M[:Q][i])*MQ[i] for i in 1:length(G)]
 
     return S0, P, Q, v, M
 
