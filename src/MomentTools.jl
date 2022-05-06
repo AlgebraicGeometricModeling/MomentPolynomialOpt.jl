@@ -18,6 +18,8 @@ include("polar.jl")
 include("annihilator.jl")
 
 include("SOS/Model.jl")
+include("SOS/MaxEigenModel.jl")
+include("SOS/MinEllipsoidModel.jl")
 
 include("sos_decompose.jl")
 

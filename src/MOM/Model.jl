@@ -126,7 +126,7 @@ Construct the Moment Program in the variables X of order d.
    - `d` is the order of the moment relaxation.
 """
 function Model(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer=MMT[:optimizer])
-    M = MOM.Model(X, d)
+    M = MOM.Model(X, d, optimizer)
     constraint_unitmass(M)
     for e in Eq  constraint_zero(M, e) end
     for p in Pos constraint_nneg(M, p) end
@@ -157,7 +157,7 @@ Construct the Moment Program where
    - `d` is the order of the moment relaxation.
 """
 function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
-    M = MOM.Model(X, d; kwargs...)
+    M = MOM.Model(X, d, optimizer; kwargs...)
     constraint_unitmass(M)
     for c in C
         if c[2] == "inf" || c[2] == "min"

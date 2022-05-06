@@ -1,4 +1,4 @@
-export sos_decompose
+export sos_decompose, esos_decompose, wsos_decompose, rat_round
 
 using LinearAlgebra, JuMP, DynamicPolynomials, MultivariateSeries
 
@@ -6,74 +6,142 @@ using LinearAlgebra, JuMP, DynamicPolynomials, MultivariateSeries
 Decompose f in the truncated quadratic module associated to the constraints H=0, G>=0:
 
 ```
-s, p, q, v, M = sos_decompose(f,H,G,X,d, optimizer)
+s, P, Q, v, M = sos_decompose(f,H,G,X,d, optimizer)
 ```
 such that 
 
 ``  f = s + \\sum_i p[i]*H[i]+ \\sum_j q[j]*G[j]      (*)  ``
 
 where 
- - p[i] is a polynomial of degree ``\\le 2d -\\deg(H[i])``
- - q[i] is a Sum of Squares of degree ``\\le 2d -\\deg(G[i])``
+ - P[i] is a polynomial of degree ``\\le 2d -\\deg(H[i])``
+ - Q[i] is a Sum of Squares of degree ``\\le 2d -\\deg(G[i])``
  - s is a Sum of Squares if v >= 0.
- - v is the maximal smallest eigenvalue of Q such that s = (X^d)^t Q (X^d) in (*)
+ - v is the maximal smallest eigenvalue of Q0 such that s = (X^d)^t Q0 (X^d) in (*)
  - `optimizer` (optional) is the optimizer used to solve the SDP program. The default value is `MMT[:optimizer]`.
 
 """
 function sos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, optimizer = MMT[:optimizer])
 
-    M = JuMP.Model(with_optimizer(optimizer))
-    
-    M[:type] = :polynomial
-    
-    Mh = [monomials(X,0:2*d-maxdegree(h)) for h in H]
-
-    Lg = [monomials(X,0:d-Int64(ceil(maxdegree(g)/2))) for g in G]
-    L0 = monomials(X,0:d)
-
-    @variable(M, lambda)
-
-    a = [@variable(M, [1:length(Mh[i])], base_name="a$i") for i in 1:length(H)]
-
-    Q = [@variable(M, [1:length(Lg[i]), 1:length(Lg[i])], PSD, base_name="Q$i") for i in 1:length(G)]
-
-    n = length(L0)
-    Q0 = @variable(M, [1:n, 1:n], Symmetric, base_name="Q0") 
-
-    # Positivity constraint: Q - lambda*I >=0
-    @constraint(M, Q0 - diagm(fill(lambda,n)) in PSDCone())
-        
-    M[:a] = a
-    M[:Q] = Q
-    M[:Q0]= Q0
-
-    P = f - L0'*Q0*L0 -
-            sum( H[i]*sum(a[i][j]*Mh[i][j] for j in 1:length(Mh[i])) for i in 1:length(H)) -
-            sum( G[i]*(Lg[i]'*Q[i]*Lg[i]) for i in 1:length(G) )
-
-
-    for c in coefficients(P)
-        @constraint(M, c == 0)
-    end
-
-    @objective(M, Max, lambda)
-
+    M = MaxEigenModel(f,H,G,X,d,optimizer)
     
     optimize!(M)
     v = objective_value(M)
 
-    s0 = L0'*value.(Q0)*L0
+    S0 = L0'*value.(Q0)*L0
 
-    h = [ dot(Mh[i],value.(a[i])) for i in 1:length(H)]
-    q = [ Lg[i]'*value.(Q[i])*Lg[i] for i in 1:length(G)]
-    return s0, h, q, v, M
+    println(">  ", eigen(value.(Q0)).values)
+    
+    P = [ dot(MP[i],value.(a[i])) for i in 1:length(H)]
+    Q = [ MQ[i]'*value.(Q[i])*MQ[i] for i in 1:length(G)]
+
+    return S0, P, Q, v, M
 
 end
 
+#----------------------------------------------------------------------
+function rat_round(x::Number, k)
+    Int64(round(x*10^k; digits = 0))//10^k
+end
 
+
+function rat_round(p::Polynomial, k)
+    dot(rat_round.(p.a,k),p.x)
+end
+
+function esos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt = MMT[:optimizer])
+    S0, P, Q, lambda, M = sos_decompose(f,H,G,X,d,opt)
+
+    if lambda <0
+        @warn "not in the interior of the truncated quadratic module"
+        return nothing
+    end
+
+    k = max(Int64(ceil(log10(1/lambda)))+3,0)
+    @info k
+    
+    Pe = rat_round.(P,k)
+    Qe = rat_round.(Q,k)
+    Se  = f - dot(H,Pe) - dot(G,Qe)
+
+    return Se, Pe, Qe, lambda, M
+end
 
 #----------------------------------------------------------------------
-export exact_decompose
+function m_sqrt(m::Monomial)
+    return prod(m.vars.^div.(m.z,2))
+end
+
+function m_div(m::Monomial, m1::Monomial)
+    return prod(m.vars.^(m.z-m1.z))
+end
+
+function is_null(f::Polynomial)
+    return (length(f.x)==0)
+end
+"""
+Decompose a polynomial as a weighted some of squares.
+
+```
+W, P = wsos_decompose(f)
+```
+such that 
+
+``  f =  \\sum_i W[i]*P[i]^2  ``
+
+where 
+ - W[i] is a scalar
+ - P[i] is a polynomial
+
+"""
+function wsos_decompose(pol)
+
+    f = pol
+    n = length(pol.x)
+
+    S = typeof(f)[]
+    W = typeof(f.a[1])[]
+
+    R = zero(f)
+    
+    for i in 1:n
+        if !is_null(f)
+            m = m_sqrt(f.x[1])
+            if m*m == f.x[1]
+                w = f.a[1]
+                p = m
+                for i in 2:length(f.x)
+                    mi = f.x[i]
+                    if divides(m,mi) && mi != f.x[1]
+                        p = p + m_div(mi,m)*f.a[i]/w/2
+                    end
+                end
+                push!(W,w)
+                push!(S,p)
+                f = f - w*p*p
+                println(">  ", f)
+            else
+                m = f.x[1]
+                c = f.a[1]
+
+                push!(W, c)
+                push!(S, m+ one(c))
+
+                push!(W, -c)
+                push!(S, m- one(c))
+
+                
+                f = f - c*m
+            end
+        else
+            break
+        end
+    end
+    return W, S
+end
+
+    
+
+#----------------------------------------------------------------------
 
 
 function Q_matrix(g, n)
@@ -126,7 +194,7 @@ The options are:
    - verbose = true or false to specify if information during the computation is printed or not
 
 """
-function exact_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], verbose = false)
+function esos_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], verbose = false)
     n = maxdegree(f)
     dg = maxdegree(g)
     dq = n-dg
