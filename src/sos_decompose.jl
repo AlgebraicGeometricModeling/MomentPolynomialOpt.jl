@@ -43,16 +43,17 @@ function sos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt
 end
 
 #----------------------------------------------------------------------
-function rat_round(x::Number, k)
+function rational_round(x::Number, k)
     Int64(round(x*10^k; digits = 0))//10^k
 end
 
 
-function rat_round(p::Polynomial, k)
-    dot(rat_round.(p.a,k),p.x)
+function rational_round(p::Polynomial, k)
+    dot(rational_round.(p.a,k),p.x)
 end
 
 function esos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt = MMT[:optimizer])
+
     S0, P, Q, lambda, M = sos_decompose(f,H,G,X,d,opt)
 
     if lambda <0
@@ -63,8 +64,8 @@ function esos_decompose(f, H::AbstractVector, G::AbstractVector, X, d::Int64, op
     k = max(Int64(ceil(log10(1/lambda)))+3,0)
     @info k
     
-    Pe = rat_round.(P,k)
-    Qe = rat_round.(Q,k)
+    Pe = rational_round.(P,k)
+    Qe = rational_round.(Q,k)
     Se  = f - dot(H,Pe) - dot(G,Qe)
 
     return Se, Pe, Qe, lambda, M
@@ -146,7 +147,6 @@ end
     
 
 #----------------------------------------------------------------------
-
 
 function Q_matrix(g, n)
     Q  = fill(zero(coefficients(g)[1]),n,n)
