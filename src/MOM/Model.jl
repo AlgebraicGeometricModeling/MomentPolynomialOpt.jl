@@ -73,7 +73,7 @@ function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
         @constraint(M, Symmetric(H) in PSDCone())
     end
     
-    JuMP.set_optimizer(M, JuMP.with_optimizer(optimizer))
+#  JuMP.set_optimizer(M, JuMP.with_optimizer(optimizer))
     #JuMP.set_optimizer(M, JuMP.with_optimizer(DualOptimizer,optimizer()))
     #@info "Using dual optimizer"
     
