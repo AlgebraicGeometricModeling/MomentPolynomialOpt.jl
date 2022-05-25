@@ -1,12 +1,11 @@
-export SOS
-
-module SOS
 
 using JuMP, DynamicPolynomials
 
 import MomentTools: MMT
 
-function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
+export SOSModel
+
+function SOSModel(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
 
     M = JuMP.Model(with_optimizer(optimizer))
 
@@ -30,19 +29,18 @@ function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
 
     if in(sense, [:Min, :min, :Inf, :inf])
         
-        P = f - lambda -
-            sum( H[i]*sum(a[i][j]*Mh[i][j] for j in 1:length(Mh[i])) for i in 1:length(H)) -
-            sum( G[i]*(Lg[i]'*Q[i]*Lg[i]) for i in 1:length(G) ) -
-            L0'*Q0*L0
+        P = f - lambda - L0'*Q0*L0
+        for i in 1:length(H) P -= H[i]*sum(a[i][j]*Mh[i][j] for j in 1:length(Mh[i])) end
+        for i in 1:length(G) P -= G[i]*(Lg[i]'*Q[i]*Lg[i]) end
 
         @objective(M, Max, lambda)
 
     else
         
-        P = lambda - f -
-            sum( H[i]*sum(a[i][j]*Mh[i][j] for j in 1:length(Mh[i])) for i in 1:length(H)) -
-            sum( G[i]*(Lg[i]'*Q[i]*Lg[i]) for i in 1:length(G) ) -
-            L0'*Q0*L0
+        P = lambda - f - L0'*Q0*L0
+        for i in 1:length(H) P -= H[i]*(a[i]'*Mh[i]) end
+        for i in 1:length(G) P -= G[i]*(Lg[i]'*Q[i]*Lg[i]) end
+           
 
         @objective(M, Min, lambda)
     end
@@ -72,6 +70,5 @@ function maximize(f, H, G, X, d , optimizer = MMT[:optimizer])
 end
 =#
 
-end #modulde SOS
 
 
