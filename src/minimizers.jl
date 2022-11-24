@@ -87,7 +87,8 @@ function get_measure(M::JuMP.Model,
     return w, Pts
 end
 
-function get_measure(M::JuMP.Model, e::Float64,
+function get_measure(M::JuMP.Model,
+                     e::Float64,
                      t::Int64 = 2*M[:degree]-2,
                      lambda::Vector = [(-1)^(k-1) for k in 1:get(M.obj_dict,:nu,1)])
 
