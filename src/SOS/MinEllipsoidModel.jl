@@ -75,7 +75,7 @@ end
 
 function min_ellipsoid(x, optimizer=MMT[:optimizer])
 
-    M = Model()
+    M = JuMP.Model()
 
     n = size(x,1)
     #@variable(model, z[1:n])

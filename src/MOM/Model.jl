@@ -83,7 +83,11 @@ end
 #----------------------------------------------------------------------
 
 function dualize!(M::JuMP.Model, optimizer=MMT[:optimizer])
-    M[:dual] = Dualization.dualize(M,with_optimizer(optimizer))
+    if optimizer == nothing
+        M[:dual] = Dualization.dualize(M)
+    else
+        M[:dual] = Dualization.dualize(M,with_optimizer(optimizer))
+    end
 end
 
 #----------------------------------------------------------------------

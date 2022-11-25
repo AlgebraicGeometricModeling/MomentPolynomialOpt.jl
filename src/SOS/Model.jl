@@ -1,14 +1,24 @@
 
-using JuMP, DynamicPolynomials
+#export SOSModel
+export SOS
+
+module SOS
 
 import MomentTools: MMT
 
-export SOSModel
 
-function SOSModel(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
+using JuMP, DynamicPolynomials
 
-    M = JuMP.Model(with_optimizer(optimizer))
+export Model
 
+function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
+
+    if optimizer == nothing
+        M = JuMP.Model()
+    else
+        M = JuMP.Model(with_optimizer(optimizer))
+    end
+    
     M[:type] = :polynomial
     
     Mh = [monomials(X,0:2*d-maxdegree(h)) for h in H]
@@ -69,6 +79,6 @@ function maximize(f, H, G, X, d , optimizer = MMT[:optimizer])
    return SOS.optimize(:sup, f,H,G,X,d, optimizer)
 end
 =#
-
+end #module SOS
 
 

@@ -5,7 +5,7 @@ export optimize, minimize, maximize
 ```julia
 v, M = optimize(M)
 ```
-Run the optimizer on the moment program `M` and output the objective_value `v` and the moment program `M`. If the optimization program has no value, it returns `nothing` and `M`.
+Run the optimizer on the moment program `M` and output the objective_value `v` and the moment program `M`. If the optimization program has no solution, it returns `nothing` and `M`.
 """
 function optimize(M::JuMP.Model)
     if haskey(M.obj_dict,:dual)
@@ -16,6 +16,30 @@ function optimize(M::JuMP.Model)
             v = nothing
         end
     else
+        JuMP.optimize!(M)
+        v = JuMP.objective_value(M)
+    end
+    #println("Solver status: ", JuMP.termination_status(M))
+    return v, M
+end
+
+"""
+```julia
+v, M = optimize(M, optimizer)
+```
+Run the optimizer on the moment program `M` using the optimizer `optimizer` and output the objective_value `v` and the moment program `M`. If the optimization program has no solution, it returns `nothing` and `M`. 
+"""
+function optimize(M::JuMP.Model, optimizer)
+    if haskey(M.obj_dict,:dual)
+        set_optimizer(M[:dual], optimizer)
+        JuMP.optimize!(M[:dual])
+        if JuMP.has_values(M[:dual])
+            v = JuMP.objective_value(M[:dual])
+        else
+            v = nothing
+        end
+    else
+        set_optimizer(M, optimizer)
         JuMP.optimize!(M)
         v = JuMP.objective_value(M)
     end
