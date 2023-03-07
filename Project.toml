@@ -13,8 +13,8 @@ MultivariateSeries = "08acae6c-c1bf-11e9-0c27-6b1945f8789b"
 
 [compat]
 Combinatorics = "1.0"
-Dualization = "0.4"
+Dualization = "0.5"
 DynamicPolynomials = "0.4"
-JuMP = "1.9"
+JuMP = "0.23, 1"
 MultivariateSeries = "0.1"
 julia = "1.5"
