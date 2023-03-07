@@ -16,7 +16,7 @@ function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
     if optimizer == nothing
         M = JuMP.Model()
     else
-        M = JuMP.Model(with_optimizer(optimizer))
+        M = JuMP.Model(optimizer_with_attributes(optimizer))
     end
     
     M[:type] = :polynomial

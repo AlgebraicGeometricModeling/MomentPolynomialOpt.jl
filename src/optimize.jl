@@ -172,7 +172,7 @@ function optimize(C::Vector, X, d::Int64, optimizer=MMT[:optimizer]; kwargs...)
         MOM.set_objective(M, "sup", one(C[1][1]))
     end
 
-    M[:dual] = Dualization.dualize(M,with_optimizer(optimizer))
+    M[:dual] = Dualization.dualize(M,optimizer_with_attributes(optimizer))
     
     return optimize(M)
 end
