@@ -11,10 +11,10 @@ G = [u - u^2, v - v^2]
 
 d = 2
 
-M0 = SOSModel(:sup,f,H,G,X,d, opt)
+M0 = SOS.Model(:sup,f,H,G,X,d, opt)
 v0, M0 = optimize(M0)
 
 
-M1 = SOSModel(:sup,f,H,G,X,d)
+M1 = SOS.Model(:sup,f,H,G,X,d)
 v1, M1 = optimize(M1)
 

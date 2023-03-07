@@ -82,7 +82,7 @@ the traces of the moment matrices.
 """
 function set_objective_ncl(M)
     B = M[:basis]
-    @objective(M.model, Min,  sum(sum(M[:moments][k,M[:index][B[i]^2]] for i in 1:length(B)) for k in 1:M[:nu]))
+    @objective(M, Min,  sum(sum(M[:moments][k,M[:index][B[i]^2]] for i in 1:length(B)) for k in 1:M[:nu]))
 end
 #----------------------------------------------------------------------
 """
@@ -92,7 +92,7 @@ set_objective_ncl(M)
 Set the objective function of moment program to the total variation of the moment sequences ``\\mu_i``, that is 
 the sum  of the unit mass of the positive moment sequences ``\\sum_{i=1}^{\\nu} \\langle \\mu_i, 1\\rangle``.
 """
-function set_objective_tv(M)
+function set_objective_tv(M::JuMP.Model)
     set_objective(M,"inf", collect(1:M[:nu]), ones(M[:nu]))
 end
 

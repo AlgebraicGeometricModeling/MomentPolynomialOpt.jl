@@ -16,5 +16,5 @@ f = y
 
 d = 3
 
-M = SOSModel(:inf, f, [p1,p2], [g], X, d)
+M = SOS.Model(:inf, f, [p1,p2], [g], X, d)
 v, M = optimize(M)
