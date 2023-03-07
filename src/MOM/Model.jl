@@ -73,8 +73,8 @@ function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
         @constraint(M, Symmetric(H) in PSDCone())
     end
     
-#  JuMP.set_optimizer(M, JuMP.with_optimizer(optimizer))
-    #JuMP.set_optimizer(M, JuMP.with_optimizer(DualOptimizer,optimizer()))
+#  JuMP.set_optimizer(M, JuMP.optimizer_with_attributes(optimizer))
+    #JuMP.set_optimizer(M, JuMP.optimizer_with_attributes(DualOptimizer,optimizer()))
     #@info "Using dual optimizer"
     
     return M #MOM.Model(m)
@@ -86,7 +86,7 @@ function dualize!(M::JuMP.Model, optimizer=MMT[:optimizer])
     if optimizer == nothing
         M[:dual] = Dualization.dualize(M)
     else
-        M[:dual] = Dualization.dualize(M,with_optimizer(optimizer))
+        M[:dual] = Dualization.dualize(M,optimizer_with_attributes(optimizer))
     end
 end
 

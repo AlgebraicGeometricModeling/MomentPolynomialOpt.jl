@@ -2,7 +2,7 @@ export MaxEigenModel
 
 function MaxEigenModel(f, H::AbstractVector, G::AbstractVector, X, d::Int64, optimizer = MMT[:optimizer])
 
-    M = JuMP.Model(with_optimizer(optimizer))
+    M = JuMP.Model(optimizer_with_attributes(optimizer))
     
     M[:type] = :polynomial
     
