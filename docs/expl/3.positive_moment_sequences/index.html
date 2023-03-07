@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Constraints on Positive Moment Sequences · MomentTools</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MomentTools</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Functions &amp; types</span><ul><li><a class="tocitem" href="../../code/1.moment_model/">Moment Program</a></li><li><a class="tocitem" href="../../code/2.optimization/">Optimization</a></li><li><a class="tocitem" href="../../code/3.polynomials/">Polynomials</a></li></ul></li><li><span class="tocitem">Example</span><ul><li><a class="tocitem" href="../0.real_roots/">A simple univariate example</a></li><li><a class="tocitem" href="../1.maximizers/">Solving a polynomial optimization problem</a></li><li><a class="tocitem" href="../2.positive_polynomial/">The minimizers of Motzkin polynomial</a></li><li class="is-active"><a class="tocitem" href>Constraints on Positive Moment Sequences</a></li></ul></li><li><a class="tocitem" href="../../package/">About the package</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Example</a></li><li class="is-active"><a href>Constraints on Positive Moment Sequences</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Constraints on Positive Moment Sequences</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/AlgebraicGeometricModeling/MomentTools.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Constraints-on-Positive-Moment-Sequences"><a class="docs-heading-anchor" href="#Constraints-on-Positive-Moment-Sequences">Constraints on Positive Moment Sequences</a><a id="Constraints-on-Positive-Moment-Sequences-1"></a><a class="docs-heading-anchor-permalink" href="#Constraints-on-Positive-Moment-Sequences" title="Permalink"></a></h1><pre><code class="language-julia hljs">using DynamicPolynomials, MultivariateSeries, MomentTools
+using MosekTools; optimizer = Mosek.Optimizer;</code></pre><pre><code class="nohighlight hljs">┌ Info: Precompiling MomentTools [65cd4d85-9fe5-4fdc-93e2-c8798c615752]
+└ @ Base loading.jl:1273
+┌ Warning: Package MomentTools does not have MultivariateSeries in its dependencies:
+│ - If you have MomentTools checked out for development and have
+│   added MultivariateSeries as a dependency but haven&#39;t updated your primary
+│   environment&#39;s manifest file, try `Pkg.resolve()`.
+│ - Otherwise you may need to report an issue with MomentTools
+└ Loading MultivariateSeries into MomentTools from project dependency, future warnings for MomentTools are suppressed.</code></pre><pre><code class="language-julia hljs">X = @polyvar x y
+d = 10
+M  = MomentModel(X, d, optimizer, nu=2)</code></pre><pre><code class="nohighlight hljs">A Moment program with:
+A JuMP Model
+Feasibility problem with:
+Variables: 462
+`Array{JuMP.VariableRef,1}`-in-`MathOptInterface.PositiveSemidefiniteConeTriangle`: 2 constraints
+Model mode: AUTOMATIC
+CachingOptimizer state: EMPTY_OPTIMIZER
+Solver name: Dual model with Mosek attached
+Names registered in the model: basis, degree, dual, index, moments, monomials, nu, variables, y</code></pre><pre><code class="language-julia hljs">constraint_nneg(M,1, 1-x^2-y^2)
+constraint_nneg(M,2, 1-x^2, 1-y^2)</code></pre><pre><code class="language-julia hljs">L = monomials(X, seq(0:2*d))
+lebesgue(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))
+constraint_moments(M,
+                   [(m=&gt;lebesgue(exponents(m)...)) for m in L],
+                   collect(1:2), [1,1] )</code></pre><pre><code class="language-julia hljs">objective(M, 1, 1.0, &quot;sup&quot;)</code></pre><p>$ y_{1,1} $</p><pre><code class="language-julia hljs">v = optimize(M)[1]</code></pre><pre><code class="nohighlight hljs">Problem
+  Name                   :                 
+  Objective sense        : min             
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 462             
+  Cones                  : 0               
+  Scalar variables       : 231             
+  Matrix variables       : 5               
+  Integer variables      : 0               
+
+Optimizer started.
+Presolve started.
+Linear dependency checker started.
+Linear dependency checker terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator started.
+Freed constraints in eliminator : 0
+Eliminator terminated.
+Eliminator - tries                  : 2                 time                   : 0.00            
+Lin. dep.  - tries                  : 1                 time                   : 0.00            
+Lin. dep.  - number                 : 0               
+Presolve terminated. Time: 0.00    
+Problem
+  Name                   :                 
+  Objective sense        : min             
+  Type                   : CONIC (conic optimization problem)
+  Constraints            : 462             
+  Cones                  : 0               
+  Scalar variables       : 231             
+  Matrix variables       : 5               
+  Integer variables      : 0               
+
+Optimizer  - threads                : 8               
+Optimizer  - solved problem         : the primal      
+Optimizer  - Constraints            : 462
+Optimizer  - Cones                  : 1
+Optimizer  - Scalar variables       : 232               conic                  : 232             
+Optimizer  - Semi-definite variables: 5                 scalarized             : 7527            
+Factor     - setup time             : 0.01              dense det. time        : 0.00            
+Factor     - ML order time          : 0.00              GP order time          : 0.00            
+Factor     - nonzeros before factor : 5.43e+04          after factor           : 8.74e+04        
+Factor     - dense dim.             : 2                 flops                  : 5.44e+07        
+ITE PFEAS    DFEAS    GFEAS    PRSTATUS   POBJ              DOBJ              MU       TIME  
+0   3.0e+00  4.0e+00  1.0e+00  0.00e+00   0.000000000e+00   0.000000000e+00   1.0e+00  0.02  
+1   8.6e-01  1.1e+00  7.4e-02  3.19e-01   2.227313818e+00   2.034785147e+00   2.9e-01  0.03  
+2   2.0e-01  2.7e-01  8.0e-03  1.62e+00   3.558535953e+00   3.532069682e+00   6.8e-02  0.05  
+3   5.3e-02  7.1e-02  1.1e-03  1.50e+00   3.775424594e+00   3.770494332e+00   1.8e-02  0.07  
+4   1.4e-02  1.9e-02  1.6e-04  1.01e+00   3.774265528e+00   3.773107456e+00   4.7e-03  0.09  
+5   4.9e-03  6.5e-03  4.0e-05  8.08e-01   3.760047982e+00   3.759705942e+00   1.6e-03  0.10  
+6   2.7e-03  3.6e-03  2.4e-05  3.66e-01   3.749815207e+00   3.749724302e+00   8.9e-04  0.12  
+7   6.9e-04  9.2e-04  4.9e-06  3.80e-01   3.725437924e+00   3.725569163e+00   2.3e-04  0.14  
+8   2.4e-04  3.1e-04  1.2e-06  3.25e-01   3.704778259e+00   3.704873452e+00   7.9e-05  0.17  
+9   1.1e-04  1.4e-04  5.3e-07  2.30e-01   3.691943416e+00   3.692063045e+00   3.6e-05  0.18  
+10  3.1e-05  4.1e-05  1.0e-07  4.47e-01   3.676385386e+00   3.676448347e+00   1.0e-05  0.20  
+11  1.1e-05  1.5e-05  3.2e-08  4.65e-01   3.668719992e+00   3.668774291e+00   3.7e-06  0.22  
+12  6.1e-06  8.2e-06  2.0e-08  2.94e-02   3.664551877e+00   3.664634224e+00   2.0e-06  0.24  
+13  3.2e-06  4.3e-06  1.2e-08  -1.56e-01  3.657723571e+00   3.657826546e+00   1.1e-06  0.26  
+14  1.1e-06  1.5e-06  3.4e-09  1.35e-01   3.645081107e+00   3.645162092e+00   3.6e-07  0.28  
+15  3.8e-07  4.9e-07  1.1e-09  1.24e-01   3.633102930e+00   3.633176735e+00   1.2e-07  0.29  
+16  2.3e-07  2.8e-07  6.8e-10  -1.62e-03  3.627183700e+00   3.627277402e+00   6.9e-08  0.31  
+17  9.2e-08  1.2e-07  2.8e-10  4.23e-02   3.615519444e+00   3.615608628e+00   2.9e-08  0.33  
+18  1.6e-08  2.9e-08  5.5e-11  1.94e-01   3.599258722e+00   3.599314907e+00   7.2e-09  0.35  
+19  5.8e-09  1.0e-08  1.5e-11  5.22e-01   3.591755197e+00   3.591786889e+00   2.6e-09  0.38  
+20  1.7e-09  3.0e-09  2.5e-12  7.78e-01   3.587479170e+00   3.587490742e+00   7.4e-10  0.41  
+21  7.7e-10  1.4e-09  9.0e-13  7.69e-01   3.586171166e+00   3.586178254e+00   3.4e-10  0.44  
+22  6.1e-10  8.9e-10  5.9e-13  5.74e-01   3.585752489e+00   3.585759466e+00   2.2e-10  0.47  
+23  3.7e-10  5.4e-10  3.2e-13  4.66e-01   3.585225807e+00   3.585231576e+00   1.3e-10  0.50  
+24  1.9e-10  2.7e-10  1.6e-13  2.65e-01   3.584589117e+00   3.584594599e+00   6.7e-11  0.53  
+25  1.9e-10  2.7e-10  1.6e-13  4.02e-01   3.584580797e+00   3.584586260e+00   6.7e-11  0.56  
+26  1.8e-10  2.5e-10  1.4e-13  3.99e-01   3.584512733e+00   3.584518052e+00   6.2e-11  0.60  
+27  8.7e-11  1.1e-10  5.5e-14  3.85e-01   3.583843540e+00   3.583847594e+00   2.7e-11  0.63  
+28  8.1e-11  8.4e-11  3.8e-14  3.28e-01   3.583633435e+00   3.583636690e+00   2.1e-11  0.65  
+29  7.9e-11  8.2e-11  3.7e-14  5.30e-01   3.583619139e+00   3.583622347e+00   2.1e-11  0.69  
+30  7.8e-11  8.2e-11  3.7e-14  6.05e-01   3.583618683e+00   3.583621889e+00   2.1e-11  0.73  
+31  7.8e-11  8.2e-11  3.7e-14  5.50e-01   3.583618683e+00   3.583621889e+00   2.1e-11  0.77  
+32  7.8e-11  8.2e-11  3.7e-14  5.60e-01   3.583618683e+00   3.583621889e+00   2.1e-11  0.82  
+Optimizer terminated. Time: 0.90    
+
+
+
+
+
+
+3.5836218894780534</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2.positive_polynomial/">« The minimizers of Motzkin polynomial</a><a class="docs-footer-nextpage" href="../../package/">About the package »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 7 March 2023 16:36">Tuesday 7 March 2023</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
