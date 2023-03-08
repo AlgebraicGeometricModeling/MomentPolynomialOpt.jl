@@ -192,6 +192,18 @@ function mmt_optimizer(opt)
     MMT[:optimizer] = opt 
 end
 
+
+"""
+```julia
+mmt_optimizer(opt, args...)
+```
+Define the default optimizer `opt` with its attribute `args...` for the optimization problems created by MomentTools
+"""
+function mmt_optimizer(opt, args...)
+    MMT[:optimizer] = JuMP.optimizer_with_attributes(opt, args...) 
+end
+
+
 #----------------------------------------------------------------------
 #= """
 ```julia

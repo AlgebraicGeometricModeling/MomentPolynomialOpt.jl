@@ -2,11 +2,11 @@ using JuMP
 using MomentTools
 using DynamicPolynomials, MultivariateSeries
 
-using MosekTools; opt = Mosek.Optimizer
+using MosekTools; mmt_optimizer(Mosek.Optimizer, "QUIET"=>true)
 
 #using CSDP; opt = CSDP.Optimizer
 
-mmt_optimizer(opt)
+
 
 X = @polyvar x y
 

@@ -1,10 +1,9 @@
 using JuMP, DynamicPolynomials, MomentTools
     
 using MosekTools
-optimizer = JuMP.optimizer_with_attributes(Mosek.Optimizer,"QUIET" => true)
 
-#using CSDP; optimizer = CSDP.Optimizer
-mmt_optimizer(optimizer)
+#using CSDP; mmt_optimizer(CSDP.Optimizer)
+mmt_optimizer(Mosek.Optimizer,"QUIET" => true)
 
 X  = @polyvar x1 x2
 

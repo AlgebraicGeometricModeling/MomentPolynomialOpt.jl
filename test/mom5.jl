@@ -15,7 +15,7 @@ optimizer = Mosek.Optimizer
 #using CSDP; optimizer = CSDP.Optimizer
 
 #MOM.mmt_optimizer(Dualization.dual_optimizer(optimizer))
-mmt_optimizer(optimizer)
+mmt_optimizer(optimizer, "QUIET" => true)
 
 X = @polyvar x y
 
