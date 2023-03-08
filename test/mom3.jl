@@ -8,7 +8,7 @@ using JuMP, MosekTools
 #else
 opt = Mosek.Optimizer
 #end 
-set_optimizer(opt)
+mmt_optimizer(opt)
 
 X  = @polyvar x y
 q1 = 1-x^2-y^2

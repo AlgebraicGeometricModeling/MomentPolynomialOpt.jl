@@ -86,7 +86,7 @@ function dualize!(M::JuMP.Model, optimizer=MMT[:optimizer])
     if optimizer == nothing
         M[:dual] = Dualization.dualize(M)
     else
-        M[:dual] = Dualization.dualize(M,optimizer_with_attributes(optimizer))
+        M[:dual] = Dualization.dualize(M,optimizer); #optimizer_with_attributes(optimizer))
     end
 end
 

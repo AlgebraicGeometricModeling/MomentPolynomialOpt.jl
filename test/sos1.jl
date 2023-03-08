@@ -4,7 +4,7 @@ using JuMP
 
 using MosekTools
 optimizer = Mosek.Optimizer
-set_optimizer(optimizer)
+mmt_optimizer(optimizer)
 
 X = @polyvar x y
 

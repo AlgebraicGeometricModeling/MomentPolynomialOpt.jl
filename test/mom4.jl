@@ -6,7 +6,7 @@ using MosekTools; opt = Mosek.Optimizer
 
 #using CSDP; opt = CSDP.Optimizer
 
-set_optimizer(opt)
+mmt_optimizer(opt)
 
 X = @polyvar x y
 

@@ -5,7 +5,7 @@ using JuMP
 using MosekTools
 optimizer = Mosek.Optimizer
 
-set_optimizer(optimizer)
+mmt_optimizer(optimizer)
 
 X = @polyvar x y
 
@@ -17,7 +17,7 @@ d = 3
 
 M = MOM.Model(:Inf, y, [p1,p2], [q], X, d)
 
-#MOM.set_optimizer(M, optimizer)
+#MOM.mmt_optimizer(M, optimizer)
 
 v, M = optimize(M)
 

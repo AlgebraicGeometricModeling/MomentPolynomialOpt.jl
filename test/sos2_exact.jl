@@ -8,7 +8,7 @@ end
 =#
 using CSDP; opt=CSDP.Optimizer
 
-set_optimizer(opt)
+mmt_optimizer(opt)
 
 
 

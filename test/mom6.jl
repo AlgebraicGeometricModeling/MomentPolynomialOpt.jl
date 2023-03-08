@@ -7,7 +7,7 @@ using LinearAlgebra
 
 using MosekTools; opt = Mosek.Optimizer
 
-set_optimizer(opt)
+mmt_optimizer(opt)
 
 X = @polyvar x y
 

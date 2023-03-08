@@ -1,4 +1,4 @@
-export optimize, minimize, maximize
+export optimize, minimize, maximize, mmt_optimizer
 
 #----------------------------------------------------------------------
 """
@@ -10,11 +10,11 @@ Run the optimizer on the moment program `M` and output the objective_value `v` a
 function optimize(M::JuMP.Model)
     if haskey(M.obj_dict,:dual)
         JuMP.optimize!(M[:dual])
-        if JuMP.has_values(M[:dual])
+#        if JuMP.has_values(M[:dual])
             v = JuMP.objective_value(M[:dual])
-        else
-            v = nothing
-        end
+#        else
+#            v = nothing
+#        end
     else
         JuMP.optimize!(M)
         v = JuMP.objective_value(M)
@@ -33,11 +33,11 @@ function optimize(M::JuMP.Model, optimizer)
     if haskey(M.obj_dict,:dual)
         set_optimizer(M[:dual], optimizer)
         JuMP.optimize!(M[:dual])
-        if JuMP.has_values(M[:dual])
+#        if JuMP.has_values(M[:dual])
             v = JuMP.objective_value(M[:dual])
-        else
+#        else
             v = nothing
-        end
+#        end
     else
         set_optimizer(M, optimizer)
         JuMP.optimize!(M)
@@ -81,6 +81,7 @@ To recover the optimizers, see [`get_minimizers`](@ref), [`get_measure`](@ref), 
 
 """
 function optimize(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer = MMT[:optimizer]; kwargs...)
+
     M = MOM.Model(sense, f, Eq, Pos, X, d, optimizer; kwargs...)
     
     return optimize(M)
@@ -179,20 +180,20 @@ end
 
 
 #----------------------------------------------------------------------
-import JuMP: set_optimizer
+#import JuMP: set_optimizer
 
 """
 ```julia
-set_optimizer(opt)
+mmt_optimizer(opt)
 ```
 Define the default optimizer `opt` for the optimization problems created by MomentTools
 """
-function JuMP.set_optimizer(opt)
+function mmt_optimizer(opt)
     MMT[:optimizer] = opt 
 end
 
 #----------------------------------------------------------------------
-"""
+#= """
 ```julia
 v, M = set_optimizer(optimizer)
 ```
@@ -206,3 +207,4 @@ function sset_optimizer(M, optimizer)
         set_optimizer(M, optimizer)
     end
 end
+=#

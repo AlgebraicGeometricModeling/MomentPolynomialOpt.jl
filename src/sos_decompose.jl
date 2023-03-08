@@ -211,7 +211,7 @@ function esos_decompose(g, f; rounding = 10000, optimizer = MMT[:optimizer], ver
     cf = MultivariateSeries.matrixof([f],L)
     cg = MultivariateSeries.matrixof([g],L)
 
-    M = JuMP.Model(optimizer_with_attributes(optimizer))
+    M = JuMP.Model(optimizer)
 
     # The variables are lambda, the symmetric matrix Q and the coefficients of q
     @variable(M, lambda)

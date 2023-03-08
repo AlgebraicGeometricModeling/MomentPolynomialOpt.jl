@@ -4,7 +4,7 @@ using JuMP, MosekTools
 import DynamicPolynomials: maxdegree
 function DynamicPolynomials.maxdegree(i::Int64) return 0 end
 
-set_optimizer(Mosek.Optimizer)
+mmt_optimizer(Mosek.Optimizer)
 
 
 X = @polyvar x y z
