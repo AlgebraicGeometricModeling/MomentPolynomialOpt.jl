@@ -149,10 +149,10 @@ end
 #----------------------------------------------------------------------
 
 function Q_matrix(g, n)
-    Q  = fill(zero(coefficients(g)[1]),n,n)
+    Q  = fill(zero(DynamicPolynomials.coefficients(g)[1]),n,n)
     for t in g
         i = maxdegree(t)
-        c = coefficient(t)
+        c = DynamicPolynomials.coefficient(t)
         if i <= n-1
             if i == 0
                 Q[1,1]= c
