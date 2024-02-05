@@ -5,7 +5,7 @@ module MOM
 
 
 using DynamicPolynomials
-using MultivariateSeries
+#using MultivariateSeries
 using JuMP, Dualization
 
 # import MathOptInterface
@@ -13,11 +13,16 @@ using JuMP, Dualization
 
 using LinearAlgebra
 
-#mutable struct Model
-#    model::JuMP.Model
-#end
 
 import MomentTools:MMT
+
+convert_Float64 = function(pol)
+    if typeof(pol) != Polynomial{DynamicPolynomials.Commutative{DynamicPolynomials.CreationOrder}, Graded{LexOrder}, Int64}
+        return dot(Float64.(coefficients(pol)),monomials(pol))
+    else
+        return pol
+    end
+end
 
 export Model
 #----------------------------------------------------------------------
@@ -44,12 +49,12 @@ function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
     M[:degree] = d
 
 
-    B = monomials(X,seq(0:d))
+    B = monomials(X,0:d)
     N = length(B)
     M[:basis] = B
 
-    M[:monomials] = DynamicPolynomials.Monomial{true}[]
-    M[:index] = Dict{DynamicPolynomials.Monomial{true},Int64}()
+    M[:monomials] = typeof(B[1])[]
+    M[:index] = Dict{typeof(B[1]),Int64}()
 
     # Hankel structure
     c = 0

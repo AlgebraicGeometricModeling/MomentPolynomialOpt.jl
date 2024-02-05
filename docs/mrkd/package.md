@@ -2,14 +2,7 @@
 
 
 
-## Installation
-
-The package can be installed from Julia as follows:
-
-```
-] add https://gitlab.inria.fr/AlgebraicGeometricModeling/MomentTools.jl
-
-```
+## Dependencies
 
 A version of Julia >= 1.3 should be used.
 
@@ -29,7 +22,7 @@ To solve the moment optimization problems, SDP optimizers have also to be instal
 ## Development
 
 The git project of the package is
-    [https://gitlab.inria.fr/AlgebraicGeometricModeling/MomentTools.jl](https://gitlab.inria.fr/AlgebraicGeometricModeling/MomentTools.jl).
+    [https://github.com/AlgebraicGeometricModeling/MomentTools.jl](https://github.com/AlgebraicGeometricModeling/MomentTools.jl).
     
 The main developpers are (so far)
 

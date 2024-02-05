@@ -1,7 +1,11 @@
 # Moment Tools
 
-The package provide tools for moment optimization problems on Positive Moment Sequences (PMS) as well as Sum-of-Square relaxations for the optimisations of polynomial functions on sets defined by polynomial sign constraints.
-Extraction tools allows to recover the global optimizers of the problem from optimal moment sequences.
+The package provide tools for solving polynomial and moment optimization problems on semi-algebraic sets defined by polynomial sign and equality constraints.
+In particular, it allows to optimize vectors of moments sequences that satisfy positivity constraints or mass constraints,
+It is based on Sum-of-Squares (SOS) and MoMent (MoM) convex relaxations, connected to Semi-Definite Programs (SDP) solvers.
+This a Julia package for solving polynomial optimization problems, via moment matrix relaxations. 
+Extraction tools allows to recover the global optimizers of the problem from optimal moment sequences, using flat truncation properties.
+
 
 As an illustrative example, we consider the set $S$ defined by the inequalities 
 ```math
@@ -35,29 +39,30 @@ This gives the following weigts and points of the weight sum of Dirac measures  
 ```math
 [
 \begin{array}{cc}
-\end{array}
 0.4999999998860686 & 0.499999999867594
+\end{array}
 ]
 ,
-\left(
-\begin{array}{cc}
+
+\begin{pmatrix}
 0.7548776660872802 & 0.7548776660872801 \\
 0.6558656173161549 & -0.6558656173161549 
-\end{array}
-\right)
+\end{pmatrix}
 ```
-These points, which are the maximizers of the optimization problem are top and bottom "corner" points of the domain.
+These points, which are the maximizers of the optimization problem are the top and bottom "corner" points of the domain.
 
 
 
 ## Optimization
 
-The package allows to solve optimization problems on Positive Moment Sequences (PMS).
+The package allows to solve optimization problems on Pseudo Moment Sequences (PMS).
 A PMS is a sequence of values 
-$\mu=(\mu_{\alpha})$ indexed by the monomial exponents $\alpha \in \mathbb{N}or equivalently a linear functional
+$\mu=(\mu_{\alpha})$ indexed by the monomial exponents $\alpha \in \mathbb{N}^n$ or equivalently a linear functional
 $\mu: p \in \mathbb{R}[\mathbf{x}] \mapsto \langle \mu, p \rangle = \sum_{\alpha} p_{\alpha}
-\mu_{\alpha}$, which is positive on the square of the polynomials:
- $\langle \mu, p^2 \rangle \geq 0$ for all $p\in \mathbb{R}[\mathbf{x}]$.
+\mu_{\alpha}$
+.
+It is *positive* if for all $p\in \mathbb{R}[\mathbf{x}]$, we have 
+ $\langle \mu, p^2 \rangle \geq 0$ .
 
 
 Optimization problems of the following form are considered:
@@ -73,7 +78,7 @@ s.t. &  \sum_i g_{i,j}\star \mu_i \succeq 0, \quad j=1,\ldots, n_1 \\
 ```
 where
     
--  $\mu_i$ are Positive Moment Sequences,
+-  $\mu_i$ are positive PMS,
 -  $f_i, g_{i,j}, h_{i,j}, p_{i,j}, q_{i,j} \in \mathbb{R}[\mathbf{x}]$ are multivariate polynomials.
 
 The solution of such optimization problem is approximated by the
@@ -93,5 +98,40 @@ a weighted sum of Dirac measures:
 where $\omega_k\in \mathbb{R}$ (resp. $\mathbb{C}$), $\xi_k \in \mathbb{R}^n$ (resp. $\mathbb{C}^n$) and $\delta_{\xi}$ is
 the Dirac measure at the point $\xi$. 
 
+In the previous example, we use the command `get_measure`:
+
+```
+w, Xi = get_measure(M)
+```
+to obtain the weights `w` and the points `Xi` (the columns of the matrix):
+```math
+[
+\begin{array}{cc}
+0.4999999998860686 & 0.499999999867594
+\end{array}
+]
+,
+
+\begin{pmatrix}
+0.7548776660872802 & 0.7548776660872801 \\
+0.6558656173161549 & -0.6558656173161549 
+\end{pmatrix}
+```
+so that the optimal moment sequence is approximately represented by the
+weighted sum of Dirac measures:
+
+```math
+w[1]\, \delta_{Xi[:,1]} + w[2]\, \delta_{Xi[:,2]}
+```
 
 ## Installation
+
+
+The package can be installed from Julia as follows:
+
+```
+] add https://github.com/AlgebraicGeometricModeling/MomentTools.jl
+
+```
+
+ Sources: [https://github.com/AlgebraicGeometricModeling/MomentTools.jl](https://github.com/AlgebraicGeometricModeling/MomentTools.jl).

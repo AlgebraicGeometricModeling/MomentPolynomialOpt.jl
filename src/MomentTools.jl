@@ -1,7 +1,7 @@
 module MomentTools
 
 using DynamicPolynomials
-using MultivariateSeries
+#using MultivariateSeries
 using JuMP
 using Dualization
 using LinearAlgebra
@@ -9,6 +9,7 @@ using Combinatorics
 
 MMT = Dict{Symbol,Any}( :optimizer => nothing )
 export MMT
+
 
 include("MOM/Model.jl")
 

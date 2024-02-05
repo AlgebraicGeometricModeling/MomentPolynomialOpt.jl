@@ -2,6 +2,8 @@ export set_objective, set_objective_ncl, set_objective_tv
 
 using JuMP
 
+using DynamicPolynomials: coefficient
+
 #----------------------------------------------------------------------
 """
 ```
@@ -12,8 +14,8 @@ Set the "inf" or "sup" objective function to  ``\\sum_{i=1}^{\\nu} \\langle p\\s
 """
 function set_objective(M::JuMP.Model, sense::String, p)
     if p != nothing
-        f = p*one(Polynomial{true,Float64})
-        obj = sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in f) for k in 1:M[:nu])
+        f = convert_Float64(p)
+        obj = sum(sum(coefficient(t)*M[:moments][k,M[:index][monomial(t)]] for t in f) for k in 1:M[:nu])
         if sense == "inf"
             @objective(M, Min, obj)
         else
@@ -32,8 +34,8 @@ Set the "inf" or "sup" objective function to  ``\\sum_{i=1}^{\\nu} \\langle p_{i
 """
 function set_objective(M::JuMP.Model, sense, idx::Vector{Int64}, p::Vector)
     if p != nothing
-        f = p*one(Polynomial{true,Float64})
-        obj = sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in f[k]) for k in 1:length(idx))
+        f = convert_Float64(p)
+        obj = sum(sum(coefficient(t)*M[:moments][idx[k],M[:index][monomial(t)]] for t in f[k]) for k in 1:length(idx))
         if sense == "inf"
             @objective(M, Min, obj)
         else

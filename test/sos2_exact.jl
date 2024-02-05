@@ -11,11 +11,6 @@ using CSDP; opt=CSDP.Optimizer
 mmt_optimizer(opt)
 
 
-
-#import MomentTools.exact_decompose
-#include("../src/exact_decompose.jl")
-
-
 X = @polyvar x
 
 f = (x^3-2)
@@ -23,4 +18,4 @@ f = (x^3-2)
 g = x - 0
 #g = x^2 -x^5/4 + f*x^2/4
 
-Q, q = esos_decompose(g,f,rounding=1, verbose=true)
+Q, q = esos_decompose(g,f; rounding=1, verbose=true)

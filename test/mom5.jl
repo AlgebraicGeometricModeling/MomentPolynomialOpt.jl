@@ -35,7 +35,7 @@ q2 = 1-y^2
 MOM.constraint_nneg(M, 2, 1-x^2, 1-y^2 )
 
 # monomials of degree <= 2*d
-L = monomials(X, seq(0:2*d))
+L = monomials(X, 0:2*d)
 
 # <1*mu_1, m> + <1*mu_2, m> = leb_mom(m)
 MOM.constraint_moments(M,

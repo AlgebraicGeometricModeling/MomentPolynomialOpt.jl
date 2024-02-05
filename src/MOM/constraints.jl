@@ -1,45 +1,49 @@
 export constraint_zero, constraint_nneg, constraint_unitmass, constraint_moments
 
+using LinearAlgebra
+
+using DynamicPolynomials: coefficient
+
 #----------------------------------------------------------------------
 function add_constraint_zero(M::JuMP.Model, eq)
-    p = eq*one(Polynomial{true,Float64})
+    p = convert_Float64(eq)
     X = M[:variables]
-    L = monomials(X,seq(0:2*M[:degree]-maxdegree(p)))
+    L = monomials(X,0:2*M[:degree]-maxdegree(p))
     for mn in L
-        q = p*mn*one(Float64)
+        q = convert_Float64(p*mn)
         for k in 1:M[:nu]
             @constraint(M,
-                        sum(t.α*M[:moments][k,M[:index][t.x]] for t in q) == 0)
+                        sum(coefficient(t)*M[:moments][k,M[:index][monomial(t)]] for t in q) == 0)
         end
     end
 end
 
 function add_constraint_zero(M::JuMP.Model, idx::Vector{Int64}, Veq)
-    P = [ e*one(Polynomial{true,Float64}) for eq in Veq ]
+    P = [ convert_Float64(e) for eq in Veq ]
     X = M[:variables]
     d0 = max([maxdegree(e) for e in P]...)
-    L = monomials(X,seq(0:2*M[:degree]-d0))
+    L = monomials(X,0:2*M[:degree]-d0)
     for mn in L
         @constraint(M,
-                    sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in P[k]*mn) for k in 1:length(idx)) == 0)
+                    sum(sum(coefficient(t)*M[:moments][idx[k],M[:index][monomial(t)]] for t in P[k]*mn) for k in 1:length(idx)) == 0)
     end
 end
 
 #----------------------------------------------------------------------
 function add_constraint_nneg(M::JuMP.Model, pos)
-    p = pos*one(Polynomial{true,Float64})
+    p = convert_Float64(pos)
     d0 = Int(ceil(maxdegree(p)/2))
     X = M[:variables]
-    L = monomials(X, seq(0:M[:degree] - d0))
+    L = monomials(X, 0:M[:degree] - d0)
     N = length(L)
     if N == 1
         for k in 1:M[:nu]
             @constraint(M,
-                        sum(t.α*M[:moments][k,M[:index][t.x]] for t in p)>=0)
+                        sum(coefficient(t)*M[:moments][k,M[:index][monomial(t)]] for t in p)>=0)
         end
     else
         for k in 1:M[:nu]
-            P = [ sum(t.α*M[:moments][k,M[:index][t.x*L[i]*L[j]]]
+            P = [ sum(coefficient(t)*M[:moments][k,M[:index][monomial(t)*L[i]*L[j]]]
                       for t in p)+0
                   for i in 1:N, j in 1:N ]
             @constraint(M, Symmetric(P) in PSDCone())
@@ -48,16 +52,16 @@ function add_constraint_nneg(M::JuMP.Model, pos)
 end
 
 function add_constraint_nneg(M::JuMP.Model, idx::Vector{Int64}, Veq)
-    p = [ eq*one(Polynomial{true,Float64}) for eq in Veq ]
+    p = [ convert_Float64(eq) for eq in Veq ]
     X = M[:variables]
     d0 = Int(ceil(max([maxdegree(e) for e in p]...)/2))
-    L = monomials(X, seq(0:M[:degree] - d0))
+    L = monomials(X, 0:M[:degree] - d0)
     N = length(L)
     if N == 1
         @constraint(M,
-                    sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in p[k]) for k in 1:length(idx)) >=0)
+                    sum(sum(coefficient(t)*M[:moments][idx[k],M[:index][monomial(t)]] for t in p[k]) for k in 1:length(idx)) >=0)
     else
-        P = [ sum(sum(t.α*M[:moments][idx[k],M[:index][t.x*L[i]*L[j]]]
+        P = [ sum(sum(coefficient(t)*M[:moments][idx[k],M[:index][monomial(t)*L[i]*L[j]]]
                       for t in p[k]) for k in 1:length(idx))+0
               for i in 1:N, j in 1:N ]
         @constraint(M, Symmetric(P) in PSDCone())
@@ -68,18 +72,18 @@ end
 function add_constraint_moment(M::JuMP.Model, v , p)
     for k in 1:M[:nu]
         @constraint(M,
-                    sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in p) for k in 1:M[:nu])-v == 0)
+                    sum(sum(coefficient(t)*M[:moments][k,M[:index][monomial(t)]] for t in p) for k in 1:M[:nu])-v == 0)
     end
 end
 
 function add_constraint_moment(M::JuMP.Model, v, p::Vector)
     @constraint(M,
-                sum(sum(t.α*M[:moments][k,M[:index][t.x]] for t in p[k]) for k in 1:length(p)) - v ==0)
+                sum(sum(coefficient(t)*M[:moments][k,M[:index][monomial(t)]] for t in p[k]) for k in 1:length(p)) - v ==0)
 end
 
 function add_constraint_moment(M::JuMP.Model, v, idx::Vector{Int64}, p::Vector)
     @constraint(M,
-                sum(sum(t.α*M[:moments][idx[k],M[:index][t.x]] for t in p[k]) for k in 1:length(idx)) - v ==0)
+                sum(sum(coefficient(t)*M[:moments][idx[k],M[:index][monomial(t)]] for t in p[k]) for k in 1:length(idx)) - v ==0)
 end
 
 
@@ -190,7 +194,7 @@ for i in `1:M[:nu]` and all pairs m=>c.
 """
 function constraint_moments(M::JuMP.Model, moments::Vector)
     for c in moments
-        MOM.add_constraint_moment(M, c[2], c[1]*one(Polynomial{true,Float64}))
+        MOM.add_constraint_moment(M, c[2], convert_Float64(c[1]))
     end
 end
 
@@ -204,13 +208,13 @@ for all pairs m=>c, where `p` is a vector of ``\\nu``=`M[:nu]` polynomials.
 """
 function constraint_moments(M::JuMP.Model, moments::Vector, p::Vector)
     for c in moments
-        MOM.add_constraint_moment(M, c[2], p*c[1]*one(Polynomial{true,Float64}))
+        MOM.add_constraint_moment(M, c[2], p*convert_Float64(c[1]))
     end
 end
 
 function constraint_moments(M::JuMP.Model, moments::Vector, idx::Vector{Int64}, P::Vector)
     for c in moments
-        MOM.add_constraint_moment(M, c[2], idx, P*c[1]*one(Polynomial{true,Float64}))
+        MOM.add_constraint_moment(M, c[2], idx, P*convert_Float64(c[1]))
     end
 end
 
@@ -224,7 +228,7 @@ Add to the moment program `M`, the constraints ``\\langle \\mu_i, 1 \\rangle - 1
 """
 
 function constraint_unitmass(M::JuMP.Model)
-    MOM.add_constraint_moment(M, 1, one(Polynomial{true,Float64}))
+    MOM.add_constraint_moment(M, 1, one(Polynomial{DynamicPolynomials.Commutative{DynamicPolynomials.CreationOrder}, Graded{LexOrder}, Float64}))
 end
 
 """

@@ -1,6 +1,6 @@
 export MaxEigenModel
 
-function MaxEigenModel(f, H::AbstractVector, G::AbstractVector, X, d::Int64, optimizer = MMT[:optimizer])
+function MaxEigenModel(f,  G::AbstractVector, H::AbstractVector, X, d::Int64, optimizer = MMT[:optimizer])
 
     M = JuMP.Model(optimizer_with_attributes(optimizer))
     
@@ -8,7 +8,12 @@ function MaxEigenModel(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt
     
     MP = [monomials(X,0:2*d-maxdegree(h)) for h in H]
     M[:mP] = MP
-    MQ = [monomials(X,0:d-Int64(ceil(maxdegree(g)/2))) for g in G]
+    if length(G)>0
+        MQ = [monomials(X,0:d-Int64(ceil(maxdegree(g)/2))) for g in G]
+    else
+        MQ=[]
+    end
+    
     M[:mQ] = MQ
     L0 = monomials(X,0:d)
     M[:monomials] = L0
@@ -17,8 +22,12 @@ function MaxEigenModel(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt
 
     P = [@variable(M, [1:length(MP[i])], base_name="P$i") for i in 1:length(H)]
 
-    Q = [@variable(M, [1:length(MQ[i]), 1:length(MQ[i])], PSD, base_name="Q$i") for i in 1:length(G)]
-
+    if length(G) > 0
+        Q = [@variable(M, [1:length(MQ[i]), 1:length(MQ[i])], PSD, base_name="Q$i") for i in 1:length(G)]
+    else
+        Q = []
+    end
+    
     n = length(L0)
     Q0 = @variable(M, [1:n, 1:n], Symmetric, base_name="Q0") 
 
@@ -29,12 +38,9 @@ function MaxEigenModel(f, H::AbstractVector, G::AbstractVector, X, d::Int64, opt
     M[:Q] = Q
     M[:Q0]= Q0
 
-    P = f - L0'*Q0*L0 -
-            sum( H[i]*sum(P[i][j]*MP[i][j] for j in 1:length(MP[i])) for i in 1:length(H)) -
-            sum( G[i]*(MQ[i]'*Q[i]*MQ[i]) for i in 1:length(G) )
-
-
-    for c in coefficients(P)
+    R = f - L0'*Q0*L0 - sum( H[i]*sum(P[i][j]*MP[i][j] for j in 1:length(MP[i])) for i in 1:length(H); init = zero(f)) - sum( G[i]*(MQ[i]'*Q[i]*MQ[i]) for i in 1:length(G); init = zero(f) )
+   
+    for c in coefficients(R)
         @constraint(M, c == 0)
     end
 

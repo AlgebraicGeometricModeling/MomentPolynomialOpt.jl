@@ -19,9 +19,9 @@ function polar_ideal(f, h::Vector, g::Vector, X)
     end
 
     # Converting everithing in Polynomial type
-    f = one(Polynomial{true, Int64})*f
-    h = one(Polynomial{true, Int64})*h
-    g = one(Polynomial{true, Int64})*g
+    f = one(f)*f
+    h = one(f)*h
+    g = one(f)*g
 
     # First work without nonneg constraints (to avoid emptysequence problems)
     partial_matrix , eq = zero_iteration(X, f, h)
@@ -46,7 +46,7 @@ function zero_iteration(X, f, h)
         partial_matrix = differentiate([f; h], X)
         eq = Polynomial[]
         for j in combinations(1:n, r+1)
-            push!(eq, one(Polynomial{true, Int64})*det(partial_matrix[:,j]))
+            push!(eq, det(partial_matrix[:,j]))
         end
     end
     return partial_matrix, setdiff(eq, 0)
@@ -72,11 +72,11 @@ function nonneg_iterations(X, partial_matrix, eq, g, r)
                             break
                         end
                     else
-                        gk = vcat(gk, one(Polynomial{true, Int64})*temp)
+                        gk = vcat(gk, temp)
                     end
                 end
             end
-            eq = one(Polynomial{true, Int64})*kron(eq, gk)
+            eq = kron(eq, gk)
         end
     end
     return setdiff(eq, 0)
