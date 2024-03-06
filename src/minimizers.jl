@@ -1,8 +1,12 @@
-export get_series, get_minimizers, get_measure, dualize
+export get_series, get_minimizers, get_measure
 
+using MultivariateSeries
+
+#=
 function dualize(p)
     MultivariateSeries.dual(p)
 end
+=#
 
 #----------------------------------------------------------------------
 """
@@ -18,13 +22,13 @@ function get_series(M::JuMP.Model)
     else
         n = length(M[:monomials])
         cstr = JuMP.all_constraints(M[:dual], AffExpr, MOI.EqualTo{Float64})
-        s  = [series([M[:monomials][i]=>-JuMP.dual(cstr[n*(k-1)+i])
+        s  = [MultivariateSeries.series([M[:monomials][i]=>-JuMP.dual(cstr[n*(k-1)+i])
                   for i in 1:n])
               for k in 1:M[:nu]]
 
         return s
     
-        [series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
+        [MultivariateSeries.series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
                  for i in 1:length(M[:monomials])])
          for k in 1:M[:nu]]
         
