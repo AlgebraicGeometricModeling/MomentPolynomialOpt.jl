@@ -1,10 +1,9 @@
 # Moment Tools
 
-The package provide tools for solving polynomial and moment optimization problems on semi-algebraic sets defined by polynomial sign and equality constraints.
-In particular, it allows to optimize vectors of moments sequences that satisfy positivity constraints or mass constraints,
-It is based on Sum-of-Squares (SOS) and MoMent (MoM) convex relaxations, connected to Semi-Definite Programs (SDP) solvers.
-This a Julia package for solving polynomial optimization problems, via moment matrix relaxations. 
-Extraction tools allows to recover the global optimizers of the problem from optimal moment sequences, using flat truncation properties.
+This Julia package provides tools for solving polynomial and moment optimization problems on semi-algebraic sets defined by polynomial sign and equality constraints.
+In particular, it allows to optimize vectors of moments sequences that satisfy positivity constraints or mass constraints.
+It is based on MoMent (MoM) and Sum-of-Squares (SOS) convex relaxations, connected to Semi-Definite Programs (SDP) solvers.
+Extraction tools allow to recover the global optimizers of the problem from optimal moment sequences, using flat truncation properties.
 
 
 As an illustrative example, we consider the set $S$ defined by the inequalities 
