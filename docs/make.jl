@@ -19,11 +19,11 @@ makedocs(
         "Example" => Expl,
         "About the package"  => "package.md",
     ],
-    repo = "https://github.com/AlgebraicGeometricModeling/MomentTools.jl",
+    repo = Remotes.GitHub("AlgebraicGeometricModeling", "MomentTools.jl"),
     doctest = false,
 )
 
-deploydocs(
+#deploydocs(
 #    deps = Deps.pip("pygments", "mkdocs", "python-markdown-math"),
-    repo = "github.com/AlgebraicGeometricModeling/MomentTools.jl.git"
-)
+#    repo = "github.com/AlgebraicGeometricModeling/MomentTools.jl.git"
+#)

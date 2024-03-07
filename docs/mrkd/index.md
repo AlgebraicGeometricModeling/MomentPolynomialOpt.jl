@@ -26,13 +26,13 @@ using CSDP; MMT[:optimizer] = CSDP.Optimizer
 
 X = @polyvar x y
 
-G = [1 - x^2 - y^2, x^3-y^2 ]
+G = [1 - x^2 - y^2, x^3-y^2 ]  # Non-negativity constraints
 
-f = y^2
+f = y^2  # objective function
 
-v, M = maximize(f, [], G)
+v, M = maximize(f, [], G, X, 3) # relaxation at order 3
 
-w, Xi = get_measure(M)
+w, Xi = get_measure(M)  # recovers the weighted sum of Dirac measures from the moments
 ```
 This gives the following weigts and points of the weight sum of Dirac measures  associated to the optimal moment sequence. 
 ```math
