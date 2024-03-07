@@ -15,7 +15,8 @@ The package can be installed in julia as follows:
 ```
 
 ## Documentation
-    
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://AlgebraicGeometricModeling.github.io/MomentTools.jl/)
+
+[![](https://img.shields.io/badge/docs-blue.svg)](https://AlgebraicGeometricModeling.github.io/MomentTools.jl/)
+[![](https://img.shields.io/badge/source-orange)](https://github.com/AlgebraicGeometricModeling/MomentTools.jl/)
 
 
