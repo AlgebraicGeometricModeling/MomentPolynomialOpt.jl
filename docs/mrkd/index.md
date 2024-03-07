@@ -2,7 +2,7 @@
 
 This Julia package provides tools for solving polynomial and moment optimization problems on semi-algebraic sets defined by polynomial sign and equality constraints.
 In particular, it allows to optimize vectors of moments sequences that satisfy positivity constraints or mass constraints.
-It is based on MoMent (MoM) and Sum-of-Squares (SOS) convex relaxations, connected to Semi-Definite Programs (SDP) solvers.
+It is based on MoMent (MoM) and Sum-of-Squares (SOS) convex relaxations, which are solved by  an external Semi-Definite Program (SDP) solvers such as `CSDP`, `MosekTools`, ... 
 Extraction tools allow to recover the global optimizers of the problem from optimal moment sequences, using flat truncation properties.
 
 
