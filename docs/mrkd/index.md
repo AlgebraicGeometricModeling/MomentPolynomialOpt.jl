@@ -1,4 +1,4 @@
-# Moment Tools
+# Moment Polynomial Optimization
 
 This Julia package provides tools for solving polynomial and moment optimization problems on semi-algebraic sets defined by polynomial sign and equality constraints.
 In particular, it allows to optimize vectors of moments sequences that satisfy positivity constraints or mass constraints.
