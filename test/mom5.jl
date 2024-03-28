@@ -1,5 +1,5 @@
 using JuMP
-using MomentTools
+using MomentPolynomialOpt
 using DynamicPolynomials
 using MultivariateSeries
 using LinearAlgebra

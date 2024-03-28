@@ -1,5 +1,5 @@
 using JuMP
-using MomentTools
+using MomentPolynomialOpt
 using DynamicPolynomials, MultivariateSeries
 
 using MosekTools; mmt_optimizer(Mosek.Optimizer, "QUIET"=>true)

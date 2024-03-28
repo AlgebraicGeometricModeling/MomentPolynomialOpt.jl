@@ -1,4 +1,4 @@
-# About MomentTools.jl
+# About MomentPolynomialOpt.jl
 
 
 
@@ -22,7 +22,7 @@ To solve the moment optimization problems, SDP optimizers have also to be instal
 ## Development
 
 The git project of the package is
-    [https://github.com/AlgebraicGeometricModeling/MomentTools.jl](https://github.com/AlgebraicGeometricModeling/MomentTools.jl).
+    [https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl](https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl).
     
 The main developpers are (so far)
 

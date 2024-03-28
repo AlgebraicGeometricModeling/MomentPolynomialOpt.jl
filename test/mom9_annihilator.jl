@@ -1,4 +1,4 @@
-using DynamicPolynomials, MomentTools, PMO
+using DynamicPolynomials, MomentPolynomialOpt, PMO
 using JuMP, MosekTools
 
 import DynamicPolynomials: maxdegree

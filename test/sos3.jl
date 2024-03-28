@@ -1,4 +1,4 @@
-using MomentTools, JuMP
+using MomentPolynomialOpt, JuMP
 using DynamicPolynomials
 using MosekTools; opt = Mosek.Optimizer
 mmt_optimizer(opt)

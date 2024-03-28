@@ -18,10 +18,10 @@ This is the blue domain below:
 
 ![DomainCusp](DomainCusp.png)
 
-We want to maximize the objective function $y^2$ on this domain and to find the maximizer points. Here is how it can be done in `MomentTools`, with the SDP solver `CSDP`.
+We want to maximize the objective function $y^2$ on this domain and to find the maximizer points. Here is how it can be done in `MomentPolynomialOpt`, with the SDP solver `CSDP`.
 
 ```
-using MomentTools, DynamicPolynomials
+using MomentPolynomialOpt, DynamicPolynomials
 using CSDP; MMT[:optimizer] = CSDP.Optimizer
 
 X = @polyvar x y
@@ -129,8 +129,8 @@ w[1]\, \delta_{Xi[:,1]} + w[2]\, \delta_{Xi[:,2]}
 The package can be installed from Julia as follows:
 
 ```
-] add https://github.com/AlgebraicGeometricModeling/MomentTools.jl
+] add https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl
 
 ```
 
- Sources: [https://github.com/AlgebraicGeometricModeling/MomentTools.jl](https://github.com/AlgebraicGeometricModeling/MomentTools.jl).
+ Sources: [https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl](https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl).

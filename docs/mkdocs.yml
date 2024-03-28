@@ -1,5 +1,5 @@
-site_name:        MomentTools
-repo_url:         https://gitlab.inria.fr/mourrain/MomentTools
+site_name:        MomentPolynomialOpt
+repo_url:         https://gitlab.inria.fr/mourrain/MomentPolynomialOpt
 site_description: Tools for moment optimization
 site_author:      B. Mourrain
 

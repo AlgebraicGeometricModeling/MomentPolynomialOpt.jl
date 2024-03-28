@@ -1,6 +1,6 @@
 using JuMP
 using Combinatorics
-using MomentTools
+using MomentPolynomialOpt
 using DynamicPolynomials
 using MultivariateSeries
 using LinearAlgebra

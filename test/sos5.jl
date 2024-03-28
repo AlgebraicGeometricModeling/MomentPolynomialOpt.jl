@@ -1,4 +1,4 @@
-using DynamicPolynomials, MomentTools
+using DynamicPolynomials, MomentPolynomialOpt
 
 X = @polyvar x y
 

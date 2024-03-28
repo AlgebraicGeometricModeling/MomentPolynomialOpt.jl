@@ -14,7 +14,7 @@ using JuMP, Dualization
 using LinearAlgebra
 
 
-import MomentTools:MMT
+import MomentPolynomialOpt:MMT
 
 convert_Float64 = function(pol)
     if typeof(pol) != Polynomial{DynamicPolynomials.Commutative{DynamicPolynomials.CreationOrder}, Graded{LexOrder}, Int64}

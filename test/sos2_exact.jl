@@ -1,4 +1,4 @@
-using LinearAlgebra, MomentTools, DynamicPolynomials, JuMP
+using LinearAlgebra, MomentPolynomialOpt, DynamicPolynomials, JuMP
 
 #=
 using MosekTools; opt=Mosek.Optimizer

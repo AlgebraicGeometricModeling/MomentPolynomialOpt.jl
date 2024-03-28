@@ -1,4 +1,4 @@
-using MomentTools, DynamicPolynomials
+using MomentPolynomialOpt, DynamicPolynomials
 using MosekTools
 #mmt_optimizer(Mosek.Optimizer)
 mmt_optimizer(Mosek.Optimizer, "QUIET"=> true)

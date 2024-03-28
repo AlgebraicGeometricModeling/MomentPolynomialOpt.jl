@@ -4,7 +4,7 @@ export SOS
 
 module SOS
 
-import MomentTools: MMT
+import MomentPolynomialOpt: MMT
 
 
 using JuMP, DynamicPolynomials

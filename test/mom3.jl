@@ -1,4 +1,4 @@
-using MomentTools
+using MomentPolynomialOpt
 using DynamicPolynomials
 using MultivariateSeries
 using JuMP, MosekTools

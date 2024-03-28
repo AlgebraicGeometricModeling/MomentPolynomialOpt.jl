@@ -1,5 +1,5 @@
 using Documenter
-using MomentTools, JuMP
+using MomentPolynomialOpt, JuMP
 
 dir = "mrkd"
 Expl = map(file -> joinpath("expl", file),
@@ -8,10 +8,10 @@ Code = map(file -> joinpath("code", file),
            filter(x ->endswith(x, ".md"), readdir(dir*"/code")))
 
 makedocs(
-    sitename = "MomentTools",
+    sitename = "MomentPolynomialOpt",
     authors = "L. Baldi, B. Mourrain",
-    modules = [MomentTools],
-    build = "MomentTools.jl/docs",
+    modules = [MomentPolynomialOpt],
+    build = "MomentPolynomialOpt.jl/docs",
     source = "mrkd",
     pages = Any[
         "Home" => "index.md",
@@ -19,11 +19,11 @@ makedocs(
         "Example" => Expl,
         "About the package"  => "package.md",
     ],
-    repo = Remotes.GitHub("AlgebraicGeometricModeling", "MomentTools.jl"),
+    repo = Remotes.GitHub("AlgebraicGeometricModeling", "MomentPolynomialOpt.jl"),
     doctest = false,
 )
 
 #deploydocs(
 #    deps = Deps.pip("pygments", "mkdocs", "python-markdown-math"),
-#    repo = "github.com/AlgebraicGeometricModeling/MomentTools.jl.git"
+#    repo = "github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl.git"
 #)

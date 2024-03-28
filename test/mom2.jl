@@ -1,4 +1,4 @@
-using JuMP, DynamicPolynomials, MomentTools
+using JuMP, DynamicPolynomials, MomentPolynomialOpt
     
 using MosekTools
 

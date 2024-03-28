@@ -68,7 +68,7 @@ If the problem is feasible and has minimizers, it outputs
 Example
 -------
 ```julia
-using MomentTools
+using MomentPolynomialOpt
 
 X  = @polyvar x1 x2
 e1 = x1^2-2
@@ -134,7 +134,7 @@ It outputs
 Example
 -------
 ```julia
-using MomentTools
+using MomentPolynomialOpt
 
 X  = @polyvar x1 x2
 e1 = x1^2-2
@@ -186,7 +186,7 @@ end
 ```julia
 mmt_optimizer(opt)
 ```
-Define the default optimizer `opt` for the optimization problems created by MomentTools
+Define the default optimizer `opt` for the optimization problems created by MomentPolynomialOpt
 """
 function mmt_optimizer(opt)
     MMT[:optimizer] = opt 
@@ -197,7 +197,7 @@ end
 ```julia
 mmt_optimizer(opt, args...)
 ```
-Define the default optimizer `opt` with its attribute `args...` for the optimization problems created by MomentTools
+Define the default optimizer `opt` with its attribute `args...` for the optimization problems created by MomentPolynomialOpt
 """
 function mmt_optimizer(opt, args...)
     MMT[:optimizer] = JuMP.optimizer_with_attributes(opt, args...) 
