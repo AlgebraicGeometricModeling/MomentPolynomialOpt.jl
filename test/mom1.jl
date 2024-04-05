@@ -1,7 +1,8 @@
 using MomentPolynomialOpt, DynamicPolynomials
 using MosekTools
-#mmt_optimizer(Mosek.Optimizer)
-mmt_optimizer(Mosek.Optimizer, "QUIET"=> true)
+
+#mpo_optimizer(Mosek.Optimizer)
+mpo_optimizer(Mosek.Optimizer, "QUIET"=> true)
 
 X = @polyvar x y
 
@@ -9,8 +10,8 @@ h1 = x*y-1
 h2 = x^2-2
 H=[h1,h2]
 
-g  = 2*x-x^2
-G=[g]
+g = 2*x-x^2
+G = [g]
 
 f  = y
 

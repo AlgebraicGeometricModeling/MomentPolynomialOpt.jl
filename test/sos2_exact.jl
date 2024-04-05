@@ -6,16 +6,15 @@ if haskey(ENV,"QUIET")
     opt = optimizer_with_attributes(opt, "QUIET" => true);
 end
 =#
-using CSDP; opt=CSDP.Optimizer
-
-mmt_optimizer(opt)
-
+#using CSDP; opt=CSDP.Optimizer; mpo_optimizer(opt)
+using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET"=>true)
 
 X = @polyvar x
 
-f = (x^3-2)
+h = x^3-2
 
-g = x - 0
+f = x+0
 #g = x^2 -x^5/4 + f*x^2/4
 
-Q, q = esos_decompose(g,f; rounding=1, verbose=true)
+WS, P, v, M = sos_decompose(f, [h], [], X, 3; round=1, exact=true)
+

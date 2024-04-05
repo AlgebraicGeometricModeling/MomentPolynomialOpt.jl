@@ -1,81 +1,78 @@
-
-#export SOSModel
 export SOS
 
 module SOS
 
-import MomentPolynomialOpt: MMT
-
+import MomentPolynomialOpt: MPO, Moments
 
 using JuMP, DynamicPolynomials
 
 export Model
 
-function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
+function Model(sense::Symbol, f, H, G, X, d, optimizer = MPO[:optimizer])
 
     if optimizer == nothing
         M = JuMP.Model()
     else
-        M = JuMP.Model(optimizer_with_attributes(optimizer))
+        M = JuMP.Model(optimizer)
     end
     
     M[:type] = :polynomial
     
-    Mh = [monomials(X,0:2*d-maxdegree(h)) for h in H]
-
+    Lh = [monomials(X,0:2*d-maxdegree(h)) for h in H]
     Lg = [monomials(X,0:d-Int64(ceil(maxdegree(g)/2))) for g in G]
     L0 = monomials(X,0:d)
 
     @variable(M, lambda)
 
-    a = [@variable(M, [1:length(Mh[i])], base_name="a$i") for i in 1:length(H)]
+    p = [@variable(M, [1:length(Lh[i])], base_name="p$i") for i in 1:length(H)]
 
-    Q = [@variable(M, [1:length(Lg[i]), 1:length(Lg[i])], PSD, base_name="Q$i") for i in 1:length(G)]
-    Q0 = @variable(M, [1:length(L0), 1:length(L0)], PSD, base_name="Q0") 
+    Q =[@variable(M, [1:length(L0), 1:length(L0)], PSD, base_name="Q0")]
+    append!(Q,[@variable(M, [1:length(Lg[i]), 1:length(Lg[i])], PSD, base_name="Q$i") for i in 1:length(G)])
+    
         
-    M[:a] = a
+    M[:p] = p
     M[:Q] = Q
-    M[:Q0]= Q0
 
     if in(sense, [:Min, :min, :Inf, :inf])
         
-        P = f - lambda - L0'*Q0*L0
-        for i in 1:length(H) P -= H[i]*sum(a[i][j]*Mh[i][j] for j in 1:length(Mh[i])) end
-        for i in 1:length(G) P -= G[i]*(Lg[i]'*Q[i]*Lg[i]) end
+        P = f - lambda - L0'*Q[1]*L0
+        for i in 1:length(H)
+            P -= H[i]*sum(p[i][j]*Lh[i][j] for j in 1:length(Lh[i]))
+        end
+        for i in 1:length(G)
+            P -= G[i]*(Lg[i]'*Q[i+1]*Lg[i])
+        end
 
         @objective(M, Max, lambda)
 
     else
         
-        P = lambda - f - L0'*Q0*L0
-        for i in 1:length(H) P -= H[i]*(a[i]'*Mh[i]) end
-        for i in 1:length(G) P -= G[i]*(Lg[i]'*Q[i]*Lg[i]) end
+        P = lambda - f - L0'*Q[1]*L0
+        for i in 1:length(H) P -= H[i]*(p[i]'*Lh[i]) end
+        for i in 1:length(G) P -= G[i]*(Lg[i]'*Q[i+1]*Lg[i]) end
            
 
         @objective(M, Min, lambda)
     end
 
-    for c in coefficients(P)
-        @constraint(M, c == 0)
-    end
-
+    M[:mu] = [ Moments([@constraint(M, c == 0) for c in coefficients(P)], monomials(P)) ]
 
     return M
 end
 
 #=
-function optimize(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
+function optimize(sense::Symbol, f, H, G, X, d, optimizer = MPO[:optimizer])
     M = SOS.Model(sense,f,H,G,X,d, optimizer)
     optimize!(M)
 
     return objective_value(M), M
 end
 
-function minimize(f, H, G, X, d , optimizer = MMT[:optimizer])
+function minimize(f, H, G, X, d , optimizer = MPO[:optimizer])
    return SOS.optimize(:inf, f,H,G,X,d, optimizer)
 end
 
-function maximize(f, H, G, X, d , optimizer = MMT[:optimizer])
+function maximize(f, H, G, X, d , optimizer = MPO[:optimizer])
    return SOS.optimize(:sup, f,H,G,X,d, optimizer)
 end
 =#

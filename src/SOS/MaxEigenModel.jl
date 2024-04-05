@@ -1,8 +1,8 @@
 export MaxEigenModel
 
-function MaxEigenModel(f,  G::AbstractVector, H::AbstractVector, X, d::Int64, optimizer = MMT[:optimizer])
+function MaxEigenModel(f, H::AbstractVector, G::AbstractVector, X, d::Int64, optimizer = MMT[:optimizer])
 
-    M = JuMP.Model(optimizer_with_attributes(optimizer))
+    M = JuMP.Model(optimizer)
     
     M[:type] = :polynomial
     
@@ -38,12 +38,22 @@ function MaxEigenModel(f,  G::AbstractVector, H::AbstractVector, X, d::Int64, op
     M[:Q] = Q
     M[:Q0]= Q0
 
-    R = f - L0'*Q0*L0 - sum( H[i]*sum(P[i][j]*MP[i][j] for j in 1:length(MP[i])) for i in 1:length(H); init = zero(f)) - sum( G[i]*(MQ[i]'*Q[i]*MQ[i]) for i in 1:length(G); init = zero(f) )
-   
-    for c in coefficients(R)
-        @constraint(M, c == 0)
-    end
+    R = f - L0'*Q0*L0
 
+    for i in 1:length(H)
+        R -= H[i]*sum(P[i][j]*MP[i][j] for j in 1:length(MP[i]))
+    end
+    
+    for i in 1:length(G)
+        R -= G[i]*(MQ[i]'*Q[i]*MQ[i])
+    end 
+   
+#    for c in coefficients(R)
+#        @constraint(M, c == 0)
+#    end
+
+    M[:mu] = [ Moments([@constraint(M, c == 0) for c in coefficients(R)], monomials(R)) ]
+    
     @objective(M, Max, lambda)
 
     return M

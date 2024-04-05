@@ -17,22 +17,40 @@ Return the vector of ``\\nu``=`M[:nu]` series of optimal moments of the optimize
 """
 function get_series(M::JuMP.Model)
 
-    if haskey(M.obj_dict,:constraints) && haskey(M.obj_dict,:monomials) 
-        return [MultivariateSeries.dual(M[:monomials]'*JuMP.dual.(M[:constraints]))]
+    if haskey(M.obj_dict,:type)
+        if M[:type] == :polynomial
+            s = get_series_dual.(M[:mu])
+            return (length(s) == 1 ? s[1] : s) 
+        elseif M[:type] == :moment
+            s = get_series_primal.(M[:mu])
+            return (length(s) == 1 ? s[1] : s) 
+        end
     else
-        n = length(M[:monomials])
-        cstr = JuMP.all_constraints(M[:dual], AffExpr, MOI.EqualTo{Float64})
-        s  = [MultivariateSeries.series([M[:monomials][i]=>-JuMP.dual(cstr[n*(k-1)+i])
-                  for i in 1:n])
-              for k in 1:M[:nu]]
-
-        return s
-    
-        [MultivariateSeries.series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
-                 for i in 1:length(M[:monomials])])
-         for k in 1:M[:nu]]
-        
+        if haskey(M.obj_dict,:constraints) && haskey(M.obj_dict,:monomials) 
+            return [MultivariateSeries.dual(M[:monomials]'*JuMP.dual.(M[:constraints]))]
+        else
+            n = length(M[:monomials])
+            cstr = JuMP.all_constraints(M[:dual], AffExpr, MOI.EqualTo{Float64})
+            s  = [MultivariateSeries.series([M[:monomials][i]=>-JuMP.dual(cstr[n*(k-1)+i])
+                                             for i in 1:n])
+                  for k in 1:M[:nu]]
+            
+            return s
+            
+            [MultivariateSeries.series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
+                                        for i in 1:length(M[:monomials])])
+             for k in 1:M[:nu]]
+            
+        end
     end
+end
+    
+function get_series_primal(s :: Moments)
+        MultivariateSeries.series([s.basis[i] => JuMP.value(s.values[i]) for i in 1:length(s.basis)])
+end
+    
+function get_series_dual(s :: Moments)
+        MultivariateSeries.series([s.basis[i] => JuMP.dual(s.values[i]) for i in 1:length(s.basis)])
 end
 
 #----------------------------------------------------------------------
@@ -51,16 +69,16 @@ get_minimizer(M)
 """
 function get_minimizers(M::JuMP.Model, t::Int64 = 2*M[:degree]-1)
     s = get_series(M)
-    w, Xi = MultivariateSeries.decompose(truncate(s[1], t));
+    w, Xi = MultivariateSeries.decompose(truncate(s, t));
     Xi
 end
 
 #----------------------------------------------------------------------
 """
 ```
-w, Xi = get_measure(M, t::Int64 = 2*M[:degree]-1 ,lambda = [(-1)^(k-1) for k in 1:M[:nu]])
+w, Xi = get_measure(M, t::Int64 = 2*M[:degree]-1)
 ```
-Return the approximation of the moment sequence ``\\sum_{i=1}^{\\nu} \\lambda_i \\mu_i``
+Return the approximation of the moment sequence ``\\mu``
 truncated to moments of degree <= t (default: twice the order of the relaxation minus 2),
 as weighted sum of Dirac measures: ``\\sum_{k=1}^{r} \\omega_k \\delta_{\\xi_k}`` where
 
@@ -74,38 +92,20 @@ w, Xi = get_measure(M)
 ```
 """
 function get_measure(M::JuMP.Model,
-                     t::Int64 = 2*M[:degree]-1,
-                     lambda::Vector = [(-1)^(k-1) for k in 1:get(M.obj_dict,:nu,1)])
+                     t::Int64 = 2*M[:degree]-1)
 
     s = get_series(M)
-    w, Pts = MultivariateSeries.decompose(truncate(s[1], t));
-    nu = get(M.obj_dict,:nu,1)
-    if nu>1
-        for k in 2:nu
-            c, Xi = MultivariateSeries.decompose(truncate(s[k], t))
-            w = vcat(w, c*lambda[k])
-            Pts= hcat(Pts,Xi)
-        end
-    end
+    w, Pts = MultivariateSeries.decompose(truncate(s, t));
 
     return w, Pts
 end
 
 function get_measure(M::JuMP.Model,
                      e::Float64,
-                     t::Int64 = 2*M[:degree]-2,
-                     lambda::Vector = [(-1)^(k-1) for k in 1:get(M.obj_dict,:nu,1)])
+                     t::Int64 = 2*M[:degree]-2)
 
     s = get_series(M)
-    w, Pts = MultivariateSeries.decompose(truncate(s[1],t), MultivariateSeries.eps_rkf(e));
-    nu = get(M.obj_dict,:nu,1)
-    if nu>1
-        for k in 2:nu
-            c, Xi = MultivariateSeries.decompose(truncate(s[k],t), MultivariateSeries.eps_rkf(e))
-            w = vcat(w, c*lambda[k])
-            Pts= hcat(Pts,Xi)
-        end
-    end
+    w, Pts = MultivariateSeries.decompose(truncate(s,t), MultivariateSeries.eps_rkf(e));
     return w, Pts
 end
 

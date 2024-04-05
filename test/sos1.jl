@@ -2,9 +2,8 @@ using MomentPolynomialOpt
 using DynamicPolynomials
 using JuMP
 
-using MosekTools
-optimizer = Mosek.Optimizer
-mmt_optimizer(optimizer)
+using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
+
 
 X = @polyvar x y
 

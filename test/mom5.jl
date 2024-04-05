@@ -14,8 +14,7 @@ optimizer = Mosek.Optimizer
 
 #using CSDP; optimizer = CSDP.Optimizer
 
-#MOM.mmt_optimizer(Dualization.dual_optimizer(optimizer))
-mmt_optimizer(optimizer, "QUIET" => true)
+mpo_optimizer(optimizer, "QUIET" => true)
 
 X = @polyvar x y
 
@@ -23,41 +22,44 @@ lebesgue(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))
 
 d = 10
 
-M = MOM.Model(X, d; nu=2)
+M = MOM.Model(X,d)
 
-p1 = 1-x^2-y^2
-# p1 * mu_1 >= 0
-MOM.constraint_nneg(M, 1, 1-x^2-y^2)
+
+mu1 = M[:mu][1]
+
+g1 = 1-x^2-y^2
+
+# p1 * mu >= 0
+MOM.add_constraint_nneg(M, g1, mu1)
+
+mu2 = MOM.add_variable_moments(M, X, 2*d, :mu2)
+MOM.add_constraint_nneg(M, mu2)
+
 
 q1 = 1-x^2
 q2 = 1-y^2
 # q1 * mu_2 >= 0, q2 * mu_2 >=0
-MOM.constraint_nneg(M, 2, 1-x^2, 1-y^2 )
+MOM.add_constraint_nneg(M, q1, mu2)
+MOM.add_constraint_nneg(M, q2, mu2)
 
 # monomials of degree <= 2*d
 L = monomials(X, 0:2*d)
 
 # <1*mu_1, m> + <1*mu_2, m> = leb_mom(m)
-MOM.constraint_moments(M,
-                   [(m=>lebesgue(exponents(m)...)) for m in L],
-                   [1,1] )
+
+for m in L
+    @constraint(M, mmt(mu1, m) + mmt(mu2,m) - lebesgue(exponents(m)...) == 0)
+end
 
 # sup  <1*mu_1,1>  
-MOM.set_objective(M, "sup", 1, 1)
+@objective(M, Max, mmt(mu1,1) )
 
-MOM.dualize!(M)
-
-v, M = optimize(M)
+JuMP.optimize!(M)
+v = JuMP.objective_value(M)
 
 println("Approximate volume: ", v)
 
-# s = get_series(M)
-# w, Xi = get_measure(M)
+s = get_series(M)
+w, Xi = get_measure(M)
 
-# sp = p1*s[1]
-# L1 = monomials(X, seq(0:d-1)); H1 =  hankel(sp, L1, L1); vp1 = eigvals(H1)
-# L2 = monomials(X, seq(0:d)); H2 =  hankel(s[1], L2, L2); vp2 = eigvals(H2)
-
-#w, Xi = decompose(get_series(M)[1])
-#plotmeas(w,Xi)
 
