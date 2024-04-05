@@ -34,7 +34,7 @@ Add to the moment program `M`, the constraints ``g \\star \\mu \\succeq 0``, tha
 function add_constraint_nneg(M::JuMP.Model, pos, mu::Moments)
     p = convert_Float64(pos)
     d0 = Int(ceil(maxdegree(p)/2))
-    X = M[:variables]
+    X = variables(mu.basis) #X = M[:variables]
     L = monomials(X, 0:M[:degree] - d0)
     N = length(L)
     if N == 1
@@ -47,8 +47,8 @@ end
 
 function add_constraint_nneg(M::JuMP.Model, mu::Moments)
     p = convert_Float64(mu.basis[1])
-    d = Int(ceil(maxdegree(mu.basis)/2))
-    X = M[:variables]
+    d = Int(floor(maxdegree(mu.basis)/2))
+    X = variables(mu.basis)
     L = monomials(X, 0:d)
     N = length(L)
     P = [ mmt(mu, p*L[i]*L[j]) for i in 1:N, j in 1:N ]
