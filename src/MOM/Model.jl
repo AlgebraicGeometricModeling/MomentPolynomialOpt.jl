@@ -28,14 +28,24 @@ end
 include("constraints.jl")
 include("objective.jl")
 
-function add_variable_moments(M, B, s)
-    v = @variable(M, [1:length(B)], base_name = s)
-    Moments(v,B)
+function moment_variables(M, B, cstr = :PSD)
+    v = @variable(M, [1:length(B)])
+    mu = Moments(v,B)
+    if haskey(M.obj_dict, :mu)
+        push!(M[:mu],mu)
+    else
+        M[:mu] = [mu]
+    end
+    if cstr == :PSD
+        add_constraint_nneg(M, mu)
+    end
+    return mu
 end
 
-function add_variable_moments(M, X, d, s)
-    add_variable_moments(M,monomials(X,0:d), s)
+function moment_variables(M, X, d::Int, cstr = :PSD)
+    moment_variables(M, monomials(X,0:d), cstr)
 end
+
 #----------------------------------------------------------------------
 function Model(X, d, optimizer = MPO[:optimizer])
 
@@ -49,15 +59,11 @@ function Model(X, d, optimizer = MPO[:optimizer])
     M[:variables] = X
     M[:degree] = d
     
-    mu = MOM.add_variable_moments(M, monomials(X,0:2*d), :y) 
-    
-    M[:mu] = [mu]
-    
-    MOM.add_constraint_nneg(M, mu.basis[1], mu)
+    mu = MOM.moment_variables(M, X, 2*d, :PSD) 
+    # MOM.add_constraint_nneg(M, mu)
 
     return M
 end
-
 
 """
 ```

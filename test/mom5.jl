@@ -32,12 +32,12 @@ g1 = 1-x^2-y^2
 # p1 * mu >= 0
 MOM.add_constraint_nneg(M, g1, mu1)
 
-mu2 = MOM.add_variable_moments(M, X, 2*d, :mu2)
-MOM.add_constraint_nneg(M, mu2)
+mu2 = MOM.moment_variables(M, X, 2*d, :PSD)
 
 
 q1 = 1-x^2
 q2 = 1-y^2
+
 # q1 * mu_2 >= 0, q2 * mu_2 >=0
 MOM.add_constraint_nneg(M, q1, mu2)
 MOM.add_constraint_nneg(M, q2, mu2)
@@ -59,7 +59,7 @@ v = JuMP.objective_value(M)
 
 println("Approximate volume: ", v)
 
-s = get_series(M)
-w, Xi = get_measure(M)
+s     = get_series(M)[2]
+#w, Xi = get_measure(M)
 
 

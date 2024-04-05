@@ -38,19 +38,19 @@ function add_constraint_nneg(M::JuMP.Model, pos, mu::Moments)
     L = monomials(X, 0:M[:degree] - d0)
     N = length(L)
     if N == 1
-        @constraint(M, sum(coefficient(t)* mmt(mu, monomial(t)) for t in p) >= 0)
+        @constraint(M, mmt(mu, p) >= 0)
     else
-        P = [ sum(coefficient(t)*mu.values[mu.index[monomial(t)*L[i]*L[j]]]      for t in p)+0
-              for i in 1:N, j in 1:N ]
+        P = [ mmt(mu, p*L[i]*L[j]) for i in 1:N, j in 1:N ]
         @constraint(M, Symmetric(P) in PSDCone())
     end
 end
 
 function add_constraint_nneg(M::JuMP.Model, mu::Moments)
+    p = convert_Float64(mu.basis[1])
     X = M[:variables]
     L = monomials(X, 0:M[:degree])
     N = length(L)
-    P = [ mmt(mu, L[i]*L[j]) for i in 1:N, j in 1:N ]
+    P = [ mmt(mu, p*L[i]*L[j]) for i in 1:N, j in 1:N ]
     @constraint(M, Symmetric(P) in PSDCone())
 end
 
