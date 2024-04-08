@@ -56,7 +56,7 @@ end
 #----------------------------------------------------------------------
 """
 ```
-get_minimizers(M, , t::Int64 = 2*M[:degree]-1)
+get_minimizers(M, , t::Int64 = Inf)
 ```
 Return the minimizer points  of the optimized moment program `M`, using moments of degree <=t
 (default: twice the order of the relaxation minus 2)
@@ -67,8 +67,9 @@ get_minimizer(M)
 [1.41421 1.73205; 1.41421 1.41421; 1.41421 -1.73205]
 ```
 """
-function get_minimizers(M::JuMP.Model, t::Int64 = 2*M[:degree]-1)
+function get_minimizers(M::JuMP.Model)
     s = get_series(M)
+    t = maxdegree(s)-1
     w, Xi = MultivariateSeries.decompose(truncate(s, t));
     Xi
 end
@@ -76,7 +77,7 @@ end
 #----------------------------------------------------------------------
 """
 ```
-w, Xi = get_measure(M, t::Int64 = 2*M[:degree]-1)
+w, Xi = get_measure(M)
 ```
 Return the approximation of the moment sequence ``\\mu``
 truncated to moments of degree <= t (default: twice the order of the relaxation minus 2),
@@ -91,20 +92,19 @@ w, Xi = get_measure(M)
 ([0.1541368146508854, 0.5889741915171074, 0.256888993597116], [1.4142135624216647 1.414213562080608 1.4142135620270329; -1.732052464639053 1.4141771454788292 1.7319839273833693])
 ```
 """
-function get_measure(M::JuMP.Model,
-                     t::Int64 = 2*M[:degree]-1)
+function get_measure(M::JuMP.Model)
 
     s = get_series(M)
-    w, Pts = MultivariateSeries.decompose(truncate(s, t));
+    t = maxdegree(s)-1
+    w, Pts = MultivariateSeries.decompose(truncate(s,t));
 
     return w, Pts
 end
 
-function get_measure(M::JuMP.Model,
-                     e::Float64,
-                     t::Int64 = 2*M[:degree]-2)
+function get_measure(M::JuMP.Model,  e::Float64)
 
     s = get_series(M)
+    t = maxdegree(s)-1
     w, Pts = MultivariateSeries.decompose(truncate(s,t), MultivariateSeries.eps_rkf(e));
     return w, Pts
 end

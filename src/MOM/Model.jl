@@ -47,6 +47,19 @@ function moment_variables(M, X, d::Int, cstr = :PSD)
 end
 
 #----------------------------------------------------------------------
+function Model(optimizer = MPO[:optimizer])
+
+    if optimizer == nothing
+        @error "No optimizer set; see mpo_optimizer"
+    else
+        M = JuMP.Model(Dualization.dual_optimizer(optimizer))
+    end
+    
+    M[:type] = :moment
+
+    return M
+end
+
 function Model(X, d, optimizer = MPO[:optimizer])
 
     if optimizer == nothing
@@ -79,9 +92,9 @@ Construct the Moment Program in the variables X of order d.
 """
 function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
 
-    M = MOM.Model(X,d,optimizer)
+    M = MOM.Model(optimizer)
 
-    mu = M[:mu][1]
+    mu = MOM.moment_variables(M, X, 2*d)
 
     MOM.add_constraint_unitmass(M, mu)
     
