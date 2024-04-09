@@ -1,4 +1,4 @@
-using MomentPolynomialOpt, DynamicPolynomials, JuMP
+using MomentPolynomialOpt, DynamicPolynomials, MultivariateSeries, JuMP
 using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET"=> true)
 
 X = @polyvar y u
@@ -7,8 +7,8 @@ d = 4
 
 M = MOM.Model()
 
-gamma = MOM.moment_variables(M, X, 2*d)
-xi    = MOM.moment_variables(M, X, 2*d)
+gamma = moments(M, X, 2*d, :PRB)
+xi    = moments(M, X, 2*d, :PSD)
 
 k = y
 f = y*u
@@ -19,9 +19,8 @@ g1 = 1 - y^2
 g2 = 1 - u^2
 
 MOM.add_constraint_nneg(M, g1, gamma)
-
 MOM.add_constraint_nneg(M, g2, gamma)
-MOM.add_constraint_unitmass(M, gamma)
+
 
 MOM.add_constraint_nneg(M, g1, xi)
 MOM.add_constraint_nneg(M, g2, xi)
@@ -39,5 +38,5 @@ optimize!(M)
 
 s = get_series(M)
 
-w, Gamma = decompose(s[1]) #gamma
 v, Xi    = decompose(s[2]) #xi
+w, Gamma = decompose(s[1]) #gamma

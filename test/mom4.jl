@@ -12,10 +12,11 @@ p =  x^2+2*x*y+1
 
 d = 4
 
-M = MOM.Model(X, d)
-mu = M[:mu][1]
+M = MOM.Model()
 
-MOM.add_constraint_unitmass(M, mu)
+mu = moments(M, X, 2*d, :PRB)
+
+#MOM.add_constraint_unitmass(M, mu)
 @constraint(M, mmt(mu, p) == 0)
 
 MOM.set_objective_ncl(M, mu)

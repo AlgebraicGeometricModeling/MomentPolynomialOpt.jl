@@ -1,5 +1,34 @@
-export MOM
+export MOM, moments
 import JuMP: optimize!, objective_value
+
+
+export moments
+
+
+"""
+```
+moments(M, X, d::Int, symb::Symbol...)
+```
+
+Define variables for the moments of the monomials of degree less than d in the variables  X.
+If
+ - `symb == PSD`, non-negativity constraints are added;
+ - `symb == PRB`, unit mass and non-negativity constraints are added.
+
+"""
+function moments(M, X, d::Int, symb::Symbol...)
+    mu = MOM.moment_variables(M, X, d)
+    for arg in symb
+        if arg == :PRB
+            MOM.add_constraint_nneg(M,mu)
+            MOM.add_constraint_unitmass(M, mu)
+        elseif arg == :PSD
+            MOM.add_constraint_nneg(M,mu)
+        end
+    end
+    return mu 
+end
+
 
 module MOM
 
@@ -11,7 +40,7 @@ using DynamicPolynomials, JuMP, Dualization
 
 using LinearAlgebra
 
-import MomentPolynomialOpt: MPO, Moments, mmt
+import MomentPolynomialOpt: MPO, Moments, moments, mmt
 
 export Model
 
@@ -28,7 +57,7 @@ end
 include("constraints.jl")
 include("objective.jl")
 
-function moment_variables(M, B, cstr = :PSD)
+function moment_variables(M, B)
     v = @variable(M, [1:length(B)])
     mu = Moments(v,B)
     if haskey(M.obj_dict, :mu)
@@ -36,14 +65,11 @@ function moment_variables(M, B, cstr = :PSD)
     else
         M[:mu] = [mu]
     end
-    if cstr == :PSD
-        add_constraint_nneg(M, mu)
-    end
     return mu
 end
 
-function moment_variables(M, X, d::Int, cstr = :PSD)
-    moment_variables(M, monomials(X,0:d), cstr)
+function moment_variables(M, X, d::Int)
+    moment_variables(M, monomials(X,0:d))
 end
 
 #----------------------------------------------------------------------
@@ -60,6 +86,7 @@ function Model(optimizer = MPO[:optimizer])
     return M
 end
 
+#=
 function Model(X, d, optimizer = MPO[:optimizer])
 
     if optimizer == nothing
@@ -77,6 +104,7 @@ function Model(X, d, optimizer = MPO[:optimizer])
 
     return M
 end
+=#
 
 """
 ```
@@ -94,9 +122,9 @@ function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
 
     M = MOM.Model(optimizer)
 
-    mu = MOM.moment_variables(M, X, 2*d)
+    mu = moments(M, X, 2*d, :PRB)
 
-    MOM.add_constraint_unitmass(M, mu)
+    #    MOM.add_constraint_unitmass(M, mu)
     
     for h in H MOM.add_constraint_zero(M, h, mu) end
     for g in G MOM.add_constraint_nneg(M, g, mu) end
@@ -120,11 +148,11 @@ Construct the Moment Program where
 """
 function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
 
-    M = MOM.Model(X,d,optimizer)
+    M = MOM.Model(optimizer)
     
-    mu = M[:mu][1]   
+    mu = moments(M, X, 2*d, :PRB)
 
-    MOM.add_constraint_unitmass(M, mu)
+    # MOM.add_constraint_unitmass(M, mu)
 
     wobj = false
     for c in C

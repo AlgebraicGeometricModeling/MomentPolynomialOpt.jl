@@ -9,12 +9,11 @@ using LinearAlgebra
 #     plot(real(Xi[1,:]), real(Xi[2,:]), seriestype = :scatter, zcolor = abs.(w), m = (:heat, 0.8, Plots.stroke(1, :black)))
 # end
 
-using MosekTools
-optimizer = Mosek.Optimizer
+using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" => true)
+
 
 #using CSDP; optimizer = CSDP.Optimizer
 
-mpo_optimizer(optimizer, "QUIET" => true)
 
 X = @polyvar x y
 
@@ -22,18 +21,17 @@ lebesgue(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))
 
 d = 10
 
-M = MOM.Model(X,d)
+M = MOM.Model()
 
 
-mu1 = M[:mu][1]
+mu1 = moments(M,X,2*d,:PSD)
 
 g1 = 1-x^2-y^2
 
 # p1 * mu >= 0
 MOM.add_constraint_nneg(M, g1, mu1)
 
-mu2 = MOM.moment_variables(M, X, 2*d, :PSD)
-
+mu2 = moments(M, X, 2*d, :PSD)
 
 q1 = 1-x^2
 q2 = 1-y^2
@@ -54,12 +52,14 @@ end
 # sup  <1*mu_1,1>  
 @objective(M, Max, mmt(mu1,1) )
 
-JuMP.optimize!(M)
-v = JuMP.objective_value(M)
+v, M = optimize(M)
+
+#JuMP.optimize!(M)
+#v = JuMP.objective_value(M)
 
 println("Approximate volume: ", v)
 
-s     = get_series(M)[2]
+S     = get_series(M)
 #w, Xi = get_measure(M)
 
 

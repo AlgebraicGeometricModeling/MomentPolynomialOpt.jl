@@ -32,7 +32,8 @@ set_objective_ncl(M)
 Set the objective function of moment program to the nuclear norm or equivalently the trace of the moment matrices.
 """
 function set_objective_ncl(M::JuMP.Model, mu)
-    B = mu.basis[findall(x-> maxdegree(x) < div(M[:degree],2), mu.basis)]
+    d = maxdegree(mu.basis)
+    B = mu.basis[findall(x-> maxdegree(x) < div(d,2), mu.basis)]
     @objective(M, Min,  sum( mmt(mu, b^2) for b in B))
 end
 #----------------------------------------------------------------------
@@ -43,9 +44,7 @@ set_objective_tv(M)
 Set the objective function of the moment program to the total variation of the moment sequence ``\\mu``, that is 
 the sum  of the unit mass of the positive moment sequences ``\\sum_{i=1}^{\\nu} \\langle \\mu_i, 1\\rangle``.
 """
-function set_objective_tv(M::JuMP.Model)
-
-
-    set_objective(M,"inf", collect(1:M[:nu]), ones(M[:nu]))
+function set_objective_tv(M::JuMP.Model, mu)
+    @objective(M, Min, mmt(mu,1))
 end
 
