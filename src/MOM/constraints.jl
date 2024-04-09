@@ -13,7 +13,7 @@ Add to the moment program `M`, the constraints ``eq\\star \\mu = 0``, that is al
 
 """
 
-function add_constraint_zero(M::JuMP.Model, eq, mu::Moments)
+function add_constraint_zero(M::JuMP.Model,  mu::Moments, eq)
     p = convert_Float64(eq)
     X = variables(mu.basis) 
     L = monomials(X,0:maxdegree(mu.basis)-maxdegree(p))
@@ -25,14 +25,14 @@ end
 #----------------------------------------------------------------------
 """
 ```
-add_constraint_nneg(M, g, mu::Moments)
+add_constraint_nneg(M, mu::Moments, g)
 ```
 Add to the moment program `M`, the constraints ``g \\star \\mu \\succeq 0``, that is the moment matrix of ``g\\star \\mu`` is PSD.
 
 """
 
-function add_constraint_nneg(M::JuMP.Model, pos, mu::Moments)
-    p = convert_Float64(pos)
+function add_constraint_nneg(M::JuMP.Model, mu::Moments, g)
+    p = convert_Float64(g)
     d0 = Int(ceil(maxdegree(p)/2))
     d = div(maxdegree(mu.basis),2)
     X = variables(mu.basis) #X = M[:variables]
@@ -59,12 +59,12 @@ end
 #----------------------------------------------------------------------
 """
 ```
-add_constraint_moment(M, p => v, mu::Moments)
+add_constraint_moment(M, mu::Moments,  p => v)
 ```
 Add to the moment program `M`, the constraint ``\\mu(p) - v == 0``.
 
 """
-function add_constraint_moment(M::JuMP.Model, pv ::Pair , mu)
+function add_constraint_moment(M::JuMP.Model, mu:: Moments, pv ::Pair )
     @constraint(M,
                 sum(coefficient(t)*mmt(mu,monomial(t)) for t in terms(pv[1])) -pv[2] == 0)
 end

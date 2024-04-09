@@ -29,7 +29,7 @@ mu1 = moments(M,X,2*d,:PSD)
 g1 = 1-x^2-y^2
 
 # p1 * mu >= 0
-MOM.add_constraint_nneg(M, g1, mu1)
+MOM.add_constraint_nneg(M, mu1, g1)
 
 mu2 = moments(M, X, 2*d, :PSD)
 
@@ -37,8 +37,8 @@ q1 = 1-x^2
 q2 = 1-y^2
 
 # q1 * mu_2 >= 0, q2 * mu_2 >=0
-MOM.add_constraint_nneg(M, q1, mu2)
-MOM.add_constraint_nneg(M, q2, mu2)
+MOM.add_constraint_nneg(M, mu2, q1)
+MOM.add_constraint_nneg(M, mu2, q2)
 
 # monomials of degree <= 2*d
 L = monomials(X, 0:2*d)

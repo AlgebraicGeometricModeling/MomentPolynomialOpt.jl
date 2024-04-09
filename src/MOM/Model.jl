@@ -1,8 +1,5 @@
 export MOM, moments
-import JuMP: optimize!, objective_value
-
-
-export moments
+#import JuMP: optimize!, objective_value
 
 
 """
@@ -33,12 +30,7 @@ end
 module MOM
 
 
-using DynamicPolynomials, JuMP, Dualization
-
-# import MathOptInterface
-# const MOI = MathOptInterface
-
-using LinearAlgebra
+using DynamicPolynomials, JuMP, Dualization, LinearAlgebra
 
 import MomentPolynomialOpt: MPO, Moments, moments, mmt
 
@@ -86,26 +78,6 @@ function Model(optimizer = MPO[:optimizer])
     return M
 end
 
-#=
-function Model(X, d, optimizer = MPO[:optimizer])
-
-    if optimizer == nothing
-        @error "No optimizer set; see mpo_optimizer"
-    else
-        M = JuMP.Model(Dualization.dual_optimizer(optimizer))
-    end
-    
-    M[:type] = :moment
-    M[:variables] = X
-    M[:degree] = d
-    
-    mu = MOM.moment_variables(M, X, 2*d, :PSD) 
-    # MOM.add_constraint_nneg(M, mu)
-
-    return M
-end
-=#
-
 """
 ```
 M = MOM.Model( `sense`, f, H, G, X, d)
@@ -123,13 +95,11 @@ function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
     M = MOM.Model(optimizer)
 
     mu = moments(M, X, 2*d, :PRB)
-
-    #    MOM.add_constraint_unitmass(M, mu)
     
-    for h in H MOM.add_constraint_zero(M, h, mu) end
-    for g in G MOM.add_constraint_nneg(M, g, mu) end
+    for h in H MOM.add_constraint_zero(M, mu, h) end
+    for g in G MOM.add_constraint_nneg(M, mu, g) end
     
-    MOM.set_objective(M, "inf", f, mu)
+    @objective(M, Min, mmt(mu,f))
 
     return M
     
@@ -152,26 +122,24 @@ function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
     
     mu = moments(M, X, 2*d, :PRB)
 
-    # MOM.add_constraint_unitmass(M, mu)
-
     wobj = false
     for c in C
         if c[2] == "inf" || c[2] == "min"
-            MOM.set_objective(M, "inf", c[1], mu)
+            @objective(M, Min, mmt(mu,c[1]))
             wobj = true
         elseif c[2] == "sup" || c[2] == "max"
-            MOM.set_objective(M, "sup", c[1], mu)
+            MOM.set_objective(M, "sup", mu, c[1])
             wobj = true
         elseif c[2] == "=0"
-            MOM.add_constraint_zero(M, c[1], mu)
+            MOM.add_constraint_zero(M, mu, c[1])
         elseif c[2] == ">=0"
-            MOM.add_constraint_nneg(M, c[1], mu)
+            MOM.add_constraint_nneg(M, mu, c[1])
         elseif c[2] == "<=0"
-            MOM.add_constraint_nneg(M,-c[1], mu)
+            MOM.add_constraint_nneg(M, mu, -c[1])
         end
     end
     if !wobj
-        MOM.set_objective(M, "sup", one(C[1][1]), mu)
+        @objective(M, Max, mmt(mu, 1)) #MOM.set_objective(M, "sup", one(C[1][1]), mu)
     end
 
     return M
