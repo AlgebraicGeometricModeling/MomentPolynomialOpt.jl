@@ -28,7 +28,7 @@ MOM.add_constraint_nneg(M, g2, xi)
 N = 4
 for i in 1:N
     @constraint(M, mmt(gamma, f^i)- mmt(gamma, y^i) ==0)
-    @constraint(M, mmt(gamma, y) - mmt(gamma, y0) -   mmt(xi, f^i)+ mmt(xi, y^i) ==0)
+    @constraint(M, mmt(gamma, y^i) - mmt(gamma, y0^i) -   mmt(xi, f^i)+ mmt(xi, y^i) ==0)
 end
 
 
