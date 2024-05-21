@@ -11,7 +11,7 @@ It uses a connection with SDP solvers via the [JuMP](https://jump.dev/JuMP.jl/st
 The package can be installed in julia as follows:
 
 ```julia
-] add https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl
+] add MomentPolynomialOpt
 ```
 
 ## Documentation
