@@ -93,7 +93,7 @@ It outputs
 Example
 -------
 ```julia
-using MomentPolynomialOpt
+using MomentPolynomialOpt, DynamicPolynomials
 
 X  = @polyvar x1 x2
 e1 = x1^2-2

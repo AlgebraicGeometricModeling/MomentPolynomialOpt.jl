@@ -17,8 +17,10 @@ using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" => true)
 
 X = @polyvar x y
 
-lebesgue(i,j) = ((1-(-1)^(i+1))/(i+1))*((1-(-1)^(j+1))/(j+1))
-
+function lebesgue(m)
+    e = exponents(m); 
+    return ((1-(-1)^(e[1]+1))/(e[1]+1))*((1-(-1)^(e[2]+1))/(e[2]+1))
+end
 d = 10
 
 M = MOM.Model()
@@ -46,7 +48,7 @@ L = monomials(X, 0:2*d)
 # <1*mu_1, m> + <1*mu_2, m> = leb_mom(m)
 
 for m in L
-    @constraint(M, mmt(mu1, m) + mmt(mu2,m) - lebesgue(exponents(m)...) == 0)
+    @constraint(M, mmt(mu1, m) + mmt(mu2,m) - lebesgue(m) == 0)
 end
 
 # sup  <1*mu_1,1>  

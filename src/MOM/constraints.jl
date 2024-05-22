@@ -12,13 +12,12 @@ add_constraint_zero(M, eq, mu::Moments)
 Add to the moment program `M`, the constraints ``eq\\star \\mu = 0``, that is all the constraints ``\\mu(p*m)==0`` for ``degree(m) \\le 2*degree(M)-degree(p)``.
 
 """
-
 function add_constraint_zero(M::JuMP.Model,  mu::Moments, eq)
     p = convert_Float64(eq)
     X = variables(mu.basis) 
-    L = monomials(X,0:maxdegree(mu.basis)-maxdegree(p))
+    L = monomials(X,0:maxdegree(mu.basis) - maxdegree(p))
     for mn in L
-        @constraint(M, mmt(mu,p*mn) == 0)
+        @constraint(M, mmt(mu, p*mn) == 0)
     end
 end
 
@@ -30,7 +29,6 @@ add_constraint_nneg(M, mu::Moments, g)
 Add to the moment program `M`, the constraints ``g \\star \\mu \\succeq 0``, that is the moment matrix of ``g\\star \\mu`` is PSD.
 
 """
-
 function add_constraint_nneg(M::JuMP.Model, mu::Moments, g)
     p = convert_Float64(g)
     d0 = Int(ceil(maxdegree(p)/2))

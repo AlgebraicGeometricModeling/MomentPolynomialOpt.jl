@@ -9,8 +9,8 @@ moments(M, X, d::Int, symb::Symbol...)
 
 Define variables for the moments of the monomials of degree less than d in the variables  X.
 If
- - `symb == PSD`, non-negativity constraints are added;
- - `symb == PRB`, unit mass and non-negativity constraints are added.
+ - `symb == :PSD`, non-negativity constraints are added;
+ - `symb == :PRB`, unit mass and non-negativity constraints are added.
 
 """
 function moments(M, X, d::Int, symb::Symbol...)
@@ -83,14 +83,14 @@ end
 M = MOM.Model( `sense`, f, H, G, X, d)
 ```
 Construct the Moment Program in the variables X of order d.
-   - `sense` == "inf" or "sup"
+   - `sense` == :inf or :sup
    - `f` polynomial objective function
    - `H =[h1, h2, ...]` array of polynomial equality constraints (can be empty)
    - `G =[g1, g2, ...]` array of non-negativity constraints (can be empty)
    - `X` is the vector of variables
    - `d` is the order of the moment relaxation.
 """
-function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
+function Model(sense::Symbol, f, H, G, X, d, optimizer = MPO[:optimizer])
 
     M = MOM.Model(optimizer)
 
@@ -98,9 +98,12 @@ function Model(sense::Symbol, f, H, G, X, d, optimizer = MMT[:optimizer])
     
     for h in H MOM.add_constraint_zero(M, mu, h) end
     for g in G MOM.add_constraint_nneg(M, mu, g) end
-    
-    @objective(M, Min, mmt(mu,f))
 
+    if sense == :inf
+        @objective(M, Min, mmt(mu,f))
+    elseif sense == :sup
+        @objective(M, Max, mmt(mu,f))
+    end
     return M
     
 end
@@ -128,7 +131,8 @@ function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
             @objective(M, Min, mmt(mu,c[1]))
             wobj = true
         elseif c[2] == "sup" || c[2] == "max"
-            MOM.set_objective(M, "sup", mu, c[1])
+            #MOM.set_objective(M, "sup", mu, c[1])
+            @objective(M, Max, mmt(mu,c[1]))
             wobj = true
         elseif c[2] == "=0"
             MOM.add_constraint_zero(M, mu, c[1])
