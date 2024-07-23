@@ -32,7 +32,7 @@ module MOM
 
 using DynamicPolynomials, JuMP, Dualization, LinearAlgebra
 
-import MomentPolynomialOpt: MPO, Moments, moments, mmt
+import MomentPolynomialOpt: MPO, Moments, moments, dot
 
 export Model
 
@@ -100,9 +100,9 @@ function Model(sense::Symbol, f, H, G, X, d, optimizer = MPO[:optimizer])
     for g in G MOM.add_constraint_nneg(M, mu, g) end
 
     if sense == :inf
-        @objective(M, Min, mmt(mu,f))
+        @objective(M, Min, dot(mu,f))
     elseif sense == :sup
-        @objective(M, Max, mmt(mu,f))
+        @objective(M, Max, dot(mu,f))
     end
     return M
     
@@ -128,11 +128,11 @@ function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
     wobj = false
     for c in C
         if c[2] == "inf" || c[2] == "min"
-            @objective(M, Min, mmt(mu,c[1]))
+            @objective(M, Min, dot(mu,c[1]))
             wobj = true
         elseif c[2] == "sup" || c[2] == "max"
             #MOM.set_objective(M, "sup", mu, c[1])
-            @objective(M, Max, mmt(mu,c[1]))
+            @objective(M, Max, dot(mu,c[1]))
             wobj = true
         elseif c[2] == "=0"
             MOM.add_constraint_zero(M, mu, c[1])
@@ -143,7 +143,7 @@ function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
         end
     end
     if !wobj
-        @objective(M, Max, mmt(mu, 1)) #MOM.set_objective(M, "sup", one(C[1][1]), mu)
+        @objective(M, Max, dot(mu, 1)) #MOM.set_objective(M, "sup", one(C[1][1]), mu)
     end
 
     return M

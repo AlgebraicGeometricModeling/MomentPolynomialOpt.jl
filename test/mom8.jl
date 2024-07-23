@@ -4,8 +4,7 @@ using JuMP
 
 using MosekTools
 optimizer = Mosek.Optimizer
-
-mpo_optimizer(Mosek.Optimizer, "QUIET"=> true)
+mpo_optimizer(Mosek.Optimizer, "QUIET" => true)
 
 X = @polyvar x y
 
@@ -15,7 +14,7 @@ q  = 2*x-x^2
 
 d = 3
 
-v, M = optimize(:Inf, y, [p1,p2], [q], X, d)
+v, M = optimize(:inf, y, [p1,p2], [q], X, d)
 
 s     = get_series(M)
 w, Xi = get_measure(M)

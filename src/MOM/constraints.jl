@@ -17,7 +17,7 @@ function add_constraint_zero(M::JuMP.Model,  mu::Moments, eq)
     X = variables(mu.basis) 
     L = monomials(X,0:maxdegree(mu.basis) - maxdegree(p))
     for mn in L
-        @constraint(M, mmt(mu, p*mn) == 0)
+        @constraint(M, dot(mu, p*mn) == 0)
     end
 end
 
@@ -37,9 +37,9 @@ function add_constraint_nneg(M::JuMP.Model, mu::Moments, g)
     L = monomials(X, 0:d-d0)
     N = length(L)
     if N == 1
-        @constraint(M, mmt(mu, p) >= 0)
+        @constraint(M, dot(mu, p) >= 0)
     else
-        P = [ mmt(mu, p*L[i]*L[j]) for i in 1:N, j in 1:N ]
+        P = [ dot(mu, p*L[i]*L[j]) for i in 1:N, j in 1:N ]
         @constraint(M, Symmetric(P) in PSDCone())
     end
 end
@@ -50,7 +50,7 @@ function add_constraint_nneg(M::JuMP.Model, mu::Moments)
     X = variables(mu.basis)
     L = monomials(X, 0:d)
     N = length(L)
-    P = [ mmt(mu, p*L[i]*L[j]) for i in 1:N, j in 1:N ]
+    P = [ dot(mu, p*L[i]*L[j]) for i in 1:N, j in 1:N ]
     @constraint(M, Symmetric(P) in PSDCone())
 end
 
@@ -64,7 +64,7 @@ Add to the moment program `M`, the constraint ``\\mu(p) - v == 0``.
 """
 function add_constraint_moment(M::JuMP.Model, mu:: Moments, pv ::Pair )
     @constraint(M,
-                sum(coefficient(t)*mmt(mu,monomial(t)) for t in terms(pv[1])) -pv[2] == 0)
+                sum(coefficient(t)*dot(mu,monomial(t)) for t in terms(pv[1])) -pv[2] == 0)
 end
 
 #----------------------------------------------------------------------

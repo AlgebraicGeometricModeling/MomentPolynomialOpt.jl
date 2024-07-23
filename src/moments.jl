@@ -14,21 +14,28 @@ function Moments(v::Vector, B)
     Moments(v,B,idx)
 end
 
-function mmt(mu::Moments, c::Real)
+import LinearAlgebra: dot
+
+function LinearAlgebra.dot(mu::Moments, c::Real)
     mu.values[1]*c
 end
 
-function mmt(mu::Moments, x::Variable)
-    mmt(mu, monomial(x))
+function LinearAlgebra.dot(mu::Moments, x::Variable)
+    LinearAlgebra.dot(mu, monomial(x))
 end
 
-function mmt(mu::Moments, m::Monomial)
+function LinearAlgebra.dot(mu::Moments, m::Monomial)
     mu.values[mu.index[m]]
 end
 
-function mmt(mu::Moments, p::AbstractPolynomial)
+function LinearAlgebra.dot(mu::Moments, p::AbstractPolynomial)
     sum(t.coefficient*mu.values[mu.index[t.monomial]] for t in terms(p))
 end
+
+function mmt(mu::Moments, p)
+    LinearAlgebra.dot(mu,p)
+end
+
 
 function moment_variables(M, B, cstr = :PSD)
     v = @variable(M, [1:length(B)])
@@ -48,3 +55,16 @@ function moment_variables(M, X, d::Int, cstr = :PSD)
     moment_variables(M, monomials(X,0:d), cstr)
 end
 
+export constraint_nneg, constraint_zero, constraint_unitmass
+
+function constraint_nneg(M::JuMP.Model, mu::Moments, p)
+    MOM.add_constraint_nneg(M,mu,p)
+end
+
+function constraint_zero(M::JuMP.Model, mu::Moments, p)
+    MOM.add_constraint_zero(M,mu,p)
+end
+
+function constraint_unitmass(M::JuMP.Model, mu::Moments)
+    MOM.add_constraint_unitmass(M,mu)
+end

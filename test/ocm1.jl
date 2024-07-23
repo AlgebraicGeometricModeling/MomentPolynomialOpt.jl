@@ -18,21 +18,20 @@ y0 = 0.5
 g1 = 1 - y^2
 g2 = 1 - u^2
 
-MOM.add_constraint_nneg(M, gamma, g1)
-MOM.add_constraint_nneg(M, gamma, g2)
+constraint_nneg(M, gamma, g1)
+constraint_nneg(M, gamma, g2)
 
-
-MOM.add_constraint_nneg(M, xi, g1)
-MOM.add_constraint_nneg(M, xi, g2)
+constraint_nneg(M, xi, g1)
+constraint_nneg(M, xi, g2)
 
 N = 4
-for i in 1:N
-    @constraint(M, mmt(gamma, f^i)- mmt(gamma, y^i) ==0)
-    @constraint(M, mmt(gamma, y^i) - mmt(gamma, y0^i) - mmt(xi, f^i) + mmt(xi, y^i) ==0)
+for i in 1:N 
+    @constraint(M, dot(gamma, f^i)- dot(gamma, y^i) ==0)
+    @constraint(M, dot(gamma, y^i) - dot(gamma, y0^i) - dot(xi, f^i) + dot(xi, y^i) ==0)
 end
 
 
-@objective(M, Min, mmt(gamma, y))
+@objective(M, Min, dot(gamma, y))
 
 optimize!(M)
 

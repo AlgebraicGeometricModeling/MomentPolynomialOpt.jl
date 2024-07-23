@@ -14,7 +14,7 @@ Set the "inf" or "sup" objective function to  ``\\sum_{i=1}^{\\nu} \\langle p\\s
 """
 function set_objective(M::JuMP.Model, sense::String, p, mu::Moments)
     if p != nothing
-        obj = mmt(mu, p)
+        obj = dot(mu, p)
         if sense == "inf"
             @objective(M, Min, obj)
         else
@@ -34,7 +34,7 @@ Set the objective function of moment program to the nuclear norm or equivalently
 function set_objective_ncl(M::JuMP.Model, mu)
     d = maxdegree(mu.basis)
     B = mu.basis[findall(x-> maxdegree(x) < div(d,2), mu.basis)]
-    @objective(M, Min,  sum( mmt(mu, b^2) for b in B))
+    @objective(M, Min,  sum( dot(mu, b^2) for b in B))
 end
 #----------------------------------------------------------------------
 """
@@ -45,6 +45,6 @@ Set the objective function of the moment program to the total variation of the m
 the sum  of the unit mass of the positive moment sequences ``\\sum_{i=1}^{\\nu} \\langle \\mu_i, 1\\rangle``.
 """
 function set_objective_tv(M::JuMP.Model, mu)
-    @objective(M, Min, mmt(mu,1))
+    @objective(M, Min, dot(mu,1))
 end
 

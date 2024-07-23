@@ -16,8 +16,7 @@ M = MOM.Model()
 
 mu = moments(M, X, 2*d, :PRB)
 
-#MOM.add_constraint_unitmass(M, mu)
-@constraint(M, mmt(mu, p) == 0)
+@constraint(M, dot(mu, p) == 0)
 
 MOM.set_objective_ncl(M, mu)
 
