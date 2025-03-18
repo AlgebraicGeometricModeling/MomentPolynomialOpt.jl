@@ -13,7 +13,7 @@ The package can be installed in julia as follows:
 ```julia
 ] add MomentPolynomialOpt
 ```
-To isntall the last version:
+To use the last version:
 ```julia
 ] add https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl.git
 ```
