@@ -132,6 +132,7 @@ function sos_decompose(f,  H::AbstractVector, G::AbstractVector, X, d::Int64, op
     #for i in 1:length(G) println(">>  ", eigen(value.(M[:Q][i])).values) end
 
     if exact != true
+    #== Approximate decomposition ==#
         WS = fill([], length(G)+1)
         w0, Lw0 = w_cholesky(value.(M[:Q0]))
         WS[1] = [w0, Lw0'*L0]
@@ -157,26 +158,30 @@ function sos_decompose(f,  H::AbstractVector, G::AbstractVector, X, d::Int64, op
         w, Lw = w_cholesky(value.(M[:Q][i]))
         Lk = rational_round.(Lw,k)
         wk = rational_round.(w,k)
-        #println(" >>>> ", norm(Lw-Float64.(Lk)))
-        #println(" >>>> ", norm(value.(M[:Q][i]) - Float64.(Lk*diagm(wk)*Lk')))
+        println(" >>>> ", norm(Lw-Float64.(Lk)))
+        println(" >>>> ", norm(value.(M[:Q][i]) - Float64.(Lk*diagm(wk)*Lk')))
         WS[i+1] = [wk, Lk' * MQ[i]]
     end
 
 
-    Q0e = dot(Rational{BigInt}.(coefficients(f)), monomials(f))
+    q0e = dot(Rational{BigInt}.(coefficients(f)), monomials(f))
 
     if length(H)>0
         Pe = rational_round.(P,k)
-        Q0e = Q0e  - dot(H,Pe) 
+        q0e = q0e  - dot(H,Pe) 
     else
         Pe = []
     end
 
     if length(G)>0
-        Q0e = Q0e - dot(G, wsos.(WS[2:end]))
+        q0e = q0e - dot(G, wsos.(WS[2:end]))
     end
 
-    QS0 = sym_matrix(Q0e, L0)
+    Q0r = rational_round.(value.(M[:Q0]),k)
+
+    q0e = q0e - L0'*Q0r*L0
+    
+    QS0 = Q0r + sym_matrix(q0e, L0)
 
     w0, Lw0 = w_cholesky(QS0)
 
@@ -194,15 +199,15 @@ function sos_decompose(f, X = variables(f), d::Int64 = Int64(ceil(maxdegree(f)/2
 end
 
 #----------------------------------------------------------------------
-function m_sqrt(m::Monomial)
+function m_sqrt(m::DynamicPolynomials.Monomial)
     return prod(m.vars.^div.(m.z,2))
 end
 
-function m_div(m::Monomial, m1::Monomial)
+function m_div(m::DynamicPolynomials.Monomial, m1::DynamicPolynomials.Monomial)
     return prod(m.vars.^(m.z-m1.z))
 end
 
-function is_null(f::Polynomial)
+function is_null(f::DynamicPolynomials.Polynomial)
     return (length(f.x)==0)
 end
 

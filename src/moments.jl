@@ -24,7 +24,7 @@ function LinearAlgebra.dot(mu::Moments, x::Variable)
     LinearAlgebra.dot(mu, monomial(x))
 end
 
-function LinearAlgebra.dot(mu::Moments, m::Monomial)
+function LinearAlgebra.dot(mu::Moments, m::DynamicPolynomials.Monomial)
     mu.values[mu.index[m]]
 end
 
