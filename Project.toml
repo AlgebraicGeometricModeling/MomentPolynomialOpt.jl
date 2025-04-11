@@ -14,7 +14,7 @@ MultivariateSeries = "08acae6c-c1bf-11e9-0c27-6b1945f8789b"
 
 [compat]
 Combinatorics = ">= 1"
-Dualization = ">= 0.6"
+Dualization = ">= 0.5"
 DynamicPolynomials = ">= 0.6"
 JuMP = ">= 0.23"
 MultivariateSeries = ">= 0.1"
