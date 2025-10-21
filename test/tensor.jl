@@ -85,7 +85,11 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
     if norm > 1
         println("Apolar distance to input polynomial is high. Try changing the input parameters.")
     end
-    return norm, L
+
+    Xi = hcat(X1, X2)
+    w = vcat(w1, -w2)
+
+    return norm, L, Xi, w
 end
 
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
@@ -128,24 +132,27 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     @objective(M, Min, mmt(mu, k))
 
     optimize!(M);
-    S1 = get_series(M)
-    w1, X1 = decompose(S1) 
-    if isempty(X1)
+    S = get_series(M)
+    w, Xi = decompose(S) 
+    if isempty(Xi)
         error("Decomposition failed. Try modifying the inputs: e.g., changing the rescaling, or trying a real decomposition.")
     end
-    X1 = vcat(fill(1.,size(X1,2))', X1)
+    Xi = vcat(fill(1.,size(Xi,2))', Xi)
     F10 = MultivariateSeries.dual(s0, d)
-    F1 = tensor(w1, X1, vcat(1, Y), d)
+    F1 = tensor(w, Xi, vcat(1, Y), d)
     norm = norm_apolar(F10 - F1)
-    L = length(w1)
+    L = length(w)
 
     ## Scale back the y and z variables ##
-    X1[2:length(Y),:] = X1[2:length(Y),:].*rescaling
+    Xi[2:length(Y),:] = Xi[2:length(Y),:].*rescaling
 
     if norm > 1
         println("Apolar distance to input polynomial is high. Try changing the input parameters.")
     end
-    return norm, L
+
+
+
+    return norm, L, Xi, w
 end
 
 # --- Public function ---

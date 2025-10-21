@@ -25,9 +25,15 @@ F0 = -0.2489979301598193 * t^4 - 0.5714471586952264 * z * t^3 - 0.50503094957268
     0.11846876725173883 * x^3 * z - 2.1207614308184404 * x^3 * y + 0.6141543193928954 * x^4
 
 # Call the main function from the module
-norm, L = symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
+norm, L, Xi, w = symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
 
 println("\n--- Results ---")
 println("Apolar norm: ", norm)
 println("Decomposition length: ", L)
+println("Decomposition weights: ")
+println(join([rpad(string(round(x, digits=3)), 10) for x in w], ""))
+println("Decomposition points: ")
+for row in eachrow(Xi)
+    println(join([rpad(string(round(x, digits=3)), 10) for x in row], ""))
+end
 println("-----------------\n")

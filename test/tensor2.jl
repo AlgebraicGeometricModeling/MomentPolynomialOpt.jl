@@ -20,9 +20,14 @@ F0 = -1549440*x*y*z^3 + 2417040*x*y^2*z^2 + 166320*x^2*y*z^2 - 829440*x*y^3*z - 
 F0 = differentiate(F0, x) / 5
 
 # Call the main function from the module
-norm, L = symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
+norm, L, Xi, w = symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
 
 println("\n--- Results ---")
 println("Apolar norm: ", norm)
 println("Decomposition length: ", L)
+println(join([rpad(string(round(x, digits=3)), 10) for x in w], ""))
+println("Decomposition points: ")
+for row in eachrow(Xi)
+    println(join([rpad(string(round(x, digits=3)), 10) for x in row], ""))
+end
 println("-----------------\n")
