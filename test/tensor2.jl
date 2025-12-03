@@ -1,11 +1,7 @@
-# Step 1: Include the file containing the module definition
-include("tensor.jl")
+using MomentPolynomialOpt, DynamicPolynomials
+using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
 
-# Step 2: Bring the module and its exported functions into the current scope
-using .MomentTensorDecomposition
-using DynamicPolynomials
-
-println("--- Running Positive Weight Decomposition Example (tensor2.jl) ---")
+println("--- Positive Weight Decomposition Example (tensor2.jl) ---")
 
 ## Input parameters ##
 X = @polyvar x y z t
@@ -20,10 +16,10 @@ F0 = -1549440*x*y*z^3 + 2417040*x*y^2*z^2 + 166320*x^2*y*z^2 - 829440*x*y^3*z - 
 F0 = differentiate(F0, x) / 5
 
 # Call the main function from the module
-norm, L, Xi, w = symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
+anorm, L, Xi, w = MomentTensorDecomposition.symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
 
 println("\n--- Results ---")
-println("Apolar norm: ", norm)
+println("Apolar norm: ", anorm)
 println("Decomposition length: ", L)
 println(join([rpad(string(round(x, digits=3)), 10) for x in w], ""))
 println("Decomposition points: ")

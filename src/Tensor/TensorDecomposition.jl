@@ -1,3 +1,5 @@
+export MomentTensorDecomposition
+
 module MomentTensorDecomposition
 
 # Export the main function to use in examples
@@ -6,7 +8,6 @@ export symm_tens_decomp
 # List necessary dependencies
 using MomentPolynomialOpt, DynamicPolynomials, MultivariateSeries, LinearAlgebra
 using JuMP
-using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
 using TensorDec
 
 # Private functions starting with an underscore
@@ -135,7 +136,7 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     S = get_series(M)
     w, Xi = decompose(S) 
     if isempty(Xi)
-        error("Decomposition failed. Try modifying the inputs: e.g., changing the rescaling, or trying a real decomposition.")
+        error("Decomposition failed. Try modifying the inputs, or using a real decomposition.")
     end
     Xi = vcat(fill(1.,size(Xi,2))', Xi)
     F10 = MultivariateSeries.dual(s0, d)

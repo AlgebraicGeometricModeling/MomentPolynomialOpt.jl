@@ -6,6 +6,7 @@ using JuMP
 using Dualization
 using LinearAlgebra
 using Combinatorics
+using TensorDec
 
 MPO = Dict{Symbol,Any}( :optimizer => nothing )
 export MPO
@@ -18,6 +19,8 @@ include("MOM/Model.jl")
 include("SOS/Model.jl")
 include("SOS/MaxEigenModel.jl")
 include("SOS/MinEllipsoidModel.jl")
+
+include("Tensor/TensorDecomposition.jl")
 
 include("optimize.jl")
 include("minimizers.jl")
