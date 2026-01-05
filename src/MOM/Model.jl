@@ -36,6 +36,8 @@ import MomentPolynomialOpt: MPO, Moments, moments, dot
 
 export Model
 
+function Model end
+
 #----------------------------------------------------------------------
 convert_Float64 = function(pol)
     if typeof(pol) != Polynomial{DynamicPolynomials.Commutative{DynamicPolynomials.CreationOrder}, Graded{LexOrder}, Int64}

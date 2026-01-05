@@ -1,6 +1,6 @@
 using JuMP
 using MomentPolynomialOpt
-using DynamicPolynomials, MultivariateSeries
+using DynamicPolynomials, MultivariateSeries, LinearAlgebra
 
 using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET"=>true)
 
