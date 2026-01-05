@@ -1,5 +1,6 @@
 using MomentPolynomialOpt, DynamicPolynomials
-using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
+#using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
+using CSDP; mpo_optimizer(CSDP.Optimizer)
 
 println("--- Real Weight Decomposition Example (tensor1.jl) ---")
 
