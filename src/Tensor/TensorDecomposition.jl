@@ -10,14 +10,26 @@ using MomentPolynomialOpt, DynamicPolynomials, MultivariateSeries, LinearAlgebra
 using JuMP
 
 
+function _series_from_hpol(F, X0, d = maxdegree(F))
+    P = subs(F,X0=>1)
+    c = coefficients(P)
+    L = monomials(P)
+    for i in 1:length(c)
+        m = exponents(L[i])
+        c[i]/=binomial(d, m)
+    end
+    return MultivariateSeries.dual(P)
+end
+
+
 # Private functions starting with an underscore
 
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
     println("Performing decomposition with real weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
-    F0 = F0(vcat(X[1], vec(X[2:end]) ./ rescaling))
-    s0 = series(F0, Y) 
+    #F1 = F0(X[1]=> 1,[y=> y/rescaling for y in Y]...)
+    s0 = _series_from_hpol(F0, X[1]) 
 
     ## Define model ###
     M = MOM.Model()
@@ -84,8 +96,8 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     println("Performing decomposition with positive weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
-    F0 = F0(variables(F0) => vcat(X[1], Y./rescaling))
-    s0 = series(F0, Y) 
+    # F0 = F0(variables(F0) => vcat(X[1], Y./rescaling))
+    s0 = _series_from_hpol(F0, X[1]) 
 
     ### Define model ###
     M = MOM.Model()

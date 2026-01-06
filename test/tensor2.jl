@@ -1,6 +1,6 @@
 using MomentPolynomialOpt, DynamicPolynomials, TensorDec
-using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
-#using CSDP; mpo_optimizer(CSDP.Optimizer)
+#using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
+using CSDP; mpo_optimizer(CSDP.Optimizer)
 
 println("--- Positive Weight Decomposition Example (tensor2.jl) ---")
 
@@ -29,7 +29,6 @@ Fh = sum(coefficient(F1,m)*m*x^(maxdegree(F0)-maxdegree(m)) for m in monomials(F
 norm = norm_apolar(F0 - Fh)
 
 ## Print results ##
-println("Apolar norm: ", norm)
 println("Decomposition length: ", length(w))
 println("Decomposition weights: ")
 println(join([rpad(string(round(x, digits=3)), 10) for x in w], ""))
@@ -38,3 +37,4 @@ for row in eachrow(Xi)
     println(join([rpad(string(round(x, digits=3)), 10) for x in row], ""))
 end
 println("-----------------\n")
+println("Apolar error: ", norm)
