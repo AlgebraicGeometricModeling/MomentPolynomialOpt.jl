@@ -15,7 +15,7 @@ using TensorDec
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
     println("Performing decomposition with real weights...")
     Y = vec(X[2:end])
-    d = degree(F0[1])
+    d = maxdegree(F0)
     F0 = F0(vcat(X[1], vec(X[2:end]) ./ rescaling))
     s0 = series(F0, Y) 
 
@@ -96,7 +96,7 @@ end
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     println("Performing decomposition with positive weights...")
     Y = vec(X[2:end])
-    d = degree(F0[1])
+    d = maxdegree(F0)
     F0 = F0(variables(F0) => vcat(X[1], Y./rescaling))
     s0 = series(F0, Y) 
 
