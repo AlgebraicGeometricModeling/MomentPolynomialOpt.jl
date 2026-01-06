@@ -6,7 +6,6 @@ using JuMP
 using Dualization
 using LinearAlgebra
 using Combinatorics
-using TensorDec
 
 MPO = Dict{Symbol,Any}( :optimizer => nothing )
 export MPO

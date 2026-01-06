@@ -1,6 +1,6 @@
-using MomentPolynomialOpt, DynamicPolynomials
-#using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
-using CSDP; mpo_optimizer(CSDP.Optimizer)
+using MomentPolynomialOpt, DynamicPolynomials, TensorDec
+using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
+#using CSDP; mpo_optimizer(CSDP.Optimizer)
 
 println("--- Real Weight Decomposition Example (tensor1.jl) ---")
 
@@ -21,16 +21,27 @@ F0 = -0.2489979301598193 * t^4 - 0.5714471586952264 * z * t^3 - 0.50503094957268
     1.4670698710382422 * x^2 * y * t - 0.015953647647009017 * x^2 * y * z - 0.361365758387135 * x^2 * y^2 + 1.253344034777953 * x^3 * t +
     0.11846876725173883 * x^3 * z - 2.1207614308184404 * x^3 * y + 0.6141543193928954 * x^4
 
-# Call the main function from the module
-anorm, L, Xi, w = MomentTensorDecomposition.symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
+# Call function from the Tensor Decomposition module
+Xi, w = MomentTensorDecomposition.symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
 
 println("\n--- Results ---")
-println("Apolar norm: ", anorm)
-println("Decomposition length: ", L)
+
+## Construct the approximated tensor ##
+F1 = tensor(w, Xi, vcat(1, vec(X[2:end])), maxdegree(F0))
+## Homogenize it ##
+Fh = sum(coefficient(F1,m)*m*x^(maxdegree(F0)-maxdegree(m)) for m in monomials(F1))
+## Compute apolar norm between F0 and Fh ##
+norm = norm_apolar(F0 - Fh)
+
+## Print results ##
+println("Apolar norm: ", norm)
+println("Decomposition length: ", length(w))
 println("Decomposition weights: ")
-println(join([rpad(string(round(x, digits=3)), 10) for x in w], ""))
+println(join([rpad(string(round(x, digits=3)), 10) for x in w], " "))
 println("Decomposition points: ")
 for row in eachrow(Xi)
-    println(join([rpad(string(round(x, digits=3)), 10) for x in row], ""))
+    println(join([rpad(string(round(x, digits=3)), 10) for x in row], " "))
 end
 println("-----------------\n")
+    
+

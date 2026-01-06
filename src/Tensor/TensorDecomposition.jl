@@ -8,7 +8,7 @@ export symm_tens_decomp
 # List necessary dependencies
 using MomentPolynomialOpt, DynamicPolynomials, MultivariateSeries, LinearAlgebra
 using JuMP
-using TensorDec
+
 
 # Private functions starting with an underscore
 
@@ -67,30 +67,17 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
 
     X1 = vcat(fill(1.,size(X1,2))', X1)
     X2 = vcat(fill(1.,size(X2,2))', X2)
-    F10 = MultivariateSeries.dual(s0, d)
-
-    if !isempty(X2) && !isempty(X1)
-        F1 = tensor(w1, X1, vcat(1, Y), d) + tensor(-w2, X2, vcat(1, Y), d) 
-    elseif !isempty(X1)
-        F1 = tensor(w1, X1, vcat(1, Y), d)
-    elseif !isempty(X2)
-        F1 = -tensor(w2, X2, vcat(1, Y), d)
-    end
-    norm = norm_apolar(F10 - F1)
-    L = length(w1)+length(w2)
 
     ## Scale back the y and z variables ##
-    X1[2:length(Y),:] = X1[2:length(Y),:].*rescaling 
-    X2[2:length(Y),:] = X2[2:length(Y),:].*rescaling    
+    X1[2:length(X),:] = X1[2:length(X),:].*rescaling 
+    X2[2:length(X),:] = X2[2:length(X),:].*rescaling 
 
-    if norm > 1
-        println("Apolar distance to input polynomial is high. Try changing the input parameters.")
-    end
 
+    ## Concatenate positive and negative components ##
     Xi = hcat(X1, X2)
     w = vcat(w1, -w2)
 
-    return norm, L, Xi, w
+    return Xi, w
 end
 
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
@@ -139,21 +126,11 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
         error("Decomposition failed. Try modifying the inputs, or using a real decomposition.")
     end
     Xi = vcat(fill(1.,size(Xi,2))', Xi)
-    F10 = MultivariateSeries.dual(s0, d)
-    F1 = tensor(w, Xi, vcat(1, Y), d)
-    norm = norm_apolar(F10 - F1)
-    L = length(w)
-
+    
     ## Scale back the y and z variables ##
-    Xi[2:length(Y),:] = Xi[2:length(Y),:].*rescaling
+    Xi[2:length(X),:] = Xi[2:length(X),:].*rescaling
 
-    if norm > 1
-        println("Apolar distance to input polynomial is high. Try changing the input parameters.")
-    end
-
-
-
-    return norm, L, Xi, w
+    return Xi, w
 end
 
 # --- Public function ---
