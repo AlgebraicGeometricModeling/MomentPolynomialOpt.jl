@@ -36,5 +36,6 @@ println("Decomposition points: ")
 for row in eachrow(Xi)
     println(join([rpad(string(round(x, digits=3)), 10) for x in row], ""))
 end
+
+println("\nApolar error: ", norm)
 println("-----------------\n")
-println("Apolar error: ", norm)

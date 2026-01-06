@@ -34,7 +34,6 @@ Fh = sum(coefficient(F1,m)*m*x^(maxdegree(F0)-maxdegree(m)) for m in monomials(F
 norm = norm_apolar(F0 - Fh)
 
 ## Print results ##
-println("Apolar norm: ", norm)
 println("Decomposition length: ", length(w))
 println("Decomposition weights: ")
 println(join([rpad(string(round(x, digits=3)), 10) for x in w], " "))
@@ -42,6 +41,8 @@ println("Decomposition points: ")
 for row in eachrow(Xi)
     println(join([rpad(string(round(x, digits=3)), 10) for x in row], " "))
 end
-println("-----------------\n")
+println("\nApolar error: ", norm)
+println("----------------\n")
+
     
 
