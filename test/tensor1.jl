@@ -22,7 +22,7 @@ F0 = -0.2489979301598193 * t^4 - 0.5714471586952264 * z * t^3 - 0.50503094957268
     0.11846876725173883 * x^3 * z - 2.1207614308184404 * x^3 * y + 0.6141543193928954 * x^4
 
 # Call function from the Tensor Decomposition module
-Xi, w = MomentTensorDecomposition.symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
+w, Xi = MomentTensorDecomposition.symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
 
 println("\n--- Results ---")
 

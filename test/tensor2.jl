@@ -17,7 +17,7 @@ F0 = -1549440*x*y*z^3 + 2417040*x*y^2*z^2 + 166320*x^2*y*z^2 - 829440*x*y^3*z - 
 F0 = differentiate(F0, x) / 5
 
 # Call function from the Tensor Decomposition module
-Xi, w = MomentTensorDecomposition.symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
+w, Xi = MomentTensorDecomposition.symm_tens_decomp(X, l, F0, rescaling = rescaling, weight_type = weight_type)
 
 println("\n--- Results ---")
 

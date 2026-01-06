@@ -25,7 +25,7 @@ end
 # Private functions starting with an underscore
 
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
-    println("Performing decomposition with real weights...")
+    @info("Performing decomposition with real weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
     s0 = _series_from_hpol(F0, X[1], Y, rescaling) 
@@ -88,11 +88,11 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
     Xi = hcat(X1, X2)
     w = vcat(w1, -w2)
 
-    return Xi, w
+    return w, Xi
 end
 
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
-    println("Performing decomposition with positive weights...")
+    @info("Performing decomposition with positive weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
     s0 = _series_from_hpol(F0, X[1], Y, rescaling) 
@@ -140,7 +140,7 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     ## Scale back the y and z variables ##
     Xi[2:length(X),:] = Xi[2:length(X),:].*rescaling
 
-    return Xi, w
+    return w, Xi
 end
 
 # --- Public function ---
