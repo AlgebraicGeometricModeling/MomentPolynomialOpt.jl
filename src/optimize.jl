@@ -118,10 +118,17 @@ end
 #import JuMP: set_optimizer
 
 """
-```julia
+```
 mpo_optimizer(opt)
 ```
 Define the default optimizer `opt` for the optimization problems created by MomentPolynomialOpt
+
+## Example
+```
+using CSDP
+mpo_optimizer(CSDP.Optimizer)
+```
+
 """
 function mpo_optimizer(opt)
     MPO[:optimizer] = opt 
@@ -133,6 +140,13 @@ end
 mpo_optimizer(opt, args...)
 ```
 Define the default optimizer `opt` with its attribute `args...` for the optimization problems created by MomentPolynomialOpt
+
+## Example
+```
+using MosekTools
+mpo_optimizer(Mosek.Optimizer, "QUIET" =>true)
+```
+
 """
 function mpo_optimizer(opt, args...)
     MPO[:optimizer] = JuMP.optimizer_with_attributes(opt, args...) 
