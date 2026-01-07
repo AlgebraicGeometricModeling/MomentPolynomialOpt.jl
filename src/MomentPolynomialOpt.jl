@@ -19,6 +19,8 @@ include("SOS/Model.jl")
 include("SOS/MaxEigenModel.jl")
 include("SOS/MinEllipsoidModel.jl")
 
+include("Tensor/TensorDecomposition.jl")
+
 include("optimize.jl")
 include("minimizers.jl")
 include("polar.jl")

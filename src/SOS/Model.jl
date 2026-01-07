@@ -8,6 +8,8 @@ using JuMP, DynamicPolynomials
 
 export Model
 
+function Model end
+
 function Model(sense::Symbol, f, H, G, X, d, optimizer = MPO[:optimizer])
 
     if optimizer == nothing
