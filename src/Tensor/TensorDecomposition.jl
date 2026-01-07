@@ -10,13 +10,13 @@ using MomentPolynomialOpt, DynamicPolynomials, MultivariateSeries, LinearAlgebra
 using JuMP
 
 #----------------------------------------------------------------------
-"""
+#== 
 ```
 _series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
 ```
 Convert a homogeneous polynomial `F` to a series representation by setting variable `X0` to 1,
 rescaling variables `Y`, and normalizing coefficients by binomial factors.
-"""
+==#
 function _series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
     P = subs(F,X0=>1, [y=>y/rescaling for y in Y]...)
     c = coefficients(P)
@@ -30,14 +30,15 @@ end
 
 
 #----------------------------------------------------------------------
-"""
+
+#==
 ```
 _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
 ```
 Perform symmetric tensor decomposition with real weights, formulating the signed measure
 as a difference of two positive measures ``\\mu - \\mu_-``.
 
-"""
+==#
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
     @info("Performing decomposition with real weights...")
     Y = vec(X[2:end])
@@ -107,13 +108,13 @@ end
 
 
 #----------------------------------------------------------------------
-"""
+#==
 ```
 _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
 ```
 Perform symmetric tensor decomposition with strictly positive weights by formulating the problem
 as a single positive measure ``\\mu``.
-"""
+==#
 function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     @info("Performing decomposition with positive weights...")
     Y = vec(X[2:end])
