@@ -194,6 +194,6 @@ function symm_tens_decomp(X, l, F0; rescaling=1, use_kernel=true, weight_type=:r
     return _symm_tens_decomp(X, l, F0, rescaling, use_kernel, Val(weight_type))
 end
 
-end
+end #module
 
 
