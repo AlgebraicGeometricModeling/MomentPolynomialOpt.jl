@@ -1,0 +1,15 @@
+## SoS Decompositions
+
+```@docs
+sos_decompose
+```
+
+```@docs
+w_cholesky
+```
+
+## Tensor Decompositions
+
+```@docs
+MomentTensorDecomposition.symm_tens_decomp
+```
