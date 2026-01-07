@@ -181,7 +181,7 @@ Given a homogeneous polynomial `F0` of degree `d`, find weights `w` and points `
 # Arguments
 - `X`: Vector of polynomial variables
 - `l`: Relaxation order for the moment problem
-- `F0`: Homogeneous polynomial to decompose
+- `F`: Homogeneous polynomial to decompose
 - `rescaling`: Scaling factor to be set so decomposition points lie in radius 1 sphere (default: 1)
 - `use_kernel`: Include kernel constraints from Hankel nullspace (default: true)
 - `weight_type`: `:real` for signed weights or `:positive` for positive-only weights (default: `:real`)
