@@ -28,7 +28,7 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
     @info("Performing decomposition with real weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
-    s0 = _series_from_hpol(F0, X[1], Y, rescaling) 
+    s0 = _series_from_hpol(F0, X[1], Y, rescaling, d) 
 
     ## Define model ###
     M = MOM.Model()
@@ -95,7 +95,7 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     @info("Performing decomposition with positive weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
-    s0 = _series_from_hpol(F0, X[1], Y, rescaling) 
+    s0 = _series_from_hpol(F0, X[1], Y, rescaling, d) 
 
     ### Define model ###
     M = MOM.Model()
