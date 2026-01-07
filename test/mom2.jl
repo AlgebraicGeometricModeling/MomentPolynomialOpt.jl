@@ -2,8 +2,8 @@ using JuMP, DynamicPolynomials, MomentPolynomialOpt
     
 using MosekTools
 
-#using CSDP; mmt_optimizer(CSDP.Optimizer)
-mmt_optimizer(Mosek.Optimizer,"QUIET" => true)
+#using CSDP; mpo_optimizer(CSDP.Optimizer)
+mpo_optimizer(Mosek.Optimizer,"QUIET" => true)
 
 X  = @polyvar x1 x2
 

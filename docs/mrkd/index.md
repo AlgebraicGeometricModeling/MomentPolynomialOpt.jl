@@ -22,7 +22,7 @@ We want to maximize the objective function $y^2$ on this domain and to find the 
 
 ```
 using MomentPolynomialOpt, DynamicPolynomials
-using CSDP; MMT[:optimizer] = CSDP.Optimizer
+using CSDP; mpo_optimizer(CSDP.Optimizer)
 
 X = @polyvar x y
 
@@ -129,7 +129,7 @@ w[1]\, \delta_{Xi[:,1]} + w[2]\, \delta_{Xi[:,2]}
 The package can be installed from Julia as follows:
 
 ```
-] add https://github.com/AlgebraicGeometricModeling/MomentPolynomialOpt.jl
+] add MomentPolynomialOpt
 
 ```
 

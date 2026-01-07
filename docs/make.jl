@@ -15,8 +15,8 @@ makedocs(
     source = "mrkd",
     pages = Any[
         "Home" => "index.md",
-        "Functions & types" => Code,
-        "Example" => Expl,
+        "Tutorials" => Expl,
+        "Manual" => Code,
         "About the package"  => "package.md",
     ],
     repo = Remotes.GitHub("AlgebraicGeometricModeling", "MomentPolynomialOpt.jl"),

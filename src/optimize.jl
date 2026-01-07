@@ -1,54 +1,12 @@
-export optimize, minimize, maximize, mmt_optimizer
+export optimize, minimize, maximize, mpo_optimizer
 
 #----------------------------------------------------------------------
-"""
-```julia
-v, M = optimize(M)
-```
-Run the optimizer on the moment program `M` and output the objective_value `v` and the moment program `M`. If the optimization program has no solution, it returns `nothing` and `M`.
-"""
 function optimize(M::JuMP.Model)
-    if haskey(M.obj_dict,:dual)
-        JuMP.optimize!(M[:dual])
-#        if JuMP.has_values(M[:dual])
-            v = JuMP.objective_value(M[:dual])
-#        else
-#            v = nothing
-#        end
-    else
-        JuMP.optimize!(M)
-        v = JuMP.objective_value(M)
-    end
-    #println("Solver status: ", JuMP.termination_status(M))
+    JuMP.optimize!(M)
+    v = JuMP.objective_value(M)
     return v, M
 end
 
-"""
-```julia
-v, M = optimize(M, optimizer)
-```
-Run the optimizer on the moment program `M` using the optimizer `optimizer` and output the objective_value `v` and the moment program `M`. If the optimization program has no solution, it returns `nothing` and `M`. 
-"""
-function optimize(M::JuMP.Model, optimizer)
-    if haskey(M.obj_dict,:dual)
-        set_optimizer(M[:dual], optimizer)
-        JuMP.optimize!(M[:dual])
-#        if JuMP.has_values(M[:dual])
-            v = JuMP.objective_value(M[:dual])
-#        else
-            v = nothing
-#        end
-    else
-        set_optimizer(M, optimizer)
-        JuMP.optimize!(M)
-        v = JuMP.objective_value(M)
-    end
-    #println("Solver status: ", JuMP.termination_status(M))
-    return v, M
-end
-
-
-#----------------------------------------------------------------------
 """
 ```julia
 v, M = optimize(sense, f, [e1, e2, ...], [p1, p2, ...], X, d)
@@ -59,7 +17,7 @@ Compute the optimum of `f` under the constraints ``e_i`` =0 and ``p_i \\geq 0`` 
   - 'sense` is a Symbol in [:Inf, :inf, :Min,:min]  or :Sup, :sup, :Max, :max
   - `X` is a tuple of variables
   - `d` is the order of the relaxation
-  - `optimizer`is the optimizer used to solve the moment relaxation. By default it is `MMT[:optimizer]`.
+  - `optimizer`is the optimizer used to solve the moment relaxation. By default it is `MPO[:optimizer]`.
 
 If the problem is feasible and has minimizers, it outputs
   - v: the optimum value
@@ -80,11 +38,12 @@ v, M = optimize(:inf, -x1, [e1, e2], [p1, p2], X, 3)
 To recover the optimizers, see [`get_minimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
 
 """
-function optimize(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer = MMT[:optimizer]; kwargs...)
+function optimize(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer = MPO[:optimizer]; kwargs...)
 
     M = MOM.Model(sense, f, Eq, Pos, X, d, optimizer; kwargs...)
-    
-    return optimize(M)
+    JuMP.optimize!(M)
+    v = JuMP.objective_value(M)
+    return v, M
 end
 
 #------------------------------------------------------------------------
@@ -98,7 +57,7 @@ See [`optimize`](@ref).
 
 
 """
-function minimize(f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer=MMT[:optimizer]; kwargs...)
+function minimize(f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer=MPO[:optimizer]; kwargs...)
     return optimize(:inf,f,Eq,Pos,X,d,optimizer;kwargs...)
 end
 
@@ -111,7 +70,7 @@ Similar to the function `minimize` but compute the supremun of `f`.
 
 See [`optimize`](@ref).
 """
-function maximize(f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer=MMT[:optimizer]; kwargs...)
+function maximize(f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer=MPO[:optimizer]; kwargs...)
     return optimize(:sup,f,Eq,Pos,X,d,optimizer;kwargs...)
 end
 
@@ -134,7 +93,7 @@ It outputs
 Example
 -------
 ```julia
-using MomentPolynomialOpt
+using MomentPolynomialOpt, DynamicPolynomials
 
 X  = @polyvar x1 x2
 e1 = x1^2-2
@@ -147,35 +106,11 @@ v, M = optimize([(-x1, "inf"), (e1, "=0"), (e2, "=0"), (p1, ">=0"), (p2>=0)], X,
 To recover the optimal values, see [`get_minimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
 
 """
-function optimize(C::Vector, X, d::Int64, optimizer=MMT[:optimizer]; kwargs...)
-    M  = MOM.Model(X,d;kwargs...)
-    MOM.constraint_unitmass(M)
-    wobj = false
-    for c in C
-        if c[2] == "inf" || c[2] == "min"
-            MOM.set_objective(M, "inf", c[1])
-            wobj = true
-        elseif c[2] == "sup" || c[2] == "max"
-            MOM.set_objective(M, "sup", c[1])
-            wobj = true
-        elseif c[2] == "=0"
-            MOM.constraint_zero(M, c[1])
-        elseif c[2] == ">=0"
-            MOM.constraint_nneg(M, c[1])
-        elseif c[2] == "<=0"
-            MOM.constraint_nneg(M,-c[1])
-        elseif isa(c[2],AbstractVector)
-            MOM.constraint_nneg(M, c[1]-c[2][1])
-            MOM.constraint_nneg(M,-c[1]+c[2][2])
-        end
-    end
-    if !wobj
-        MOM.set_objective(M, "sup", one(C[1][1]))
-    end
+function optimize(C::Vector, X, d::Int64, optimizer=MPO[:optimizer]; kwargs...)
 
-    M[:dual] = Dualization.dualize(M,optimizer_with_attributes(optimizer))
-    
-    return optimize(M)
+    M = MOM.Model(C,X,d,optimizer)
+    JuMP.optimize!(M)
+    return JuMP.objective_value(M), M
 end
 
 
@@ -184,39 +119,24 @@ end
 
 """
 ```julia
-mmt_optimizer(opt)
+mpo_optimizer(opt)
 ```
 Define the default optimizer `opt` for the optimization problems created by MomentPolynomialOpt
 """
-function mmt_optimizer(opt)
-    MMT[:optimizer] = opt 
+function mpo_optimizer(opt)
+    MPO[:optimizer] = opt 
 end
 
 
 """
 ```julia
-mmt_optimizer(opt, args...)
+mpo_optimizer(opt, args...)
 ```
 Define the default optimizer `opt` with its attribute `args...` for the optimization problems created by MomentPolynomialOpt
 """
-function mmt_optimizer(opt, args...)
-    MMT[:optimizer] = JuMP.optimizer_with_attributes(opt, args...) 
+function mpo_optimizer(opt, args...)
+    MPO[:optimizer] = JuMP.optimizer_with_attributes(opt, args...) 
 end
 
 
 #----------------------------------------------------------------------
-#= """
-```julia
-v, M = set_optimizer(optimizer)
-```
-Set the optimizer of the moment program `M` to the dual optimizer of `optimizer`.
-"""
-function sset_optimizer(M, optimizer)
-    if haskey(M,:type) && M[:type] == :moment
-        @info "Using dual optimizer for the model"
-        JuMP.set_optimizer(M, Dualization.dual_optimizer(optimizer))
-    else
-        set_optimizer(M, optimizer)
-    end
-end
-=#

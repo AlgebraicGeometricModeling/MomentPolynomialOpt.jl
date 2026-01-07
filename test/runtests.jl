@@ -10,9 +10,9 @@ T = Float64[]
 
 for f in F0
     try
-        t = @elapsed include(f)
-        @info "\033[96m$f\033[0m   $t(s)"
-        push!(T,t)
+        s = @elapsed include(f)
+        @info "\033[96m$f\033[0m   $s(s)"
+        push!(T,s)
     catch
         @warn "problem with $f"
         push!(E,f)

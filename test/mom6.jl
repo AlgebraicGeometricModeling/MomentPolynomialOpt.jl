@@ -7,7 +7,7 @@ using LinearAlgebra
 
 using MosekTools; opt = Mosek.Optimizer
 
-mmt_optimizer(opt)
+mpo_optimizer(opt, "QUIET" => true)
 
 X = @polyvar x y
 
@@ -18,7 +18,7 @@ f = x #objective function
 d = 10 #degree of approximation
 
 v, m = polar_minimize(f, h, g, X, d)
-println(v)
+println("Polar minimize on compact set: ", v)
 
 # Minimize on a noncompact singular semialgebraic set with polar_minimize
 h = [] #zero constraints
@@ -27,7 +27,7 @@ f = x #objective function
 d = 10 #degree of approximation
 
 v, m = polar_minimize(f, h, g, X, d)
-println(v)
+println("Polar minimize on non-compact set: ", v)
 
 # Minimize on a compact singular semialgebraic set with polar_minimize, adding the preordering
 h = [] #zero constraints
@@ -38,9 +38,9 @@ d = 10 #degree of approximation
 pg = preordering(g)
 
 v, m = polar_minimize(f, h, pg, X, d)
-println(v)
+println("Polar minimize on compact set with preord.: ",v)
 
 #Compare without addind the product: if it is possible, better to avoid to add it
-w, n = polar_minimize(f, h, g, X, d)
-println(w)
-println(v)
+w, n = polar_minimize(f, h, pg, X, d)
+println("Polar minimize on non-compact set with preord.: ", w)
+#println(v)

@@ -1,5 +1,8 @@
 using DynamicPolynomials, MomentPolynomialOpt
 
+using MosekTools; mpo_optimizer(Mosek.Optimizer,  "QUIET" => true)
+#using CSDP; mpo_optimizer(CSDP.Optimizer)
+
 X = @polyvar x y
 
 f = x + y + 3
@@ -10,14 +13,11 @@ d = 2
 
 L  = monomials(X, 0:d)
 
-optimizer = MMT[:optimizer]
+WS, P, v, M = sos_decompose(f, H, G, X, d; exact=true, round = 1 )
 
-WS0, WS, P, v, M = sos_decompose(f, G, H, X, d; exact=true, round = 1 )
-
-eq0 = f - wsos(WS0) - dot(G, wsos.(WS)) - dot(H,P)
+eq0 = f - wsos(WS[1]) - dot(G, wsos.(WS[2:end])) - dot(H,P)
 println("reminder === ", eq0 )
 
-Q0 = wsos(WS0)
-Q1 = wsos(WS[1])
+Q0 = wsos(WS[1])
+Q1 = wsos(WS[2])
 
-WS0, Q0

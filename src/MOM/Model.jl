@@ -1,21 +1,44 @@
-export MOM
-import JuMP: optimize!, objective_value
+export MOM, moments
+#import JuMP: optimize!, objective_value
+
+
+"""
+```
+moments(M, X, d::Int, symb::Symbol...)
+```
+
+Define variables for the moments of the monomials of degree less than d in the variables  X.
+If
+ - `symb == :PSD`, non-negativity constraints are added;
+ - `symb == :PRB`, unit mass and non-negativity constraints are added.
+
+"""
+function moments(M, X, d::Int, symb::Symbol...)
+    mu = MOM.moment_variables(M, X, d)
+    for arg in symb
+        if arg == :PRB
+            MOM.add_constraint_nneg(M,mu)
+            MOM.add_constraint_unitmass(M, mu)
+        elseif arg == :PSD
+            MOM.add_constraint_nneg(M,mu)
+        end
+    end
+    return mu 
+end
+
 
 module MOM
 
 
-using DynamicPolynomials
-#using MultivariateSeries
-using JuMP, Dualization
+using DynamicPolynomials, JuMP, Dualization, LinearAlgebra
 
-# import MathOptInterface
-# const MOI = MathOptInterface
+import MomentPolynomialOpt: MPO, Moments, moments, dot
 
-using LinearAlgebra
+export Model
 
+function Model end
 
-import MomentPolynomialOpt:MMT
-
+#----------------------------------------------------------------------
 convert_Float64 = function(pol)
     if typeof(pol) != Polynomial{DynamicPolynomials.Commutative{DynamicPolynomials.CreationOrder}, Graded{LexOrder}, Int64}
         return dot(Float64.(coefficients(pol)),monomials(pol))
@@ -23,141 +46,74 @@ convert_Float64 = function(pol)
         return pol
     end
 end
-
-export Model
-#----------------------------------------------------------------------
-"""
-Construct the Moment Program in the variables X of order d.
-The moments of all monomials in X of degree 2*d are variables of
-the optimization program.
-
-```
-M = MOM.Model(X,d, optimizer=MMT[:optimizer]; nu=k)
-```
-  - `X` is the vector of variables
-  - `d` is the order of the moment relaxation
-  - 'optimizer`is the the optimizer used to solve the SDP program
-  - `nu=k` is the number of Positive Moment Sequences
-"""
-function Model(X, d::Int64, optimizer=MMT[:optimizer]; nu::Int64=1, kwargs...)
-
-    M = JuMP.Model(kwargs...)
-
-    M[:type] = :moment
-    M[:nu] = nu
-    M[:variables] = X
-    M[:degree] = d
-
-
-    B = monomials(X,0:d)
-    N = length(B)
-    M[:basis] = B
-
-    M[:monomials] = typeof(B[1])[]
-    M[:index] = Dict{typeof(B[1]),Int64}()
-
-    # Hankel structure
-    c = 0
-    for i in 1:N
-        for j  in 1:N
-            mn = B[i]*B[j]
-	    if !haskey(M[:index], mn)
-                c += 1
-                M[:index][mn] = c
-                push!(M[:monomials], mn)
-	    end
-        end
-    end
-
-    s = length(M[:monomials])
-    @variable(M, y[1:nu, 1:s])
-    M[:moments] = y
-
-    for k in 1:nu
-        H = [ y[k,M[:index][B[i]*B[j]]]+0 for i in 1:N, j in 1:N]
-        @constraint(M, Symmetric(H) in PSDCone())
-    end
-    
-#  JuMP.set_optimizer(M, JuMP.optimizer_with_attributes(optimizer))
-    #JuMP.set_optimizer(M, JuMP.optimizer_with_attributes(DualOptimizer,optimizer()))
-    #@info "Using dual optimizer"
-    
-    return M #MOM.Model(m)
-end
-
-#----------------------------------------------------------------------
-
-function dualize!(M::JuMP.Model, optimizer=MMT[:optimizer])
-    if optimizer == nothing
-        M[:dual] = Dualization.dualize(M)
-    else
-        M[:dual] = Dualization.dualize(M,optimizer); #optimizer_with_attributes(optimizer))
-    end
-end
-
 #----------------------------------------------------------------------
 
 include("constraints.jl")
 include("objective.jl")
 
-#----------------------------------------------------------------------
-"""
-Construct the Moment Program in the variables X of order d.
-The moments of all monomials in X of degree 2*d are variables of
-the optimization program.
-
-```
-M = MomentModel(X,d; nu=k)
-```
-  - `X` is the vector of variables
-  - `d` is the order of the moment relaxation.
-  - `nu=k` is the number of Positive Moment Sequences
-"""
-function MomentModel(X, d::Int64; nu::Int64=1,  kwargs...)
-    return MOM.Model(X,d;nu=nu,kwargs...)
-end
-
-function MomentModel(X, d::Int64, optimizer; kwargs...)
-    return MOM.Model(X,d,optimizer; kwargs...)
-end
-
-
-"""
-```julia
-M = MOM.Model( `sense`, f, [e1, e2, ...], [g1, g2, ...], X, d)
-```
-Construct the Moment Program in the variables X of order d.
-   - `sense` == "inf" or "sup"
-   - `f` polynomial objective function
-   - `[e1, e2, ...]` array of polynomial equality constraints (can be empty)
-   - `[g1, g2, ...]` array of non-negativity constraints (can be empty)
-   - `X` is the vector of variables
-   - `d` is the order of the moment relaxation.
-"""
-function Model(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer=MMT[:optimizer])
-    M = MOM.Model(X, d, optimizer)
-    constraint_unitmass(M)
-    for e in Eq  constraint_zero(M, e) end
-    for p in Pos constraint_nneg(M, p) end
-    if f != nothing
-        if in(sense,[:Inf,:inf,:Min,:min])
-            set_objective(M, "inf", f)
-        else
-            set_objective(M, "sup", f)
-        end
+function moment_variables(M, B)
+    v = @variable(M, [1:length(B)])
+    mu = Moments(v,B)
+    if haskey(M.obj_dict, :mu)
+        push!(M[:mu],mu)
     else
-        set_objective(M, "sup", one(Polynomial{true,Float64}))
+        M[:mu] = [mu]
     end
+    return mu
+end
 
-    MOM.dualize!(M,optimizer)
-     
+function moment_variables(M, X, d::Int)
+    moment_variables(M, monomials(X,0:d))
+end
+
+#----------------------------------------------------------------------
+function Model(optimizer = MPO[:optimizer])
+
+    if optimizer == nothing
+        @error "No optimizer set; see mpo_optimizer"
+    else
+        M = JuMP.Model(Dualization.dual_optimizer(optimizer))
+    end
+    
+    M[:type] = :moment
+
     return M
 end
 
+"""
+```
+M = MOM.Model( `sense`, f, H, G, X, d)
+```
+Construct the Moment Program in the variables X of order d.
+   - `sense` == :inf or :sup
+   - `f` polynomial objective function
+   - `H =[h1, h2, ...]` array of polynomial equality constraints (can be empty)
+   - `G =[g1, g2, ...]` array of non-negativity constraints (can be empty)
+   - `X` is the vector of variables
+   - `d` is the order of the moment relaxation.
+"""
+function Model(sense::Symbol, f, H, G, X, d, optimizer = MPO[:optimizer])
+
+    M = MOM.Model(optimizer)
+
+    mu = moments(M, X, 2*d, :PRB)
+    
+    for h in H MOM.add_constraint_zero(M, mu, h) end
+    for g in G MOM.add_constraint_nneg(M, mu, g) end
+
+    if sense == :inf
+        @objective(M, Min, dot(mu,f))
+    elseif sense == :sup
+        @objective(M, Max, dot(mu,f))
+    end
+    return M
+    
+end
+
 
 
 """
-```julia
+```
 M = MOM.Model(C, X, d)
 ```
 Construct the Moment Program where
@@ -166,29 +122,34 @@ Construct the Moment Program where
    - `d` is the order of the moment relaxation.
 """
 function  Model(C::Vector, X, d::Int64, optimizer = MMT["optimizer"]; kwargs...)
-    M = MOM.Model(X, d, optimizer; kwargs...)
-    constraint_unitmass(M)
+
+    M = MOM.Model(optimizer)
+    
+    mu = moments(M, X, 2*d, :PRB)
+
+    wobj = false
     for c in C
         if c[2] == "inf" || c[2] == "min"
-            set_objective(M, "inf", c[1])
+            @objective(M, Min, dot(mu,c[1]))
             wobj = true
         elseif c[2] == "sup" || c[2] == "max"
-            set_objective(M,"sup", c[1])
+            #MOM.set_objective(M, "sup", mu, c[1])
+            @objective(M, Max, dot(mu,c[1]))
             wobj = true
         elseif c[2] == "=0"
-            constraint_zero(M, c[1])
+            MOM.add_constraint_zero(M, mu, c[1])
         elseif c[2] == ">=0"
-            constraint_nneg(M, c[1])
+            MOM.add_constraint_nneg(M, mu, c[1])
         elseif c[2] == "<=0"
-            constraint_nneg(M, -c[1])
-        elseif isa(c[2], AbstractVector)
-            constraint_nneg(M, c[1] - c[2][1])
-            constraint_nneg(M, -c[1] + c[2][2])
+            MOM.add_constraint_nneg(M, mu, -c[1])
         end
     end
+    if !wobj
+        @objective(M, Max, dot(mu, 1)) #MOM.set_objective(M, "sup", one(C[1][1]), mu)
+    end
 
-    MOM.dualize!(M, optimizer)
     return M
+    
 end
 
 end  #module MOM
