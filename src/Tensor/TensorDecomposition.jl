@@ -171,11 +171,11 @@ end
 #----------------------------------------------------------------------
 """
 ```
-symm_tens_decomp(X, l, F0; rescaling=1, use_kernel=true, weight_type=:real)
+w, Xi = symm_tens_decomp(X, l, F; rescaling=1, use_kernel=true, weight_type=:real)
 ```
-Decompose a symmetric tensor represented as a homogeneous polynomial `F0` into a weighted sum of rank-1 components.
+Decompose a symmetric tensor represented as a homogeneous polynomial `F` into a weighted sum of rank-1 components.
 Given a homogeneous polynomial `F0` of degree `d`, find weights `w` and points `Xi` such that
-``F_0 \\approx \\sum_{i} w_i \\langle X_i, x \\rangle^d``.
+``F \\approx \\sum_{i} w_i \\langle X_i, x \\rangle^d``.
 
 # Arguments
 - `X`: Vector of polynomial variables
