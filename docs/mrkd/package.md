@@ -16,7 +16,7 @@ It depends on the following packages, which are installed automatically:
   - `MultivariateSeries` (v>=1.1.2) for the representation of moment sequences
     and the decomposition of series.
 
-To solve the moment optimization problems, SDP optimizers have also to be installed, such as `MosekTools`, `CSD`, ...
+To solve the moment optimization problems, an external SDP optimizers has  to be installed, such as `MosekTools`, `CSDP`, ...
     
     
 ## Development
