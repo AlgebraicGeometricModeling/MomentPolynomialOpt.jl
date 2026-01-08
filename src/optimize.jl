@@ -35,7 +35,7 @@ p1 = x1
 p2 = 2-x2
 v, M = optimize(:inf, -x1, [e1, e2], [p1, p2], X, 3)
 ```
-To recover the optimizers, see [`get_minimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
+To recover the optimizers, see [`get_optimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
 
 """
 function optimize(sense::Symbol, f, Eq::Vector, Pos::Vector,  X, d::Int64, optimizer = MPO[:optimizer]; kwargs...)
@@ -103,7 +103,7 @@ p2 = 2-x2
 v, M = optimize([(-x1, "inf"), (e1, "=0"), (e2, "=0"), (p1, ">=0"), (p2>=0)], X, 3)
 ```
 
-To recover the optimal values, see [`get_minimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
+To recover the optimal values, see [`get_optimizers`](@ref), [`get_measure`](@ref), [`get_series`](@ref).
 
 """
 function optimize(C::Vector, X, d::Int64, optimizer=MPO[:optimizer]; kwargs...)

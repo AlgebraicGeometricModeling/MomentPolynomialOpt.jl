@@ -1,4 +1,4 @@
-export get_series, get_minimizers, get_measure
+export get_series, get_optimizers, get_measure
 
 using MultivariateSeries
 
@@ -56,18 +56,18 @@ end
 #----------------------------------------------------------------------
 """
 ```
-get_minimizers(M, , t::Int64 = Inf)
+get_optimizers(M, , t::Int64 = Inf)
 ```
-Return the minimizer points  of the optimized moment program `M`, using moments of degree <=t
+Return the optimal points  of the moment program `M`, using moments of degree <=t
 (default: twice the order of the relaxation minus 2)
 
 ```julia
-get_minimizer(M)
+get_optimizers(M)
 
 [1.41421 1.73205; 1.41421 1.41421; 1.41421 -1.73205]
 ```
 """
-function get_minimizers(M::JuMP.Model)
+function get_optimizers(M::JuMP.Model)
     s = get_series(M)
     t = maxdegree(s)-1
     w, Xi = MultivariateSeries.decompose(truncate(s, t));
