@@ -1,8 +1,6 @@
 using MomentPolynomialOpt, DynamicPolynomials
 
-using JuMP, MosekTools
-
-mpo_optimizer(Mosek.Optimizer, "QUIET" => true)
+using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET" => true)
 
 X  = @polyvar x y
 q1 = 1-x^2-y^2

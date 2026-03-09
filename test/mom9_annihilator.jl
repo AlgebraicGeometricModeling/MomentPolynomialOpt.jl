@@ -1,6 +1,7 @@
 using DynamicPolynomials, MomentPolynomialOpt, JuMP
 
-using MosekTools; mpo_optimizer(Mosek.Optimizer,  "QUIET" => true)
+#using MosekTools; mpo_optimizer(Mosek.Optimizer,  "QUIET" => true)
+using CSDP; mpo_optimizer(CSDP.Optimizer)
 
 
 X = @polyvar x y z

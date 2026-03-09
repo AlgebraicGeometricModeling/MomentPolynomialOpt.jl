@@ -1,10 +1,9 @@
 using JuMP
-using MomentPolynomialOpt
-using DynamicPolynomials, MultivariateSeries, LinearAlgebra
+using MomentPolynomialOpt,  DynamicPolynomials, LinearAlgebra
 
-using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET"=>true)
-
+#using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET"=>true)
 #using CSDP; mpo_optimizer(CSDP.Optimizer)
+using Hypatia; mpo_optimizer(Hypatia.Optimizer)
 
 X = @polyvar x y
 

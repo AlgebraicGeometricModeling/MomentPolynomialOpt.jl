@@ -6,9 +6,10 @@ module MomentTensorDecomposition
 export symm_tens_decomp
 
 # List necessary dependencies
-using MomentPolynomialOpt, DynamicPolynomials, MultivariateSeries, LinearAlgebra
+using MomentPolynomialOpt, DynamicPolynomials, AlgebraicSolvers, LinearAlgebra
 using JuMP
 
+export series_from_hpol
 #----------------------------------------------------------------------
 #== 
 ```
@@ -17,7 +18,7 @@ _series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
 Convert a homogeneous polynomial `F` to a series representation by setting variable `X0` to 1,
 rescaling variables `Y`, and normalizing coefficients by binomial factors.
 ==#
-function _series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
+function series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
     P = subs(F,X0=>1, [y=>y/rescaling for y in Y]...)
     c = coefficients(P)
     m = monomials(P)
@@ -25,7 +26,7 @@ function _series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
         e = exponents(m[i])
         c[i]/=binomial(d, e)
     end
-    return MultivariateSeries.dual(P)
+    return AlgebraicSolvers.dual(P)
 end
 
 

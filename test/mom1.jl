@@ -1,8 +1,7 @@
 using MomentPolynomialOpt, DynamicPolynomials
-using MosekTools
-
-#mpo_optimizer(Mosek.Optimizer)
-mpo_optimizer(Mosek.Optimizer, "QUIET"=> true)
+#using MosekTools; mpo_optimizer(Mosek.Optimizer)
+#using MosekTools; mpo_optimizer(Mosek.Optimizer, "QUIET"=> true)
+using CSDP; mpo_optimizer(CSDP.Optimizer)
 
 X = @polyvar x y
 

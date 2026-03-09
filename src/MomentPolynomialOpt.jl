@@ -1,7 +1,7 @@
 module MomentPolynomialOpt
 
 using DynamicPolynomials
-#using MultivariateSeries
+#using AlgebraicSolvers
 using JuMP
 using Dualization
 using LinearAlgebra

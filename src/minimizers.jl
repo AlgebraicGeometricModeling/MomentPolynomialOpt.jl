@@ -1,10 +1,10 @@
 export get_series, get_optimizers, get_measure
 
-using MultivariateSeries
+using AlgebraicSolvers
 
 #=
 function dualize(p)
-    MultivariateSeries.dual(p)
+    AlgebraicSolvers.dual(p)
 end
 =#
 
@@ -27,17 +27,17 @@ function get_series(M::JuMP.Model)
         end
     else
         if haskey(M.obj_dict,:constraints) && haskey(M.obj_dict,:monomials) 
-            return [MultivariateSeries.dual(M[:monomials]'*JuMP.dual.(M[:constraints]))]
+            return [AlgebraicSolvers.dual(M[:monomials]'*JuMP.dual.(M[:constraints]))]
         else
             n = length(M[:monomials])
             cstr = JuMP.all_constraints(M[:dual], AffExpr, MOI.EqualTo{Float64})
-            s  = [MultivariateSeries.series([M[:monomials][i]=>-JuMP.dual(cstr[n*(k-1)+i])
+            s  = [AlgebraicSolvers.series([M[:monomials][i]=>-JuMP.dual(cstr[n*(k-1)+i])
                                              for i in 1:n])
                   for k in 1:M[:nu]]
             
             return s
             
-            [MultivariateSeries.series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
+            [AlgebraicSolvers.series([M[:monomials][i]=>JuMP.value(M[:moments][k,i])
                                         for i in 1:length(M[:monomials])])
              for k in 1:M[:nu]]
             
@@ -46,11 +46,11 @@ function get_series(M::JuMP.Model)
 end
     
 function get_series_primal(s :: Moments)
-        MultivariateSeries.series([s.basis[i] => JuMP.value(s.values[i]) for i in 1:length(s.basis)])
+        AlgebraicSolvers.series([s.basis[i] => JuMP.value(s.values[i]) for i in 1:length(s.basis)])
 end
     
 function get_series_dual(s :: Moments)
-        MultivariateSeries.series([s.basis[i] => JuMP.dual(s.values[i]) for i in 1:length(s.basis)])
+        AlgebraicSolvers.series([s.basis[i] => JuMP.dual(s.values[i]) for i in 1:length(s.basis)])
 end
 
 #----------------------------------------------------------------------
@@ -70,7 +70,7 @@ get_optimizers(M)
 function get_optimizers(M::JuMP.Model)
     s = get_series(M)
     t = maxdegree(s)-1
-    w, Xi = MultivariateSeries.decompose(truncate(s, t));
+    w, Xi = AlgebraicSolvers.decompose(truncate(s, t));
     Xi
 end
 
@@ -96,7 +96,7 @@ function get_measure(M::JuMP.Model)
 
     s = get_series(M)
     t = maxdegree(s)-1
-    w, Pts = MultivariateSeries.decompose(truncate(s,t));
+    w, Pts = AlgebraicSolvers.decompose(truncate(s,t));
 
     return w, Pts
 end
@@ -105,7 +105,7 @@ function get_measure(M::JuMP.Model,  e::Float64)
 
     s = get_series(M)
     t = maxdegree(s)-1
-    w, Pts = MultivariateSeries.decompose(truncate(s,t), MultivariateSeries.eps_rkf(e));
+    w, Pts = AlgebraicSolvers.decompose(truncate(s,t), AlgebraicSolvers.eps_rkf(e));
     return w, Pts
 end
 
