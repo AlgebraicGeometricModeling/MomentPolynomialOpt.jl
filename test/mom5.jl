@@ -1,7 +1,7 @@
 using JuMP
 using MomentPolynomialOpt
 using DynamicPolynomials
-using MultivariateSeries
+#using MultivariateSeries
 using LinearAlgebra
 
 # using Plots

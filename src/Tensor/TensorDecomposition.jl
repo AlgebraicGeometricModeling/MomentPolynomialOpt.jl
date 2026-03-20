@@ -13,7 +13,7 @@ export series_from_hpol
 #----------------------------------------------------------------------
 #== 
 ```
-_series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
+series_from_hpol(F, X0, Y, rescaling, d = maxdegree(F))
 ```
 Convert a homogeneous polynomial `F` to a series representation by setting variable `X0` to 1,
 rescaling variables `Y`, and normalizing coefficients by binomial factors.
@@ -44,7 +44,7 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:real})
     @info("Performing decomposition with real weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
-    s0 = _series_from_hpol(F0, X[1], Y, rescaling)
+    s0 = series_from_hpol(F0, X[1], Y, rescaling)
 
     ## Define model ###
     M = MOM.Model()
@@ -120,7 +120,7 @@ function _symm_tens_decomp(X, l, F0, rescaling, use_kernel, ::Val{:positive})
     @info("Performing decomposition with positive weights...")
     Y = vec(X[2:end])
     d = maxdegree(F0)
-    s0 = _series_from_hpol(F0, X[1], Y, rescaling)
+    s0 = series_from_hpol(F0, X[1], Y, rescaling)
 
     ### Define model ###
     M = MOM.Model()
